@@ -1,10 +1,10 @@
-<!-- MESEM Portal (Birleşik) — Sürüm v1.4 — Son güncelleme: 2026-10-10 -->
+<!-- MESEM Portal (Birleşik) — Sürüm v1.6 — Son güncelleme: 2026-10-11 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v1.4</title>
+<title>MESEM Portal v1.6</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.0.3/qrcode.min.js"></script>
@@ -20,6 +20,8 @@
 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
 
 .navbar { background-color: #1e293b; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 50; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-shrink: 0; }
+.navbar { overflow: hidden; max-height: 90px; transition: max-height .2s ease, padding .2s ease; }
+.navbar.nav-hidden { max-height: 0; padding-top: 0 !important; padding-bottom: 0 !important; box-shadow: none; }
 .navbar h1 { margin: 0; font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 .nav-links { display: flex; gap: 10px; }
 .nav-links a { color: #cbd5e1; text-decoration: none; font-weight: 500; cursor: pointer; padding: 6px 10px; border-radius: 6px; transition: 0.2s; font-size: 14px; }
@@ -63,6 +65,14 @@ th { background-color: #f1f5f9; position: sticky; top: 0; z-index: 10; font-weig
 th:hover { background-color: #e2e8f0; cursor: pointer; }
 th .th-content { display: flex; align-items: center; justify-content: space-between; }
 th i { margin-left: 5px; color: #94a3b8; font-size: 11px; }
+/* Liste: Id, No, Ad Soyad sütunları kaydırmada sabit (v1.6) */
+#mainTable th:nth-child(-n+3), #mainTable td:nth-child(-n+3) { position: sticky; background: #fff; }
+#mainTable th:nth-child(-n+3) { z-index: 12; background: #f1f5f9; }
+#mainTable td:nth-child(-n+3) { z-index: 5; }
+#mainTable tbody tr:nth-child(even) td:nth-child(-n+3) { background: #f8fafc; }
+#mainTable th:nth-child(1), #mainTable td:nth-child(1) { left: 0; min-width: 80px; max-width: 80px; width: 80px; }
+#mainTable th:nth-child(2), #mainTable td:nth-child(2) { left: 80px; min-width: 80px; max-width: 80px; width: 80px; }
+#mainTable th:nth-child(3), #mainTable td:nth-child(3) { left: 160px; min-width: 150px; max-width: 150px; width: 150px; box-shadow: 2px 0 0 #e2e8f0; }
 th.active-sort i { color: var(--primary-dark); }
 tbody tr:nth-child(even) td { background-color: #f8fafc; }
 tbody tr:hover td { background-color: #f1f5f9 !important; }
@@ -209,13 +219,22 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
     thead { display: table-header-group; } tr { break-inside: avoid; }
     .sign { break-inside: avoid; }
     #planPreviewModal { display: none !important; }
+    /* Liste yazdırma: sığdır, satır aralığı minimum */
+    .list-view-inner { overflow: visible !important; height: auto !important; display: block !important; padding: 0 !important; }
+    .table-container { overflow: visible !important; border: none !important; }
+    #mainTable { min-width: 0 !important; width: 100% !important; table-layout: auto; }
+    #mainTable th, #mainTable td { position: static !important; box-shadow: none !important; min-width: 0 !important; max-width: none !important; width: auto !important; padding: 2px 4px !important; font-size: 7.5pt !important; line-height: 1.15; border-bottom: 1px solid #999 !important; border-right: none !important; background: #fff !important; word-break: break-word; }
+    #mainTable th { background: #e5e7eb !important; font-weight: 700; }
+    #mainTable th i { display: none; }
+    #mainTable .badge { padding: 0 3px; font-size: 7pt; }
+    #mainTable th:nth-last-child(-n+3), #mainTable td:nth-last-child(-n+3) { display: none !important; }
 }
 </style>
 </head>
 <body>
 
 <div class="navbar">
-    <h1>MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v1.4</span></h1>
+    <h1>MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v1.6</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="plan">Haftalık Planlama</a>
@@ -278,7 +297,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
                         <th style="width: 80px;"><div class="th-content sortable" data-col="ogrNo" id="th-ogrNo">No <i class="fas fa-sort"></i></div></th>
                         <th style="width: 140px;"><div class="th-content sortable" data-col="adSoyad" id="th-adSoyad">Ad Soyad <i class="fas fa-sort"></i></div></th>
                         <th style="width: 100px;"><div class="th-content sortable" data-col="ogrTel" id="th-ogrTel">Öğrenci Tel <i class="fas fa-sort"></i></div></th>
-                        <th style="width: 110px;" title="Gün paterni ve sınıfı birlikte gösterir"><div class="th-content sortable" data-col="sube" id="th-sube">Şube / Sınıf <i class="fas fa-sort"></i></div></th>
+                        <th style="width: 110px;" title="Okul günü paterni"><div class="th-content sortable" data-col="sube" id="th-sube">Şube <i class="fas fa-sort"></i></div></th>
                         <th style="width: 140px;"><div class="th-content sortable" data-col="ogretmen" id="th-ogretmen">Öğretmen <i class="fas fa-sort"></i></div></th>
                         <th style="width: 160px;"><div class="th-content sortable" data-col="isletme" id="th-isletme">İşletme <i class="fas fa-sort"></i></div></th>
                         <th style="width: 100px;"><div class="th-content sortable" data-col="isyeriTel" id="th-isyeriTel">İşyeri Tel <i class="fas fa-sort"></i></div></th>
@@ -426,6 +445,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
                     <h3 style="margin:0;">Bölge Öncelik Sıralaması</h3>
                     <div style="display:flex; gap:10px;">
                         <button class="btn btn-warning" id="btnExportRules">İndir</button>
+                        <button class="btn btn-danger" id="btnDeleteAllRules" type="button">Tümünü Sil</button>
                         <label class="btn btn-import" style="margin:0;">
                             Yükle
                             <input type="file" id="rulesUpload" accept=".json" style="display:none;">
@@ -588,7 +608,26 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('archiveSearchInput').addEventListener('input', () => renderTable('archive'));
         document.getElementById('ruleSearchInput').addEventListener('input', renderRules);
         document.getElementById('btnExportExcel').addEventListener('click', exportToExcel);
-        document.getElementById('btnPrint').addEventListener('click', () => window.print());
+        document.getElementById('btnPrint').addEventListener('click', () => {
+            let st = document.getElementById('planPageStyle');
+            if (!st) { st = document.createElement('style'); st.id = 'planPageStyle'; document.head.appendChild(st); }
+            st.textContent = '@page { size: A4 landscape; margin: 8mm; }';
+            window.print();
+        });
+        document.getElementById('btnDeleteAllRules').addEventListener('click', () => {
+            if (!regionRules.length) { showToast('Silinecek kural yok.'); return; }
+            if (!confirm(regionRules.length + ' bölge kuralının TÜMÜ silinecek.\nManuel bölge atanmayanların bölgesi "Belirtilmemiş / Diğer" olur.\nÖnce İndir ile yedek almanız önerilir. Devam edilsin mi?')) return;
+            regionRules = []; resetRuleForm(); compileRules(); recalculateRegions(); renderRules(); renderTable('main'); updateRegionDatalist(); saveData();
+            showToast('Tüm kurallar silindi.');
+        });
+        // Aşağı kaydırırken üst başlık gizlenir, en üste dönünce görünür
+        (function() {
+            const nav = document.querySelector('.navbar');
+            document.querySelectorAll('.list-view-inner').forEach(sc => sc.addEventListener('scroll', () => {
+                if (sc.scrollTop > 60 && (sc.scrollHeight - sc.clientHeight) > 150) nav.classList.add('nav-hidden');
+                else if (sc.scrollTop < 10) nav.classList.remove('nav-hidden');
+            }, { passive: true }));
+        })();
         document.getElementById('btnExportBackup').addEventListener('click', exportBackup);
         document.getElementById('btnExportRules').addEventListener('click', exportRulesData);
         document.getElementById('excelUpload').addEventListener('change', importExcel);
@@ -642,7 +681,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function factoryReset() {
         if (confirm("TÜM SİSTEMİ SIFIRLAMAK ÜZERESİNİZ!\n\nTüm kayıtlar, adresler, notlar ve kurallar kalıcı olarak silinecek. Emin misiniz?")) {
             exportBackup();
-            localStorage.removeItem('mesemRecordsBirlesikV1'); localStorage.removeItem('mesemRulesBirlesikV1');
+            ['mesemRecordsBirlesikV1','mesemRulesBirlesikV1','mesemHolidaysBirlesikV1','mesemRecordsV23','mesemRulesV23'].forEach(k => localStorage.removeItem(k));
             msSelected = { ogretmen: [], bolge: [], sinif: [], sube: [], dal: [] };
             document.getElementById('searchInput').value = '';
             document.getElementById('archiveSearchInput').value = '';
@@ -650,6 +689,7 @@ document.addEventListener('DOMContentLoaded', function() {
             initData(); compileRules(); recalculateRegions(); updateFilters();
             renderTable('main'); renderRules(); updateRegionDatalist(); populatePlanTeachers();
             showToast("Sistem ilk haline sıfırlandı.");
+            setTimeout(() => location.reload(), 800); // yedek indirmesi başlasın, sonra temiz sayfa
         }
     }
 
@@ -797,8 +837,8 @@ document.addEventListener('DOMContentLoaded', function() {
             let ogrNoDisp = (r.ogrNo && !String(r.ogrNo).startsWith('ID-')) ? r.ogrNo : '<span style="color:#94a3b8;">' + (r.ogrNo||'') + '</span>';
             // Şube hücresi artık hem gün paternini (rozet) hem sınıfı (alt rozet) tek sütunda gösterir — Sınıf ayrı sütun değil
             let subeDayBadge = rr.sube ? (parseSchoolDays(rr.sube).length ? `<span class="badge badge-sube">${r.sube}</span>` : `<span class="badge badge-warn" title="Gün ayrıştırılamadı">${r.sube} ⚠</span>`) : '<span style="color:#94a3b8;">-</span>';
-            let sinifBadge = rr.sinif ? `<br><span class="badge badge-info" style="margin-top:3px;">${r.sinif}</span>` : '';
-            let subeBadge = subeDayBadge + sinifBadge;
+            // Sınıf hücrede gösterilmez; arka planda tutulur (filtre, Excel, düzenleme)
+            let subeBadge = subeDayBadge;
             if (type === 'main') {
                 parts.push(`<tr>
                     <td class="col-id"><span style="font-size:11px; color:#64748b;">${r.internalId}</span></td>
@@ -1059,7 +1099,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 let wb = XLSX.read(data, {type: 'array'});
                 let ws = wb.Sheets[wb.SheetNames[0]];
                 let json = XLSX.utils.sheet_to_json(ws);
-                let importedIdsThisSession = new Set();
+                let updatedIdsThisSession = new Set(); // sadece "kaç kayıt güncellendi" sayacı için; eşleştirmeyi ENGELLEMEZ
                 let added = 0, updated = 0, skipped = 0, snapshot = JSON.stringify(records);
                 let byId = new Map(), byNo = new Map();
                 records.forEach(r => { byId.set(String(r.internalId), r); if (!byNo.has(String(r.ogrNo))) byNo.set(String(r.ogrNo), r); });
@@ -1087,7 +1127,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     let existing = null;
                     if (id) existing = byId.get(id); else if (oNo) existing = byNo.get(oNo);
-                    if (existing && importedIdsThisSession.has(existing.internalId)) existing = null;
 
                     if (existing) {
                         if (ism) existing.isletme = ism;
@@ -1102,7 +1141,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (ogrTel) existing.ogrTel = ogrTel;
                         if (isyeriTel) existing.isyeriTel = isyeriTel;
                         if (ustaOgretici) existing.ustaOgretici = ustaOgretici;
-                        importedIdsThisSession.add(existing.internalId); updated++;
+                        if (!updatedIdsThisSession.has(existing.internalId)) { updatedIdsThisSession.add(existing.internalId); updated++; }
                     } else {
                         let internalId = id || oNo || genId();
                         if (byId.has(internalId)) internalId = genId();
@@ -1110,7 +1149,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             ogretmen: ogrt, isletme: ism, adres: adr, bolge: "Belirtilmemiş / Diğer", koordinat: kord, notlar: ntlr,
                             ogrTel, isyeriTel, ustaOgretici, manuelBolge: false, isArchived: false };
                         records.push(rec); byId.set(internalId, rec); if (!byNo.has(rec.ogrNo)) byNo.set(rec.ogrNo, rec);
-                        importedIdsThisSession.add(internalId); added++;
+                        updatedIdsThisSession.add(internalId); added++;
                     }
                 });
                 recalculateRegions(); renderTable('main'); saveData();
