@@ -1,10 +1,11 @@
-<!-- MESEM Portal (Birleşik) — Sürüm v2.2 — Son güncelleme: 2026-10-11 -->
+<!-- MESEM Portal (Birleşik) — Sürüm v2.7 — Son güncelleme: 2026-10-11 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v2.2</title>
+<title>MESEM Portal v2.7</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.0.3/qrcode.min.js"></script>
@@ -34,7 +35,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-
 .list-view-inner { overflow-anchor: none; display: flex; flex-direction: column; height: 100%; overflow: auto; padding-bottom: 15px; -webkit-overflow-scrolling: touch;}
 
 .action-bar { display: flex; flex-direction: column; background: var(--card); padding: 14px 16px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 12px; gap: 12px; flex-shrink:0;}
-.search-full { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; outline: none; font-size: 14px; }
+.search-compact { width: 210px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; outline: none; font-size: 13px; background: #fff; }
 .toolbar-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; }
 
 .ms-group { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; min-width: 0; }
@@ -178,6 +179,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
     .action-bar { padding: 10px; gap: 10px; }
     .toolbar-row { flex-direction: column; align-items: stretch; gap: 12px; }
     .ms-group { display: grid; grid-template-columns: 1fr 1fr; width: 100%; gap: 8px; }
+    .search-compact { grid-column: 1 / -1; width: 100%; }
     .multi-select { width: 100%; }
     .toolbar-right { flex-direction: column; align-items: stretch; width: 100%; }
     .toolbar-divider { display: none; }
@@ -247,7 +249,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v2.2</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v2.7</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="plan">Haftalık Planlama</a>
@@ -262,9 +264,9 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
     <div id="view-main" class="view-section active">
       <div class="list-view-inner">
         <div class="action-bar">
-            <input type="text" id="searchInput" class="search-full" placeholder="Hızlı Ara (Id, No, İsim, Firma...)">
             <div class="toolbar-row">
                 <div class="ms-group">
+                    <input type="text" id="searchInput" class="search-compact" placeholder="Hızlı Ara (Id, No, İsim, Firma...)">
                     <div class="multi-select" id="ms-ogretmen">
                         <div class="multi-select-header" data-ms="ogretmen"><span>👨‍🏫 Öğretmenler</span> <i class="fas fa-chevron-down"></i></div>
                         <div class="multi-select-options" id="mso-ogretmen"></div>
@@ -604,6 +606,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const escapeHtml = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     const escRec = r => { const o={}; for(const k in r){ o[k] = typeof r[k]==='string' ? escapeHtml(r[k]) : r[k]; } return o; };
     const normTR = s => String(s||'').toLocaleUpperCase('tr-TR').replace(/[ÇĞİÖŞÜçğıöşüi]/g, m => TR_ASCII[m]);
+    const bizKey = v => normTR(String(v||'').trim()).replace(/\s+/g,' '); // işletme tekilliği: Liste ve Plan aynı anahtarı kullanır
+    const stuKey = r => String(r.ogrId || r.ogrNo || r.internalId); // tekil öğrenci
     const escapeRegExp = s => s.replace(/[.*+?^${}()|[\]\\\/-]/g, '\\$&');
 
     /* --- YENİ: Şube -> okul günü ayrıştırma (v18'den) --- */
@@ -851,7 +855,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let filtered = records.filter(r => matchesFilters(r, type, sInput));
         if (type === 'main') {
             filtered = sortData(filtered);
-            let unqIsletme = new Set(filtered.filter(r => r.isletme && r.isletme.trim() !== "").map(r => r.isletme.trim().toUpperCase()));
+            let unqIsletme = new Set(filtered.filter(r => bizKey(r.isletme)).map(r => bizKey(r.isletme)));
             document.getElementById('recordCount').innerHTML = `${filtered.length} Öğrenci &nbsp;|&nbsp; ${unqIsletme.size} İşletme`;
         }
         let parts = [];
@@ -1132,6 +1136,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 let ws = wb.Sheets[wb.SheetNames[0]];
                 let json = XLSX.utils.sheet_to_json(ws);
                 let usedKeyless = new Set(), noNoCount = 0, rowsRead = json.length;
+                let touchedThisImport = new Set();
                 let updatedIdsThisSession = new Set(); // sadece "kaç kayıt güncellendi" sayacı için; eşleştirmeyi ENGELLEMEZ
                 let added = 0, updated = 0, skipped = 0, snapshot = JSON.stringify(records);
                 let byId = new Map(), byNo = new Map(), byOgrId = new Map();
@@ -1160,14 +1165,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (!ad && !ism && !adr && !oNo && !id && !ogrId) { skipped++; return; }
 
                     let existing = null;
-                    // Eşleştirme sırası: Öğr.Id → Öğr.No → (ikisi de yoksa) Id. Id yalnızca sıra no olabildiği için tek başına güvenilmez.
-                    if (ogrId) existing = byOgrId.get(ogrId);
-                    if (!existing && oNo) existing = byNo.get(oNo);
-                    if (!existing && !oNo && id) {
-                        // Id tek başına güvenilmez (1,2,3.. sıra no olabilir): yalnızca Öğr.Id'si olmayan ve adı boş/aynı olan eski kayıtla eşleştir
-                        const c = byId.get(id);
-                        if (c && !c.ogrId && (!c.adSoyad || normTR(c.adSoyad) === normTR(ad))) existing = c;
-                    }
+                    // Eşleştirme: 1) Id (aynı Id ve aynı Öğr.Id ise, v1.6 davranışı) 2) Öğr.Id 3) Öğr.No.
+                    // Bu dosyada zaten işlenmiş bir kayıt ikinci kez eşleşmez: aynı öğrencinin farklı işletmedeki satırları ayrı kalır.
+                    const fresh = r => r && !touchedThisImport.has(String(r.internalId));
+                    if (id) { const c = byId.get(id); if (fresh(c) && (!ogrId || !c.ogrId || c.ogrId === ogrId)) existing = c; }
+                    if (!existing && ogrId) { const c = byOgrId.get(ogrId); if (fresh(c)) existing = c; }
+                    if (!existing && oNo) { const c = byNo.get(oNo); if (fresh(c)) existing = c; }
                     // Hiçbir kimliği olmayan öğrenci: ad + işletme + sınıf + şube ile eşleştir (aynı dosyada iki kez aynı kayda birleşmez)
                     if (!existing && !ogrId && !oNo && !id) {
                         const k = v => normTR(v);
@@ -1179,6 +1182,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     if (existing) {
                         if (ogrId) { existing.ogrId = ogrId; byOgrId.set(ogrId, existing); }
+                        touchedThisImport.add(String(existing.internalId));
                         if (ism) existing.isletme = ism;
                         if (adr && adr !== existing.adres) { existing.adres = adr; existing.manuelBolge = false; }
                         if (ogrt) existing.ogretmen = ogrt;
@@ -1198,7 +1202,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         let rec = { internalId, ogrId, ogrNo: oNo, adSoyad: ad, sinif, sube, dal,
                             ogretmen: ogrt, isletme: ism, adres: adr, bolge: "Belirtilmemiş / Diğer", koordinat: kord, notlar: ntlr,
                             ogrTel, isyeriTel, ustaOgretici, manuelBolge: false, isArchived: false };
-                        records.push(rec); byId.set(internalId, rec); if (rec.ogrNo && !byNo.has(rec.ogrNo)) byNo.set(rec.ogrNo, rec); if (ogrId) byOgrId.set(ogrId, rec);
+                        records.push(rec); touchedThisImport.add(String(internalId)); byId.set(internalId, rec); if (rec.ogrNo && !byNo.has(rec.ogrNo)) byNo.set(rec.ogrNo, rec); if (ogrId) byOgrId.set(ogrId, rec);
                         updatedIdsThisSession.add(internalId); added++; if (!ogrId && !oNo && !id) usedKeyless.add(internalId);
                     }
                 });
@@ -1393,7 +1397,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const rnd = mulberry(seed*7919+13);
         const businessMap = new Map();
         records.filter(r => !r.isArchived && r.ogretmen === teacher).forEach(r => {
-            const bKey = (r.isletme||'').toLocaleLowerCase('tr-TR');
+            const bKey = bizKey(r.isletme);
             if (!businessMap.has(bKey)) businessMap.set(bKey, { name: r.isletme, bolge: r.bolge, kume: r.kume || '', students: [], stu: [], adres: r.adres, ustas: new Set(), dals: new Set(), schoolDays: new Set(), ll: parseLL(r.koordinat) });
             const b = businessMap.get(bKey);
             if (!b.kume && r.kume) b.kume = r.kume;
