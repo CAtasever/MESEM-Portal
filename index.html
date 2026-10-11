@@ -1,10 +1,10 @@
-<!-- MESEM Portal (Birleşik) — Sürüm v1.6 — Son güncelleme: 2026-10-11 -->
+<!-- MESEM Portal (Birleşik) — Sürüm v1.7 — Son güncelleme: 2026-10-11 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v1.6</title>
+<title>MESEM Portal v1.7</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.0.3/qrcode.min.js"></script>
@@ -20,7 +20,7 @@
 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
 
 .navbar { background-color: #1e293b; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 50; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-shrink: 0; }
-.navbar { overflow: hidden; max-height: 90px; transition: max-height .2s ease, padding .2s ease; }
+.navbar { overflow: hidden; max-height: 260px; } /* animasyon yok: her karede tabloyu yeniden yerleştirip kasılma yapıyordu */
 .navbar.nav-hidden { max-height: 0; padding-top: 0 !important; padding-bottom: 0 !important; box-shadow: none; }
 .navbar h1 { margin: 0; font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 .nav-links { display: flex; gap: 10px; }
@@ -30,7 +30,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-
 .container { flex: 1; padding: 15px 15px 0 15px; overflow: hidden; display: flex; flex-direction: column; position: relative; }
 .view-section { display: none; height: 100%; flex-direction: column; overflow: hidden; }
 .view-section.active { display: flex; }
-.list-view-inner { display: flex; flex-direction: column; height: 100%; overflow: auto; padding-bottom: 15px; -webkit-overflow-scrolling: touch;}
+.list-view-inner { overflow-anchor: none; display: flex; flex-direction: column; height: 100%; overflow: auto; padding-bottom: 15px; -webkit-overflow-scrolling: touch;}
 
 .action-bar { display: flex; flex-direction: column; background: var(--card); padding: 14px 16px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 12px; gap: 12px; flex-shrink:0;}
 .search-full { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; outline: none; font-size: 14px; }
@@ -158,6 +158,9 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 }
 @media (max-width: 768px) {
     .navbar { flex-direction: column; gap: 12px; padding: 15px; text-align: center; }
+    /* Mobilde yalnızca Ad Soyad sabit kalır; 3 sütun ekranın çoğunu kaplıyordu */
+    #mainTable th:nth-child(1), #mainTable td:nth-child(1), #mainTable th:nth-child(2), #mainTable td:nth-child(2) { position: static; }
+    #mainTable th:nth-child(3), #mainTable td:nth-child(3) { left: 0; min-width: 120px; max-width: 120px; width: 120px; }
     .nav-links { flex-wrap: wrap; justify-content: center; gap: 8px; }
     .nav-links a { font-size: 13px; padding: 8px 12px; background-color: rgba(255,255,255,0.1); border-radius: 20px; }
     .container { padding: 10px; overflow-y: auto;}
@@ -234,7 +237,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 <body>
 
 <div class="navbar">
-    <h1>MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v1.6</span></h1>
+    <h1>MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v1.7</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="plan">Haftalık Planlama</a>
@@ -623,9 +626,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Aşağı kaydırırken üst başlık gizlenir, en üste dönünce görünür
         (function() {
             const nav = document.querySelector('.navbar');
+            let busy = false, lock = false;
             document.querySelectorAll('.list-view-inner').forEach(sc => sc.addEventListener('scroll', () => {
-                if (sc.scrollTop > 60 && (sc.scrollHeight - sc.clientHeight) > 150) nav.classList.add('nav-hidden');
-                else if (sc.scrollTop < 10) nav.classList.remove('nav-hidden');
+                if (busy || lock) return; busy = true;
+                requestAnimationFrame(() => {
+                    busy = false;
+                    const hidden = nav.classList.contains('nav-hidden');
+                    if (!hidden && sc.scrollTop > 120 && (sc.scrollHeight - sc.clientHeight) > 300) { nav.classList.add('nav-hidden'); lock = true; setTimeout(() => lock = false, 350); }
+                    else if (hidden && sc.scrollTop < 10) { nav.classList.remove('nav-hidden'); lock = true; setTimeout(() => lock = false, 350); }
+                });
             }, { passive: true }));
         })();
         document.getElementById('btnExportBackup').addEventListener('click', exportBackup);
@@ -667,7 +676,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (String(r.ogrNo).startsWith('0.')) { r.ogrNo = ''; r.internalId = ''; }
             r.internalId = str(r.internalId) || str(r.ogrNo) || genId();
             r.ogrNo = str(r.ogrNo) || r.internalId;
-            ['adSoyad','sinif','sube','dal','ogretmen','isletme','adres','bolge','koordinat','notlar','ogrTel','isyeriTel','ustaOgretici'].forEach(k => { r[k] = str(r[k]); });
+            ['ogrId','adSoyad','sinif','sube','dal','ogretmen','isletme','adres','bolge','koordinat','notlar','ogrTel','isyeriTel','ustaOgretici'].forEach(k => { r[k] = str(r[k]); });
         });
     }
 
@@ -1101,13 +1110,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 let json = XLSX.utils.sheet_to_json(ws);
                 let updatedIdsThisSession = new Set(); // sadece "kaç kayıt güncellendi" sayacı için; eşleştirmeyi ENGELLEMEZ
                 let added = 0, updated = 0, skipped = 0, snapshot = JSON.stringify(records);
-                let byId = new Map(), byNo = new Map();
-                records.forEach(r => { byId.set(String(r.internalId), r); if (!byNo.has(String(r.ogrNo))) byNo.set(String(r.ogrNo), r); });
+                let byId = new Map(), byNo = new Map(), byOgrId = new Map();
+                records.forEach(r => { byId.set(String(r.internalId), r); if (!byNo.has(String(r.ogrNo))) byNo.set(String(r.ogrNo), r); if (r.ogrId && !byOgrId.has(String(r.ogrId))) byOgrId.set(String(r.ogrId), r); });
                 const pick = (row, keys) => { for (const k of keys) { const v = str(row[k]); if (v) return v; } return ''; };
 
                 json.forEach(raw => {
                     let row = {}; for (const k in raw) row[k.trim()] = raw[k];
-                    let id = pick(row, ['Id','id','ID','Öğr.Id','Ogr.Id','Öğrenci Id']);
+                    let ogrId = pick(row, ['Öğr.Id','Ogr.Id','Öğrenci Id']).replace(/\.0$/, ''); // arka plan eşleştirme anahtarı, tabloda gösterilmez
+                    let id = pick(row, ['Id','id','ID']);
                     let oNo = pick(row, ['Öğr.No','ogrNo','Öğrenci No','Ogr.No','No','Numara']).replace(/\.0$/, '');
                     let ad = pick(row, ['Ad Soyad','Adı Soyadı','Öğrenci Adı','adSoyad','İsim']);
                     let ism = pick(row, ['Firma','Firma Adı','Tespit Edilen Firma','İşletme','isletme','İşletme Adı']);
@@ -1123,12 +1133,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     let isyeriTel = pick(row, ['İşyeri Tel','İşletme Tel','Firma Tel']);
                     let ustaOgretici = pick(row, ['Usta Öğretici','Usta Ogretici','Eğitici Personel','Usta']);
 
-                    if (!ad && !ism && !adr && !oNo && !id) { skipped++; return; }
+                    if (!ad && !ism && !adr && !oNo && !id && !ogrId) { skipped++; return; }
 
                     let existing = null;
-                    if (id) existing = byId.get(id); else if (oNo) existing = byNo.get(oNo);
+                    // Eşleştirme sırası: Öğr.Id → Öğr.No → (ikisi de yoksa) Id. Id yalnızca sıra no olabildiği için tek başına güvenilmez.
+                    if (ogrId) existing = byOgrId.get(ogrId);
+                    if (!existing && oNo) existing = byNo.get(oNo);
+                    if (!existing && !ogrId && !oNo && id) existing = byId.get(id);
 
                     if (existing) {
+                        if (ogrId) { existing.ogrId = ogrId; byOgrId.set(ogrId, existing); }
                         if (ism) existing.isletme = ism;
                         if (adr && adr !== existing.adres) { existing.adres = adr; existing.manuelBolge = false; }
                         if (ogrt) existing.ogretmen = ogrt;
@@ -1145,10 +1159,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else {
                         let internalId = id || oNo || genId();
                         if (byId.has(internalId)) internalId = genId();
-                        let rec = { internalId, ogrNo: oNo || internalId, adSoyad: ad, sinif, sube, dal,
+                        let rec = { internalId, ogrId, ogrNo: oNo || internalId, adSoyad: ad, sinif, sube, dal,
                             ogretmen: ogrt, isletme: ism, adres: adr, bolge: "Belirtilmemiş / Diğer", koordinat: kord, notlar: ntlr,
                             ogrTel, isyeriTel, ustaOgretici, manuelBolge: false, isArchived: false };
-                        records.push(rec); byId.set(internalId, rec); if (!byNo.has(rec.ogrNo)) byNo.set(rec.ogrNo, rec);
+                        records.push(rec); byId.set(internalId, rec); if (!byNo.has(rec.ogrNo)) byNo.set(rec.ogrNo, rec); if (ogrId) byOgrId.set(ogrId, rec);
                         updatedIdsThisSession.add(internalId); added++;
                     }
                 });
