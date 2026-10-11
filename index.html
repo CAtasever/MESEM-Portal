@@ -1,10 +1,10 @@
-<!-- MESEM Portal (Birleşik) — Sürüm v2.0 — Son güncelleme: 2026-10-11 -->
+<!-- MESEM Portal (Birleşik) — Sürüm v2.2 — Son güncelleme: 2026-10-11 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v2.0</title>
+<title>MESEM Portal v2.2</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.0.3/qrcode.min.js"></script>
@@ -247,7 +247,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v2.0</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v2.2</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="plan">Haftalık Planlama</a>
@@ -311,6 +311,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
                         <th style="width: 140px;"><div class="th-content sortable" data-col="adSoyad" id="th-adSoyad">Ad Soyad <i class="fas fa-sort"></i></div></th>
                         <th style="width: 100px;"><div class="th-content sortable" data-col="ogrTel" id="th-ogrTel">Öğrenci Tel <i class="fas fa-sort"></i></div></th>
                         <th style="width: 110px;" title="Okul günü paterni"><div class="th-content sortable" data-col="sube" id="th-sube">Şube <i class="fas fa-sort"></i></div></th>
+                        <th style="width: 130px;"><div class="th-content sortable" data-col="dal" id="th-dal">Dal <i class="fas fa-sort"></i></div></th>
                         <th style="width: 140px;"><div class="th-content sortable" data-col="ogretmen" id="th-ogretmen">Öğretmen <i class="fas fa-sort"></i></div></th>
                         <th style="width: 160px;"><div class="th-content sortable" data-col="isletme" id="th-isletme">İşletme <i class="fas fa-sort"></i></div></th>
                         <th style="width: 100px;"><div class="th-content sortable" data-col="isyeriTel" id="th-isyeriTel">İşyeri Tel <i class="fas fa-sort"></i></div></th>
@@ -394,6 +395,9 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
                         <label class="chk"><input type="checkbox" class="pcol" value="bolge" checked> Bölge</label>
                         <label class="chk"><input type="checkbox" class="pcol" value="ogrenci" checked> Öğrenci(ler)</label>
                         <label class="chk"><input type="checkbox" class="pcol" value="sube" checked> Şube</label>
+                        <label class="chk"><input type="checkbox" class="pcol" value="isltel" checked> İşletme Tel</label>
+                        <label class="chk"><input type="checkbox" class="pcol" value="ogrtel" checked> Öğrenci Tel</label>
+                        <label class="chk"><input type="checkbox" class="pcol" value="dal" checked> Dal</label>
                         <label class="chk"><input type="checkbox" class="pcol" value="usta" checked> Usta Öğretici</label>
                         <label class="chk"><input type="checkbox" class="pcol" value="yapildi" checked> Yapıldı kutusu</label>
                         <label class="chk"><input type="checkbox" class="pcol" value="not" checked> Ziyaret Notu alanı</label>
@@ -873,6 +877,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td>${r.adSoyad}</td>
                     <td>${r.ogrTel}</td>
                     <td>${subeBadge}</td>
+                    <td>${r.dal}</td>
                     <td>${r.ogretmen}</td>
                     <td><span style="color:var(--primary-dark); font-weight:500;">${r.isletme}</span></td>
                     <td>${r.isyeriTel}</td>
@@ -1523,10 +1528,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         : `<div style="font-size:11px;opacity:.7">📍 ${escapeHtml(item.biz.adres)}</div>`)
                     : '';
                 html += `<tr class="${item.biz.unk>0?'tr-warn':''}">
-                    <td><strong style="color:var(--primary-dark)">${escapeHtml(item.biz.name)}</strong>${adresLine}${item.biz.ustas.size?`<div style="font-size:11px;opacity:.7">Usta: ${escapeHtml([...item.biz.ustas].join(', '))}</div>`:''}
+                    <td><strong style="color:var(--primary-dark)">${escapeHtml(item.biz.name)}</strong>${adresLine}${item.biz.tel?`<div style="font-size:11px;opacity:.8">Tel: ${escapeHtml(item.biz.tel)}</div>`:''}${item.biz.ustas.size?`<div style="font-size:11px;opacity:.7">Usta: ${escapeHtml([...item.biz.ustas].join(', '))}</div>`:''}
                         ${item.biz.unk>0?'<span class="warn-text">⚠ Şube/okul günü belirsiz öğrenci var.</span>':''}${confText(item)?`<div style="color:#0b5cad;font-size:12px;">ℹ ${escapeHtml(confText(item))}</div>`:''}</td>
                     <td>${item.biz.bolge?`<span class="badge badge-bolge">${escapeHtml(item.biz.bolge)}</span>`:'-'}</td>
-                    <td>${escapeHtml(item.biz.stu.map(x => x.name + (x.no?' ('+x.no+')':'')).join(', '))}</td>
+                    <td>${item.biz.stu.map(x => `<div>${escapeHtml(x.name + (x.no?' ('+x.no+')':''))}${x.dal?`<span style="font-size:11px;opacity:.75"> · ${escapeHtml(x.dal)}</span>`:''}${x.tel?`<span style="font-size:11px;opacity:.75"> — ${escapeHtml(x.tel)}</span>`:''}</div>`).join('')}</td>
                     <td>${[...new Set(item.biz.stu.map(x=>x.sube).filter(Boolean))].map(b=>`<span class="badge badge-sube">${escapeHtml(b)}</span>`).join(' ') || '-'}</td>
                     <td class="noprint"><select data-idx="${actualIndex}" style="padding:6px;font-size:12px;font-weight:600;width:100%;">${optionsHtml}</select></td>
                 </tr>`;
@@ -1550,13 +1555,13 @@ document.addEventListener('DOMContentLoaded', function() {
             let items = sortAssignedItems(plan.assigned.filter(a => a.dateKey === dateKey));
             if (items.length) {
                 ws_data.push([`HAFTA: ${formatDisplayDate(dateKey).toUpperCase()}`]);
-                ws_data.push(["İşletme / Firma Adı","Bölge","Öğrenci(ler)","Şube","Adres","Usta Öğretici","Okul Günü Notu"]);
-                items.forEach(item => ws_data.push([item.biz.name, item.biz.bolge||'-', item.biz.students.join(', '), [...new Set(item.biz.stu.map(x=>x.sube).filter(Boolean))].join(', '), item.biz.adres||'', [...item.biz.ustas].join(', '), confText(item)]));
+                ws_data.push(["İşletme / Firma Adı","Bölge","Öğrenci(ler)","Öğrenci Tel","Dal","Şube","Adres","İşletme Tel","Usta Öğretici","Okul Günü Notu"]);
+                items.forEach(item => ws_data.push([item.biz.name, item.biz.bolge||'-', item.biz.students.join(', '), item.biz.stu.map(x=>x.tel||'-').join(', '), [...new Set(item.biz.stu.map(x=>x.dal).filter(Boolean))].join(', '), [...new Set(item.biz.stu.map(x=>x.sube).filter(Boolean))].join(', '), item.biz.adres||'', item.biz.tel||'', [...item.biz.ustas].join(', '), confText(item)]));
                 ws_data.push([]);
             }
         });
         const ws = XLSX.utils.aoa_to_sheet(ws_data);
-        ws['!cols'] = [{wch:45},{wch:25},{wch:35},{wch:15},{wch:45},{wch:30},{wch:35}];
+        ws['!cols'] = [{wch:45},{wch:25},{wch:35},{wch:28},{wch:24},{wch:15},{wch:45},{wch:16},{wch:30},{wch:35}];
         ws['!merges'] = [{s:{r:0,c:0}, e:{r:0,c:3}}];
         const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Ziyaret_Plani");
         XLSX.writeFile(wb, `Ziyaret_Plani_${plan.teacher.replace(/\s+/g,'_')}.xlsx`);
@@ -1666,6 +1671,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     { key:'_qr', title:'Konum (QR)', c:true, always: () => qrOn, td:b=>`<td class="c"><div class="qr">${qrSvg(b)}</div></td>` },
                     { key:'bolge', title:'Bölge', c:false, td:b=>`<td>${escapeHtml(b.bolge||'-')}</td>` },
                     { key:'ogrenci', title:'Öğrenci(ler)', c:false, td:b=>`<td>${b.stu.map(x=>escapeHtml(x.name)).join('<br>')||'-'}</td>` },
+                    { key:'isltel', title:'İşletme Tel', c:false, td:b=>`<td style="white-space:nowrap">${escapeHtml(b.tel||'-')}</td>` },
+                    { key:'ogrtel', title:'Öğrenci Tel', c:false, td:b=>`<td style="white-space:nowrap">${b.stu.map(x=>escapeHtml(x.tel||'-')).join('<br>')}</td>` },
+                    { key:'dal', title:'Dal', c:false, td:b=>`<td>${[...new Set(b.stu.map(x=>x.dal).filter(Boolean))].map(escapeHtml).join('<br>')||'-'}</td>` },
                     { key:'sube', title:'Şube', c:false, td:b=>`<td>${[...new Set(b.stu.map(x=>x.sube).filter(Boolean))].map(escapeHtml).join('<br>')||'-'}</td>` },
                     { key:'usta', title:'Usta Öğretici', c:false, td:b=>`<td>${[...b.ustas].map(escapeHtml).join('<br>')||'-'}</td>` },
                     { key:'yapildi', title:'Yapıldı', c:true, td:()=>`<td class="c"><span class="cb"></span></td>` },
