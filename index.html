@@ -1,10 +1,10 @@
-<!-- MESEM Portal (Birleşik) — Sürüm v1.8 — Son güncelleme: 2026-10-11 -->
+<!-- MESEM Portal (Birleşik) — Sürüm v1.9 — Son güncelleme: 2026-10-11 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v1.8</title>
+<title>MESEM Portal v1.9</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.0.3/qrcode.min.js"></script>
@@ -238,7 +238,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 <body>
 
 <div class="navbar">
-    <h1>MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v1.8</span></h1>
+    <h1>MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v1.9</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="plan">Haftalık Planlama</a>
@@ -676,7 +676,8 @@ document.addEventListener('DOMContentLoaded', function() {
         records.forEach(r => {
             if (String(r.ogrNo).startsWith('0.')) { r.ogrNo = ''; r.internalId = ''; }
             r.internalId = str(r.internalId) || str(r.ogrNo) || genId();
-            r.ogrNo = str(r.ogrNo) || r.internalId;
+            r.ogrNo = str(r.ogrNo);
+            if (/^ID-/.test(r.ogrNo)) r.ogrNo = ''; // eski sürümlerin ürettiği sahte numara
             ['ogrId','adSoyad','sinif','sube','dal','ogretmen','isletme','adres','bolge','koordinat','notlar','ogrTel','isyeriTel','ustaOgretici'].forEach(k => { r[k] = str(r[k]); });
         });
     }
@@ -844,7 +845,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let coordBadge = hasCoord ? `<br><span class="badge badge-coord" title="Özel Koordinat Atanmış">📍 Kord.</span>` : '';
             let cleanNote = escapeHtml(rr.notlar || '');
             let noteHtml = cleanNote.length > 0 ? `<i class="fas fa-comment-dots note-icon" title="${cleanNote}" data-action="note" data-note="${cleanNote}"></i>` : '';
-            let ogrNoDisp = (r.ogrNo && !String(r.ogrNo).startsWith('ID-')) ? r.ogrNo : '<span style="color:#94a3b8;">' + (r.ogrNo||'') + '</span>';
+            let ogrNoDisp = r.ogrNo ? r.ogrNo : '<span class="badge badge-warn" title="Öğrenci numarası yok">Yok</span>';
             // Şube hücresi artık hem gün paternini (rozet) hem sınıfı (alt rozet) tek sütunda gösterir — Sınıf ayrı sütun değil
             let subeDayBadge = rr.sube ? (parseSchoolDays(rr.sube).length ? `<span class="badge badge-sube">${r.sube}</span>` : `<span class="badge badge-warn" title="Gün ayrıştırılamadı">${r.sube} ⚠</span>`) : '<span style="color:#94a3b8;">-</span>';
             // Sınıf hücrede gösterilmez; arka planda tutulur (filtre, Excel, düzenleme)
@@ -1113,7 +1114,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 let updatedIdsThisSession = new Set(); // sadece "kaç kayıt güncellendi" sayacı için; eşleştirmeyi ENGELLEMEZ
                 let added = 0, updated = 0, skipped = 0, snapshot = JSON.stringify(records);
                 let byId = new Map(), byNo = new Map(), byOgrId = new Map();
-                records.forEach(r => { byId.set(String(r.internalId), r); if (!byNo.has(String(r.ogrNo))) byNo.set(String(r.ogrNo), r); if (r.ogrId && !byOgrId.has(String(r.ogrId))) byOgrId.set(String(r.ogrId), r); });
+                records.forEach(r => { byId.set(String(r.internalId), r); if (r.ogrNo && !byNo.has(String(r.ogrNo))) byNo.set(String(r.ogrNo), r); if (r.ogrId && !byOgrId.has(String(r.ogrId))) byOgrId.set(String(r.ogrId), r); });
                 const pick = (row, keys) => { for (const k of keys) { const v = str(row[k]); if (v) return v; } return ''; };
 
                 json.forEach(raw => {
@@ -1141,11 +1142,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Eşleştirme sırası: Öğr.Id → Öğr.No → (ikisi de yoksa) Id. Id yalnızca sıra no olabildiği için tek başına güvenilmez.
                     if (ogrId) existing = byOgrId.get(ogrId);
                     if (!existing && oNo) existing = byNo.get(oNo);
-                    if (!existing && !ogrId && !oNo && id) existing = byId.get(id);
+                    if (!existing && !oNo && id) {
+                        // Id tek başına güvenilmez (1,2,3.. sıra no olabilir): yalnızca Öğr.Id'si olmayan ve adı boş/aynı olan eski kayıtla eşleştir
+                        const c = byId.get(id);
+                        if (c && !c.ogrId && (!c.adSoyad || normTR(c.adSoyad) === normTR(ad))) existing = c;
+                    }
                     // Hiçbir kimliği olmayan öğrenci: ad + işletme + sınıf + şube ile eşleştir (aynı dosyada iki kez aynı kayda birleşmez)
                     if (!existing && !ogrId && !oNo && !id) {
                         const k = v => normTR(v);
-                        existing = records.find(r => !r.ogrId && String(r.ogrNo) === String(r.internalId) && !usedKeyless.has(r.internalId)
+                        existing = records.find(r => !r.ogrId && (!r.ogrNo || String(r.ogrNo) === String(r.internalId)) && !usedKeyless.has(r.internalId)
                             && k(r.adSoyad) === k(ad) && k(r.isletme) === k(ism) && k(r.sinif) === k(sinif) && k(r.sube) === k(sube)) || null;
                         if (existing) usedKeyless.add(existing.internalId);
                     }
@@ -1169,10 +1174,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else {
                         let internalId = id || oNo || genId();
                         if (byId.has(internalId)) internalId = genId();
-                        let rec = { internalId, ogrId, ogrNo: oNo || internalId, adSoyad: ad, sinif, sube, dal,
+                        let rec = { internalId, ogrId, ogrNo: oNo, adSoyad: ad, sinif, sube, dal,
                             ogretmen: ogrt, isletme: ism, adres: adr, bolge: "Belirtilmemiş / Diğer", koordinat: kord, notlar: ntlr,
                             ogrTel, isyeriTel, ustaOgretici, manuelBolge: false, isArchived: false };
-                        records.push(rec); byId.set(internalId, rec); if (!byNo.has(rec.ogrNo)) byNo.set(rec.ogrNo, rec); if (ogrId) byOgrId.set(ogrId, rec);
+                        records.push(rec); byId.set(internalId, rec); if (rec.ogrNo && !byNo.has(rec.ogrNo)) byNo.set(rec.ogrNo, rec); if (ogrId) byOgrId.set(ogrId, rec);
                         updatedIdsThisSession.add(internalId); added++; if (!ogrId && !oNo && !id) usedKeyless.add(internalId);
                     }
                 });
@@ -1372,7 +1377,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const b = businessMap.get(bKey);
             if (!b.kume && r.kume) b.kume = r.kume;
             const nm = r.adSoyad || '(adsız)';
-            if (!b.stu.some(x => x.name===nm && x.no===r.ogrNo)) { b.stu.push({ name: nm, no: r.ogrNo, sube: r.sube, dal: r.dal, tel: r.ogrTel }); b.students.push(nm); }
+            if (!b.stu.some(x => x.key===r.internalId)) { b.stu.push({ key: r.internalId, name: nm, no: r.ogrNo, sube: r.sube, dal: r.dal, tel: r.ogrTel }); b.students.push(nm); }
             if (r.ustaOgretici) b.ustas.add(r.ustaOgretici);
             if (r.isyeriTel && !b.tel) b.tel = r.isyeriTel;
             if (r.dal) b.dals.add(r.dal);
