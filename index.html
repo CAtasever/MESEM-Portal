@@ -1,10 +1,10 @@
-<!-- MESEM Portal (Birleşik) — Sürüm v1.7 — Son güncelleme: 2026-10-11 -->
+<!-- MESEM Portal (Birleşik) — Sürüm v1.8 — Son güncelleme: 2026-10-11 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v1.7</title>
+<title>MESEM Portal v1.8</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.0.3/qrcode.min.js"></script>
@@ -111,11 +111,12 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 .btn-cancel { background-color: #e2e8f0; color: #334155; } .btn-cancel:hover { background-color: #cbd5e1; }
 
-.rules-container { display: flex; gap: 20px; height: 100%; overflow: hidden; align-items: flex-start; }
-.rules-form { width: 350px; flex-shrink: 0; background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border); display:flex; flex-direction:column; position: sticky; top: 0; max-height: 100%; overflow-y: auto; }
-.rules-list-wrapper { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; background: white; border-radius: 8px; border: 1px solid var(--border); padding: 20px; }
+#view-rules { overflow-y: auto; padding-bottom: 20px; }
+.rules-container { display: flex; gap: 20px; height: auto; overflow: visible; flex-shrink: 0; align-items: flex-start; }
+.rules-form { width: 350px; flex-shrink: 0; background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border); display:flex; flex-direction:column; position: sticky; top: 0; max-height: calc(100vh - 40px); overflow-y: auto; }
+.rules-list-wrapper { flex: 1; display: flex; flex-direction: column; height: auto; overflow: visible; min-width: 0; background: white; border-radius: 8px; border: 1px solid var(--border); padding: 20px; }
 .rules-list-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px; flex-shrink: 0;}
-.rules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; overflow-y: auto; padding-right: 5px; align-content: start; flex: 1;}
+.rules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; overflow: visible; padding-right: 5px; align-content: start;}
 .rule-card { border: 1px solid var(--border); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; background-color: #f8fafc; border-left: 4px solid var(--primary); }
 .rule-card.inactive-rule { opacity: 0.6; border-left-color: #94a3b8; background-color: #f1f5f9; }
 .rule-card.inactive-rule h4 { color: #64748b; text-decoration: line-through; }
@@ -237,7 +238,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 <body>
 
 <div class="navbar">
-    <h1>MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v1.7</span></h1>
+    <h1>MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v1.8</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="plan">Haftalık Planlama</a>
@@ -1108,6 +1109,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 let wb = XLSX.read(data, {type: 'array'});
                 let ws = wb.Sheets[wb.SheetNames[0]];
                 let json = XLSX.utils.sheet_to_json(ws);
+                let usedKeyless = new Set(), noNoCount = 0, rowsRead = json.length;
                 let updatedIdsThisSession = new Set(); // sadece "kaç kayıt güncellendi" sayacı için; eşleştirmeyi ENGELLEMEZ
                 let added = 0, updated = 0, skipped = 0, snapshot = JSON.stringify(records);
                 let byId = new Map(), byNo = new Map(), byOgrId = new Map();
@@ -1140,6 +1142,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (ogrId) existing = byOgrId.get(ogrId);
                     if (!existing && oNo) existing = byNo.get(oNo);
                     if (!existing && !ogrId && !oNo && id) existing = byId.get(id);
+                    // Hiçbir kimliği olmayan öğrenci: ad + işletme + sınıf + şube ile eşleştir (aynı dosyada iki kez aynı kayda birleşmez)
+                    if (!existing && !ogrId && !oNo && !id) {
+                        const k = v => normTR(v);
+                        existing = records.find(r => !r.ogrId && String(r.ogrNo) === String(r.internalId) && !usedKeyless.has(r.internalId)
+                            && k(r.adSoyad) === k(ad) && k(r.isletme) === k(ism) && k(r.sinif) === k(sinif) && k(r.sube) === k(sube)) || null;
+                        if (existing) usedKeyless.add(existing.internalId);
+                    }
+                    if (!oNo) noNoCount++;
 
                     if (existing) {
                         if (ogrId) { existing.ogrId = ogrId; byOgrId.set(ogrId, existing); }
@@ -1163,13 +1173,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             ogretmen: ogrt, isletme: ism, adres: adr, bolge: "Belirtilmemiş / Diğer", koordinat: kord, notlar: ntlr,
                             ogrTel, isyeriTel, ustaOgretici, manuelBolge: false, isArchived: false };
                         records.push(rec); byId.set(internalId, rec); if (!byNo.has(rec.ogrNo)) byNo.set(rec.ogrNo, rec); if (ogrId) byOgrId.set(ogrId, rec);
-                        updatedIdsThisSession.add(internalId); added++;
+                        updatedIdsThisSession.add(internalId); added++; if (!ogrId && !oNo && !id) usedKeyless.add(internalId);
                     }
                 });
                 recalculateRegions(); renderTable('main'); saveData();
 
                 const subeEksik = records.filter(r => !r.isArchived && !r.sube).length;
-                let msg = `${added} yeni kayıt, ${updated} güncelleme tespit edildi.\n(${skipped} boş satır atlandı)`;
+                let msg = `${rowsRead} satır okundu: ${added} yeni kayıt, ${updated} güncelleme.\n(${skipped} boş satır atlandı)`;
+                if (noNoCount > 0) msg += `\n${noNoCount} öğrencinin numarası yok; yine de listeye dahil edildi.`;
                 if (subeEksik > 0) msg += `\n\nUYARI: ${subeEksik} kayıtta "Şube" bilgisi yok. Bu kayıtlar Haftalık Planlama'da gün belirsiz ⚠ olarak işaretlenecek.`;
                 msg += `\n\nListeye uygulansın mı?`;
                 if (!confirm(msg)) {
