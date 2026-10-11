@@ -1,10 +1,10 @@
-<!-- MESEM Portal (Birleşik) — Sürüm v1.9 — Son güncelleme: 2026-10-11 -->
+<!-- MESEM Portal (Birleşik) — Sürüm v2.0 — Son güncelleme: 2026-10-11 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v1.9</title>
+<title>MESEM Portal v2.0</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.0.3/qrcode.min.js"></script>
@@ -22,6 +22,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-
 .navbar { background-color: #1e293b; color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 50; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-shrink: 0; }
 .navbar { overflow: hidden; max-height: 260px; } /* animasyon yok: her karede tabloyu yeniden yerleştirip kasılma yapıyordu */
 .navbar.nav-hidden { max-height: 0; padding-top: 0 !important; padding-bottom: 0 !important; box-shadow: none; }
+#homeLink { cursor: pointer; user-select: none; } #homeLink:hover { opacity: .85; }
 .navbar h1 { margin: 0; font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 .nav-links { display: flex; gap: 10px; }
 .nav-links a { color: #cbd5e1; text-decoration: none; font-weight: 500; cursor: pointer; padding: 6px 10px; border-radius: 6px; transition: 0.2s; font-size: 14px; }
@@ -137,6 +138,14 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 .grid-row { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; margin-bottom: 12px; }
 .plan-fg { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 200px; }
 .plan-fg label { font-size: 12px; font-weight: 600; opacity: 0.8; }
+#planSettingsCard { padding: 12px 14px; }
+#planSettingsCard .card-title { margin-bottom: 6px; }
+#planSettingsCard .grid-row { gap: 10px; margin-bottom: 8px; }
+#planSettingsCard .plan-fg { min-width: 150px; gap: 3px; }
+#planSettingsCard select, #planSettingsCard input[type=month], #planSettingsCard input[type=date] { padding: 6px 8px; font-size: 13px; }
+#planSettingsCard .week-starts { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; margin-top: 2px; }
+#planSettingsCard .week-start-item { padding: 5px 8px; gap: 6px; font-size: 12px; }
+#planSettingsCard .week-start-item select { width: auto; flex: 1; min-width: 0; padding: 4px; }
 .week-starts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
 .week-start-item { background: var(--bg); border: 1px solid var(--border); padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
 .week-start-item select { padding: 5px; width: 220px; font-weight:500; border:1px solid var(--border); border-radius:6px;}
@@ -238,7 +247,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 <body>
 
 <div class="navbar">
-    <h1>MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v1.9</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v2.0</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="plan">Haftalık Planlama</a>
@@ -322,9 +331,9 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
     <!-- ================= HAFTALIK PLANLAMA (v18'den enjekte edilen modül) ================= -->
     <div id="view-plan" class="view-section">
       <div class="list-view-inner">
-        <div class="card noprint">
+        <div class="card noprint" id="planSettingsCard">
             <h3 class="card-title">Planlama Ayarları</h3>
-            <p style="font-size:12px;opacity:.75;margin:0 0 12px">Veri, "Liste" sekmesindeki kayıtlardan (arşivlenmemiş) otomatik gelir. Ayrı Excel yüklemeye gerek yoktur; planlama, her kaydın <b>Şube</b> alanına göre öğrencinin okulda olduğu günleri hesaplar.</p>
+            <p style="font-size:12px;opacity:.7;margin:0 0 8px">Veri Liste sekmesinden gelir; okul günü kayıtların <b>Şube</b> alanından hesaplanır.</p>
             <div class="grid-row">
                 <div class="plan-fg">
                     <label>Öğretmen Seçimi</label>
@@ -334,29 +343,29 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
                     <label>Planlanacak Ay</label>
                     <input type="month" id="planMonthSelect">
                 </div>
-                <div class="plan-fg" style="max-width:320px;">
-                    <label>Yakın adresleri aynı güne toplama (denge)</label>
+                <div class="plan-fg">
+                    <label>Yakın adresleri aynı güne toplama</label>
                     <select id="planSlackSel">
                         <option value="0" selected>Eşit yük — önerilen</option>
                         <option value="2">Dengeli (±2 işletme)</option>
                         <option value="4">Yakınlık öncelikli (±4 işletme)</option>
                     </select>
                 </div>
-            </div>
-            <div id="planUploadInfo" style="margin-bottom:10px;font-size:13px;font-weight:600;"></div>
-            <div class="plan-fg">
-                <label>Resmi Tatiller <span class="help-text" style="display:inline">(Eklenen tarihler hafta hesabından ve gün seçeneklerinden otomatik çıkarılır)</span></label>
-                <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
-                    <input type="date" id="planHolidayInput" style="max-width:180px;">
-                    <button type="button" class="btn btn-import" id="btnAddHoliday" style="padding:8px 12px;">Tatil Ekle</button>
+                <div class="plan-fg" title="Eklenen tarihler hafta hesabından otomatik çıkarılır">
+                    <label>Resmi Tatiller</label>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <input type="date" id="planHolidayInput" style="flex:1; min-width:0;">
+                        <button type="button" class="btn btn-import" id="btnAddHoliday" style="padding:6px 10px;">Ekle</button>
+                    </div>
                 </div>
-                <div id="planHolidayChips" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;"></div>
             </div>
+            <div id="planHolidayChips" style="display:flex; flex-wrap:wrap; gap:6px; margin:-2px 0 8px;"></div>
+            <div id="planUploadInfo" style="margin-bottom:10px;font-size:13px;font-weight:600;"></div>
             <div class="plan-fg">
                 <label>Haftalık Ziyaret Günleri</label>
                 <div class="week-starts" id="planWeekStartsContainer"></div>
             </div>
-            <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
                 <button class="btn btn-primary" id="btnPlanGenerate">Planı Oluştur</button>
                 <button class="btn btn-print" id="btnPlanSuggest" type="button" title="Her hafta için en uygun günü dener">Otomatik Gün Öner</button>
             </div>
@@ -377,7 +386,6 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
                 <div class="chk-box" style="margin-top:12px">
                     <label class="chk"><input type="checkbox" id="pFit" checked> Her ziyaret günü tek sayfaya sığsın (otomatik küçült)</label>
                     <label class="chk"><input type="checkbox" id="pQrOn" checked> QR kodu ekle</label>
-                    <label class="chk"><input type="checkbox" id="pSign" checked> İmza alanı ekle</label>
                 </div>
                 <div class="plan-fg" style="margin-top:12px;">
                     <label>Yazdırılacak Sütunlar</label>
@@ -605,6 +613,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const stuSchoolDays = r => parseSchoolDays(r.sube);
 
     function bindAllEvents() {
+        const goHome = () => {
+            switchTab('main');
+            document.querySelector('.navbar').classList.remove('nav-hidden');
+            document.querySelectorAll('.list-view-inner').forEach(sc => sc.scrollTop = 0);
+            window.scrollTo(0, 0);
+        };
+        document.getElementById('homeLink').addEventListener('click', goHome);
+        document.getElementById('homeLink').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goHome(); } });
         document.querySelectorAll('.nav-tab').forEach(el => el.addEventListener('click', e => switchTab(e.currentTarget.dataset.tab)));
         document.getElementById('btnFactoryReset').addEventListener('click', factoryReset);
         document.getElementById('btnGetLocation').addEventListener('click', getMyLocation);
@@ -1529,7 +1545,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $$('btnPlanExportExcel').addEventListener('click', () => {
         if (!activePlan) return;
         const plan = activePlan;
-        const ws_data = [["MESEM HAFTALIK İŞLETME ZİYARET PLANI"], ["Öğretmen:", plan.teacher, "Planlanan Ay:", plan.month], []];
+        const ws_data = [["HAFTALIK İŞLETME ZİYARET PLANI"], ["Öğretmen:", plan.teacher, "Planlanan Ay:", plan.month], []];
         plan.selectedVisitDates.forEach(dateKey => {
             let items = sortAssignedItems(plan.assigned.filter(a => a.dateKey === dateKey));
             if (items.length) {
@@ -1632,10 +1648,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const [yy, mm] = (plan.month || '-').split('-');
         const monthText = MONTHS[(+mm || 1) - 1] + ' ' + yy;
         const school = $$('pSchool').value.trim();
-        const sign = $$('pSign').checked ? `<div class="sign"><div>Öğretmen (İmza)</div><div>Okul Müdürü / Onay</div></div>` : '';
-        const hdrFull = `<div class="print-header">${school?`<h3>${escapeHtml(school)}</h3>`:''}<h1>MESEM HAFTALIK İŞLETME ZİYARET PLANI</h1>
+        const hdrFull = `<div class="print-header">${school?`<h3>${escapeHtml(school)}</h3>`:''}<h1>HAFTALIK İŞLETME ZİYARET PLANI</h1>
             <p><strong>Öğretmen:</strong> ${escapeHtml(plan.teacher)} &nbsp;|&nbsp; <strong>Ay:</strong> ${monthText} &nbsp;|&nbsp; <strong>Toplam işletme:</strong> ${plan.totalBusinesses} &nbsp;|&nbsp; <strong>Planlanan:</strong> ${plan.assigned.length}</p></div>`;
-        const hdrMini = `<div class="print-header" style="padding-bottom:4px;margin-bottom:6px"><strong style="font-size:1.2em">${school?escapeHtml(school)+' — ':''}MESEM HAFTALIK İŞLETME ZİYARET PLANI</strong><br>Öğretmen: ${escapeHtml(plan.teacher)} &nbsp;|&nbsp; Ay: ${monthText}</div>`;
+        const hdrMini = `<div class="print-header" style="padding-bottom:4px;margin-bottom:6px"><strong style="font-size:1.2em">${school?escapeHtml(school)+' — ':''}HAFTALIK İŞLETME ZİYARET PLANI</strong><br>Öğretmen: ${escapeHtml(plan.teacher)} &nbsp;|&nbsp; Ay: ${monthText}</div>`;
         let html = fit ? '' : hdrFull;
         const dates = $$('pScope').value === 'active' ? [plan.selectedVisitDates[currentWeekIndex]] : plan.selectedVisitDates;
         dates.forEach((dateKey, k) => {
@@ -1667,17 +1682,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 g += `<table>${thead}<tbody>${rows.join('')}</tbody></table>`;
             }
-            if (fit) g += sign;
             g += `</div>`;
             html += fit ? `<div class="fitwrap" data-lbl="${wIdx+1}. hafta">${g}</div>` : g;
         });
-        if (!fit) html += sign;
         $$('planPrintArea').innerHTML = html;
         if (fit) { land = fitPages(orient); pageStyle.textContent = `@page { size: A4 ${land?'landscape':'portrait'}; }`; }
         else $$('planFitInfo').textContent = '';
         window.__planLand = land;
     }
-    document.querySelectorAll('#pOrient,#pQrMode,#pScope,#pSchool,#pQrOn,#pSign,#pFit').forEach(el => { el.addEventListener('change', renderPlanPrintArea); el.addEventListener('input', renderPlanPrintArea); });
+    document.querySelectorAll('#pOrient,#pQrMode,#pScope,#pSchool,#pQrOn,#pFit').forEach(el => { el.addEventListener('change', renderPlanPrintArea); el.addEventListener('input', renderPlanPrintArea); });
     document.querySelectorAll('.pcol').forEach(el => el.addEventListener('change', renderPlanPrintArea));
 
     /* --- ÖNİZLEME (v18'den) --- */
