@@ -1,11 +1,11 @@
-<!-- MESEM Portal (Birleşik) — Sürüm v2.9 — Son güncelleme: 2026-10-11 -->
+<!-- MESEM Portal (Birleşik) — Sürüm v3.5 — Son güncelleme: 2026-10-11 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v2.9</title>
+<title>MESEM Portal v3.5</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.0.3/qrcode.min.js"></script>
@@ -144,6 +144,19 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 #planSettingsCard .grid-row { gap: 10px; margin-bottom: 8px; }
 #planSettingsCard .plan-fg { min-width: 150px; gap: 3px; }
 #planSettingsCard select, #planSettingsCard input[type=month], #planSettingsCard input[type=date] { padding: 6px 8px; font-size: 13px; }
+#weekCard { padding: 12px 14px; }
+#imeCard { padding: 12px 14px; }
+#imeCard .card-title { margin-bottom: 6px; }
+#imeCard.ime-off #imeBody { opacity: .5; }
+#imeCard .ime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px; margin-top: 6px; }
+#imeCard .ime-row { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+#imeCard .ime-row b { width: 70px; font-weight: 600; }
+#imeCard .ime-row select { padding: 3px 4px; font-size: 12px; width: auto; min-width: 0; }
+#imeCard .ime-row .tsel { display: inline-flex; align-items: center; gap: 2px; }
+#imeCard .ime-row input[type=time] { padding: 4px 6px; font-size: 12px; width: 92px; }
+#imeCard .ime-visit { margin-top: 6px; font-size: 12px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+#imeCard .ime-visit input { width: 64px; padding: 4px 6px; font-size: 12px; }
+#imeCard .ime-row.bad input { border-color: #ef4444; }
 #planSettingsCard .week-starts { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; margin-top: 2px; }
 #planSettingsCard .week-start-item { padding: 5px 8px; gap: 6px; font-size: 12px; }
 #planSettingsCard .week-start-item select { width: auto; flex: 1; min-width: 0; padding: 4px; }
@@ -155,6 +168,12 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 .stat-box .num { display: block; font-size: 22px; font-weight: 700; color: var(--primary-dark); margin-bottom: 4px; }
 .stat-box .lbl { font-size: 11px; font-weight: 600; opacity: 0.7; }
 .tabs { display: flex; gap: 8px; flex-wrap: wrap; border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 12px; }
+.wk-group { grid-column: 1 / -1; border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; background: var(--card); }
+.wk-title { font-weight: 700; font-size: 13px; color: var(--primary-dark); margin-bottom: 6px; padding-bottom: 4px; border-bottom: 2px solid var(--primary); display: inline-block; }
+.wk-days { display: flex; gap: 8px; flex-wrap: wrap; }
+.wk-days .stat-box { flex: 1 1 120px; max-width: 190px; }
+.wk-tabs { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; border: 1px solid var(--border); border-radius: 22px; padding: 3px 8px 3px 12px; background: var(--card); }
+.wk-tabs b { font-size: 12px; color: var(--primary-dark); margin-right: 2px; }
 .tab-btn { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 7px 14px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 12px; }
 .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 .warn-text { color: #b45309; font-size: 12px; font-weight: 600; display: block; margin-top: 4px; }
@@ -206,6 +225,8 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 .print-header h1 { font-size: 1.3em; margin: 0 0 3px; } .print-header h3 { margin: 0 0 3px; font-size: 1em; } .print-header p { margin: 0; font-size: .95em; }
 .print-week-group { margin-bottom: 18px; width: 100%; }
 .print-week-group h2 { font-size: 1.1em; background: #2b3441 !important; color: #fff !important; padding: 6px 10px; margin: 0; }
+.print-wrapper .print-week-group h2 { white-space: normal; line-height: 1.3; }
+.print-wrapper tr.daystart td { border-top: 2.5px solid #111; }
 .print-wrapper .chipline { font-size: .84em; padding: 3px 10px; background: #eef1f5 !important; border: 1px solid #2b3441; border-top: none; }
 .print-wrapper table { width: 100%; border-collapse: collapse; }
 .print-wrapper th, .print-wrapper td { border: 1px solid #555; padding: 5px 6px; font-size: .92em; text-align: left; vertical-align: middle; }
@@ -249,9 +270,10 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v2.9</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v3.5</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
+        <a class="nav-tab" data-tab="loc">İşletme Konum</a>
         <a class="nav-tab" data-tab="plan">Haftalık Planlama</a>
         <a class="nav-tab" data-tab="rules">Kurallar</a>
         <a class="nav-tab" data-tab="archive">Arşiv</a>
@@ -332,6 +354,26 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
     </div>
 
     <!-- ================= HAFTALIK PLANLAMA (v18'den enjekte edilen modül) ================= -->
+    <!-- ================= İŞLETME KONUM ================= -->
+    <div id="view-loc" class="view-section">
+      <div class="list-view-inner">
+        <div class="action-bar">
+            <div class="toolbar-row">
+                <input type="text" id="locSearch" class="search-compact" style="width:280px;" placeholder="İşletme veya adres ara...">
+                <label class="chk"><input type="checkbox" id="locOnlyMissing"> Yalnızca konumu olmayanlar</label>
+                <div class="record-count" id="locCount"></div>
+            </div>
+            <div class="help-text" style="font-size:12px; opacity:.75;">Konum alanına <b>41.0082, 28.9784</b> yazın ya da Google Maps linkini yapıştırın. Bu alan Liste'deki <b>Nokta Konum</b> ile aynı veridir; değişiklik işletmenin tüm satırlarına ve Liste'ye yansır.</div>
+        </div>
+        <div class="table-container">
+            <table id="locTable" style="min-width:0;">
+                <thead><tr><th style="width:28%">İşletme</th><th style="width:34%">Adres</th><th style="width:30%">Konum (Nokta Konum)</th><th style="width:8%">Harita</th></tr></thead>
+                <tbody id="locBody"></tbody>
+            </table>
+        </div>
+      </div>
+    </div>
+
     <div id="view-plan" class="view-section">
       <div class="list-view-inner">
         <div class="card noprint" id="planSettingsCard">
@@ -364,10 +406,13 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
             </div>
             <div id="planHolidayChips" style="display:flex; flex-wrap:wrap; gap:6px; margin:-2px 0 8px;"></div>
             <div id="planUploadInfo" style="margin-bottom:10px;font-size:13px;font-weight:600;"></div>
-            <div class="plan-fg">
-                <label>Haftalık Ziyaret Günleri</label>
+        </div>
+
+        <div class="card noprint" id="weekCard">
+            <details id="weekBox">
+                <summary style="cursor:pointer; font-weight:600; font-size:14px;">Haftalık Ziyaret Günleri <span id="weekSummary" style="font-weight:400; opacity:.7; font-size:12px;"></span></summary>
                 <div class="week-starts" id="planWeekStartsContainer"></div>
-            </div>
+            </details>
             <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
                 <button class="btn btn-primary" id="btnPlanGenerate">Planı Oluştur</button>
                 <button class="btn btn-print" id="btnPlanSuggest" type="button" title="Her hafta için en uygun günü dener">Otomatik Gün Öner</button>
@@ -375,8 +420,27 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
             <div id="planSuggestInfo" style="font-size:12px; margin-top:8px; opacity:.9;"></div>
         </div>
 
+        <div class="card noprint" id="imeCard">
+            <h3 class="card-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">İME Saatleri
+                <label class="chk" style="font-weight:600;"><input type="checkbox" id="imeOn" checked> İME'yi planlamada kullan</label>
+            </h3>
+            <div id="imeBody">
+                <div class="ime-grid" id="imeGrid"></div>
+                <div class="ime-visit">Ziyaret süresi: <input type="number" id="imeVisit" min="5" max="240" step="5" value="40"> dk <span id="imeSummary"></span></div>
+                <div style="margin-top:8px;">
+                    <div style="font-size:12px; font-weight:600; margin-bottom:4px;">Haftalar <span style="font-weight:400; opacity:.7;">(işareti kaldırılan hafta İME yok sayılır)</span></div>
+                    <div class="chk-box" id="imeWeeks"></div>
+                </div>
+                <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; align-items:center;">
+                    <button class="btn btn-primary" id="btnImeGenerate" type="button">Planı Oluştur</button>
+                    <span style="font-size:11px; opacity:.7;">Öğretmen, ay ve yakın adres ayarı üstteki Planlama Ayarları'ndan alınır. Gün seçmeniz gerekmez: açık haftalarda saat girilen tüm günler kullanılır. İstirahat (11:40–12:40) otomatik düşülür.</span>
+                </div>
+            </div>
+        </div>
+
         <div id="planOutput" class="hidden">
             <div class="stats-grid" id="planStatsGrid"></div>
+            <div id="planSkipNote" style="margin:2px 0 8px; font-size:13px;"></div>
 
             <div class="card noprint">
                 <h3 class="card-title">Yazdırma Ayarları</h3>
@@ -716,7 +780,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function factoryReset() {
         if (confirm("TÜM SİSTEMİ SIFIRLAMAK ÜZERESİNİZ!\n\nTüm kayıtlar, adresler, notlar ve kurallar kalıcı olarak silinecek. Emin misiniz?")) {
             exportBackup();
-            ['mesemRecordsBirlesikV1','mesemRulesBirlesikV1','mesemHolidaysBirlesikV1','mesemRecordsV23','mesemRulesV23'].forEach(k => localStorage.removeItem(k));
+            ['mesemRecordsBirlesikV1','mesemRulesBirlesikV1','mesemHolidaysBirlesikV1','mesemImeBirlesikV1','mesemImeBirlesikV2','mesemRecordsV23','mesemRulesV23'].forEach(k => localStorage.removeItem(k));
             msSelected = { ogretmen: [], bolge: [], sinif: [], sube: [], dal: [] };
             document.getElementById('searchInput').value = '';
             document.getElementById('archiveSearchInput').value = '';
@@ -737,6 +801,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (tabId === 'main') renderTable('main');
         if (tabId === 'archive') renderTable('archive');
         if (tabId === 'plan') populatePlanTeachers();
+        if (tabId === 'loc') renderLoc();
     }
 
     function showToast(msg) {
@@ -970,7 +1035,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     function saveEdit() {
         let idx = document.getElementById('editIndex').value;
-        let oAdres = records[idx].adres;
+        let oAdres = records[idx].adres, oKoord = records[idx].koordinat || '';
         let tVal = document.getElementById('editOgretmenSelect').value.trim();
         if (tVal === 'YENI_EKLE') tVal = document.getElementById('editOgretmenInput').value.trim();
         records[idx].ogretmen = tVal;
@@ -978,7 +1043,7 @@ document.addEventListener('DOMContentLoaded', function() {
         records[idx].sinif = document.getElementById('editSinif').value.trim();
         records[idx].sube = document.getElementById('editSube').value.trim();
         records[idx].adres = document.getElementById('editAdres').value;
-        records[idx].koordinat = document.getElementById('editKoordinat').value.trim();
+        { const raw = document.getElementById('editKoordinat').value.trim(), pc = parseCoordInput(raw); records[idx].koordinat = pc.err ? raw : pc.v; }
         records[idx].notlar = document.getElementById('editNotlar').value.trim();
         records[idx].ogrTel = document.getElementById('editOgrTel').value.trim();
         records[idx].isyeriTel = document.getElementById('editIsyeriTel').value.trim();
@@ -986,6 +1051,8 @@ document.addEventListener('DOMContentLoaded', function() {
         let bVal = document.getElementById('editBolgeSelect').value;
         if (bVal === "AUTO") { records[idx].manuelBolge = false; if (oAdres !== records[idx].adres || records[idx].bolge === "Belirtilmemiş / Diğer") records[idx].bolge = ""; }
         else { records[idx].manuelBolge = true; records[idx].bolge = bVal; }
+        // Nokta Konum eşlenik: değiştiyse aynı işletmenin diğer satırlarına da uygula
+        if ((records[idx].koordinat || '') !== oKoord) { const bk = bizKey(records[idx].isletme); if (bk) records.forEach(r => { if (bizKey(r.isletme) === bk) r.koordinat = records[idx].koordinat; }); }
         recalculateRegions(); updateFilters(); closeModal(); renderTable('main');
         showToast("Kayıt başarıyla güncellendi.");
     }
@@ -1293,20 +1360,155 @@ document.addEventListener('DOMContentLoaded', function() {
             : `<span style="color:var(--primary-dark)">Tüm aktif kayıtlarda Şube bilgisi mevcut.</span>`;
     }
 
+    /* --- İME durumu: tek program, plandan bağımsız bölüm. Kutu açık + en az bir gün saati girilmişse plan İME'yi kullanır --- */
+    const IME_KEY = 'mesemImeBirlesikV2';
+    const IME_DAYS = [[1,'Pazartesi'],[2,'Salı'],[3,'Çarşamba'],[4,'Perşembe'],[5,'Cuma']];
+    let ime = { on: true, days: {}, visit: 40, off: [] };
+    try { const x = JSON.parse(localStorage.getItem(IME_KEY) || 'null'); if (x && typeof x === 'object') { ime.on = x.on !== false; ime.days = x.days || {}; ime.visit = parseInt(x.visit) || 40; ime.off = Array.isArray(x.off) ? x.off : []; } } catch(e) {}
+    function saveIme() { try { localStorage.setItem(IME_KEY, JSON.stringify(ime)); } catch(e) {} }
+    function imeMins(t) { if (!t) return null; const a = t.split(':').map(Number); return a[0]*60 + a[1]; }
+    function imeFmt(m) { return String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m%60).padStart(2,'0'); }
+    function imeWin(dow) { const v = ime.days[dow]; if (!v) return null; const s0 = imeMins(v.s), e0 = imeMins(v.e); return (s0 != null && e0 != null && e0 > s0) ? { s: s0, e: e0 } : null; }
+    // İstirahat 11:40–12:40 İME'den düşülür (yalnızca İME planında kullanılır)
+    const IME_REST = { s: 11*60+40, e: 12*60+40 };
+    function imeSegs(w) {
+        const out = [];
+        if (w.s < IME_REST.s) out.push({ s: w.s, e: Math.min(w.e, IME_REST.s) });
+        if (w.e > IME_REST.e) out.push({ s: Math.max(w.s, IME_REST.e), e: w.e });
+        return out.filter(g => g.e > g.s);
+    }
+    function imeSlotStarts(w, visit) { const a = []; imeSegs(w).forEach(g => { for (let t = g.s; t + visit <= g.e; t += visit) a.push(t); }); return a; }
+    function imeCap(dow) { const w = imeWin(dow); return w ? imeSlotStarts(w, ime.visit).length : 0; }
+    function imeOn() { return ime.on && IME_DAYS.some(([d]) => imeWin(d)); }   // plan İME'yi kullanıyor mu
+    function imeDow(dateKey) { const a = dateKey.split('-').map(Number); return new Date(a[0], a[1]-1, a[2]).getDay(); }
+    function imeMonday(dateKey) { const a = dateKey.split('-').map(Number), d = new Date(a[0], a[1]-1, a[2]); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+    function imeWeekOff(dateKey) { return ime.off.includes(imeMonday(dateKey)); }
+    function imeWinOn(dateKey) { return (!imeOn() || imeWeekOff(dateKey)) ? null : imeWin(imeDow(dateKey)); }
+    function imeCapOn(dateKey) { const w = imeWinOn(dateKey); return w ? imeSlotStarts(w, ime.visit).length : 0; }
+    // Planın İME bilgisi oluşturulduğu andaki anlık görüntüden okunur (sonradan İME değişse de plan tutarlı kalır)
+    const IME_SHORT = { 1:'Pzt', 2:'Sal', 3:'Çar', 4:'Per', 5:'Cum' };
+    const planIme = p => !!(p && p.source === 'ime');
+    function planImeWin(p, dk) { return planIme(p) && p.imeWins ? (p.imeWins[dk] || null) : null; }
+    function planImeText(p, dk) { const w = planImeWin(p, dk); return w ? imeFmt(w.s) + '–' + imeFmt(w.e) : ''; }
+    function planImeNote(p, dk) { const w = planImeWin(p, dk); return w ? `<span class="badge badge-info">İME ${imeFmt(w.s)}–${imeFmt(w.e)} · en fazla ${imeSlotStarts(w, p.imeVisit).length} işletme</span>` : ''; }
+    function planImeSlot(p, dk, idx) {
+        const w = planImeWin(p, dk); if (!w) return '';
+        const starts = imeSlotStarts(w, p.imeVisit);
+        if (idx < starts.length) return imeFmt(starts[idx]) + '–' + imeFmt(starts[idx] + p.imeVisit);
+        const lastEnd = starts.length ? starts[starts.length-1] + p.imeVisit : w.s, t = lastEnd + (idx - starts.length) * p.imeVisit;
+        return imeFmt(t) + '–' + imeFmt(t + p.imeVisit) + ' (İME dışı)';
+    }
+    function planLabel(p, i) { return (p && p.labels && p.labels[i]) || `${i+1}. Hafta`; }
+
+    /* --- İME arayüzü --- */
+    function renderImeWeeks() {
+        const mons = calculateWeeks().mondays || [];
+        $$('imeWeeks').innerHTML = mons.map((mk, i) => {
+            const a = mk.split('-').map(Number), f = new Date(a[0], a[1]-1, a[2]+4), fmt = d => String(d.getDate()).padStart(2,'0') + '.' + String(d.getMonth()+1).padStart(2,'0');
+            return `<label class="chk"><input type="checkbox" data-wk="${mk}" ${ime.off.includes(mk) ? '' : 'checked'}> ${i+1}. Hafta <span style="font-weight:400;opacity:.7">(${fmt(new Date(a[0], a[1]-1, a[2]))}–${fmt(f)})</span></label>`;
+        }).join('') || '<span style="font-size:12px;opacity:.6">Önce ay seçin.</span>';
+    }
+    function imeTimeSel(d, k, val) {
+        const hm = val ? val.split(':') : ['', ''], h = hm[0] || '', m = hm[1] || '';
+        const hours = '<option value="">--</option>' + Array.from({length:24}, (_,i) => { const v = String(i).padStart(2,'0'); return `<option value="${v}" ${v===h?'selected':''}>${v}</option>`; }).join('');
+        const ms = []; for (let i = 0; i < 60; i += 5) ms.push(String(i).padStart(2,'0')); if (m && !ms.includes(m)) { ms.push(m); ms.sort(); }
+        const mins = ms.map(v => `<option value="${v}" ${(v===m||(!m&&v==='00'))?'selected':''}>${v}</option>`).join('');
+        const dis = ime.on ? '' : 'disabled';
+        return `<span class="tsel"><select data-ime="${d}" data-k="${k}" data-part="h" ${dis}>${hours}</select>:<select data-ime="${d}" data-k="${k}" data-part="m" ${dis}>${mins}</select></span>`;
+    }
+    function renderImeGrid() {
+        $$('imeCard').classList.toggle('ime-off', !ime.on);
+        $$('imeOn').checked = ime.on;
+        $$('imeGrid').innerHTML = IME_DAYS.map(([d, name]) => {
+            const v = ime.days[d] || { s: '', e: '' };
+            const bad = v.s && v.e && v.e <= v.s;
+            return `<div class="ime-row ${bad?'bad':''}"><b>${name}</b>${imeTimeSel(d,'s',v.s)} – ${imeTimeSel(d,'e',v.e)}${imeCap(d) ? `<span style="opacity:.7">${imeCap(d)} işletme</span>` : ''}${bad?'<span class="warn-text">bitiş &gt; başlangıç olmalı</span>':''}</div>`;
+        }).join('');
+        $$('imeVisit').value = ime.visit; $$('imeVisit').disabled = !ime.on;
+        document.querySelectorAll('#imeWeeks input').forEach(x => x.disabled = !ime.on); $$('btnImeGenerate').disabled = !ime.on;
+        const days = IME_DAYS.filter(([d]) => imeCap(d) > 0), tot = days.reduce((t,[d]) => t + imeCap(d), 0);
+        $$('imeSummary').textContent = !ime.on ? '· kapalı' : (days.length ? `· ${days.length} gün, hafta başına en fazla ${tot} ziyaret` : '· saat girilmedi');
+    }
+    function imeChanged() { saveIme(); renderImeGrid(); if (activePlan) renderPlanTable(); }
+    $$('imeOn').addEventListener('change', e => { ime.on = e.target.checked; imeChanged(); });
+    $$('imeGrid').addEventListener('change', e => {
+        const el = e.target.closest('[data-ime]'); if (!el) return;
+        const d = el.dataset.ime, k = el.dataset.k, row = el.closest('.ime-row');
+        const h = row.querySelector(`[data-ime="${d}"][data-k="${k}"][data-part="h"]`).value, m = row.querySelector(`[data-ime="${d}"][data-k="${k}"][data-part="m"]`).value;
+        ime.days[d] = ime.days[d] || { s: '', e: '' }; ime.days[d][k] = h === '' ? '' : h + ':' + (m || '00');
+        const part = el.dataset.part; imeChanged();
+        const back = $$('imeGrid').querySelector(`[data-ime="${d}"][data-k="${k}"][data-part="${part}"]`); if (back) back.focus();   // odak kaybolmasın
+    });
+    $$('imeVisit').addEventListener('change', e => { ime.visit = Math.min(240, Math.max(5, parseInt(e.target.value) || 40)); imeChanged(); });
+    $$('imeWeeks').addEventListener('change', e => {
+        const el = e.target.closest('[data-wk]'); if (!el) return;
+        ime.off = ime.off.filter(x => x !== el.dataset.wk); if (!el.checked) ime.off.push(el.dataset.wk);
+        imeChanged();
+    });
+    function updateWeekSummary() {
+        const n = [...document.querySelectorAll('.plan-week-visit-select')].filter(x => x.value).length;
+        $$('weekSummary').textContent = n ? `· ${n} hafta seçili` : '· seçim yok';
+    }
+    $$('planWeekStartsContainer').addEventListener('change', updateWeekSummary);
+
+    /* --- İŞLETME KONUM sekmesi: Liste'deki koordinat (Nokta Konum) ile eşlenik --- */
+    function parseCoordInput(t) {
+        t = String(t || '').trim(); if (!t) return { v: '' };
+        const norm = (a, b) => { const lat = parseFloat(a), lon = parseFloat(b); if (isNaN(lat) || isNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) return { err: 'Enlem -90..90, boylam -180..180 aralığında olmalı.' }; return { v: lat.toFixed(6) + ', ' + lon.toFixed(6) }; };
+        const pats = [ /^(-?\d{1,3}\.\d+)\s*[,;\s]\s*(-?\d{1,3}\.\d+)$/, /@(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/, /!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)/, /[?&](?:q|ll|query|destination)=(-?\d{1,3}\.\d+)(?:,|%2C)(-?\d{1,3}\.\d+)/i ];
+        for (const re of pats) { const m = t.match(re); if (m) return norm(m[1], m[2]); }
+        const m2 = t.match(/^(-?\d{1,3},\d+)\s*[;\s]\s*(-?\d{1,3},\d+)$/); if (m2) return norm(m2[1].replace(',', '.'), m2[2].replace(',', '.'));
+        if (/^https?:\/\/(maps\.app\.goo\.gl|goo\.gl)/i.test(t)) return { err: 'Kısa link çözülemiyor. Haritada açıp uzun linki ya da koordinatı yapıştırın.' };
+        return { err: 'Anlaşılamadı. Örnek: 41.0082, 28.9784 ya da Google Maps linki.' };
+    }
+    function locGroups() {
+        const m = new Map();
+        records.forEach(r => {
+            const k = bizKey(r.isletme); if (!k || r.isArchived) return;
+            let g = m.get(k); if (!g) { g = { key: k, name: r.isletme, adres: '', koord: '', coords: new Set(), count: 0 }; m.set(k, g); }
+            g.count++; if (!g.adres && r.adres) g.adres = r.adres;
+            if (r.koordinat) { g.coords.add(r.koordinat); if (!g.koord) g.koord = r.koordinat; }
+        });
+        return [...m.values()].sort((a, b) => collator.compare(a.name, b.name));
+    }
+    function renderLoc() {
+        const q = normTR($$('locSearch').value.trim()), only = $$('locOnlyMissing').checked;
+        const all = locGroups(), list = all.filter(g => (!only || !g.koord) && (!q || normTR(g.name + ' ' + g.adres).includes(q)));
+        $$('locBody').innerHTML = list.map(g => {
+            const url = planMapsUrl({ ll: parseLL(g.koord), adres: g.adres, name: g.name });
+            return `<tr><td><strong>${escapeHtml(g.name)}</strong><div style="font-size:11px;opacity:.65">${g.count} kayıt</div></td>
+                <td style="font-size:12px">${escapeHtml(g.adres || '-')}</td>
+                <td><input type="text" class="loc-input" data-key="${escapeHtml(g.key)}" value="${escapeHtml(g.koord)}" placeholder="41.0082, 28.9784 ya da Google Maps linki" style="width:100%;">
+                    <div class="loc-msg" style="font-size:11px;min-height:14px;">${g.coords.size > 1 ? '<span class="warn-text">Satırlarda farklı konumlar var; kaydedince hepsi aynı olur.</span>' : ''}</div></td>
+                <td class="narrow-cell">${url ? `<a href="${url}" target="_blank" class="map-icon" title="${g.koord ? 'Koordinatla aç' : 'Adresle ara'}"><i class="fas fa-map-marker-alt"></i></a>` : '-'}</td></tr>`;
+        }).join('') || '<tr><td colspan="4" style="text-align:center;padding:20px;opacity:.6;">Gösterilecek işletme yok.</td></tr>';
+        $$('locCount').textContent = `${list.length} / ${all.length} işletme · ${all.filter(g => g.koord).length} konumlu`;
+    }
+    function setBizCoord(key, value) { records.forEach(r => { if (bizKey(r.isletme) === key) r.koordinat = value; }); saveData(); }
+    $$('locBody').addEventListener('change', e => {
+        const el = e.target.closest('.loc-input'); if (!el) return;
+        const r = parseCoordInput(el.value), msg = el.parentNode.querySelector('.loc-msg');
+        if (r.err) { msg.innerHTML = `<span class="warn-text">${r.err}</span>`; el.style.borderColor = '#ef4444'; return; }
+        setBizCoord(el.dataset.key, r.v); el.value = r.v; el.style.borderColor = ''; msg.innerHTML = '<span style="color:#15803d">Kaydedildi</span>';
+        $$('locCount').textContent = $$('locCount').textContent;   // sayaç aşağıda yenilenir
+        setTimeout(() => { if ($$('view-loc').classList.contains('active')) renderLoc(); }, 600);
+    });
+    $$('locSearch').addEventListener('input', renderLoc); $$('locOnlyMissing').addEventListener('change', renderLoc);
+
     function dateToKey(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
     function formatDisplayDate(key) { const [y,m,d] = key.split('-').map(Number); const dt = new Date(y,m-1,d); return String(d).padStart(2,'0')+'.'+String(m).padStart(2,'0')+'.'+y+' '+G_DAYS[dt.getDay()]; }
 
     function calculateWeeks() {
         const val = $$('planMonthSelect').value; if (!val) return [];
         const [year, month] = val.split('-').map(Number);
-        let weeks = []; const daysInMonth = new Date(year, month, 0).getDate(); let lastMondayKey = null;
+        let weeks = []; weeks.mondays = []; const daysInMonth = new Date(year, month, 0).getDate(); let lastMondayKey = null;
         for (let d = 1; d <= daysInMonth; d++) {
             const dt = new Date(year, month-1, d); const dow = dt.getDay();
             if (dow < 1 || dow > 5) continue;
             const dk = dateToKey(dt);
             const currentMonday = new Date(year, month-1, d - (dow-1));
             const mondayKey = dateToKey(currentMonday);
-            if (mondayKey !== lastMondayKey) { weeks.push([]); lastMondayKey = mondayKey; }
+            if (mondayKey !== lastMondayKey) { weeks.push([]); weeks.mondays.push(mondayKey); lastMondayKey = mondayKey; }
             if (planHolidays.has(dk)) continue; // resmi tatil: seçilebilir gün listesine girmesin
             weeks[weeks.length-1].push(dk);
         }
@@ -1314,13 +1516,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     function renderPlanWeekStarts() {
         const weeks = calculateWeeks(); let html = '';
+        const prevSel = [...document.querySelectorAll('.plan-week-visit-select')].map(x => x.value);
         weeks.forEach((w,i) => {
             let optionsHtml = w.map(dk => { const dow = new Date(dk.replace(/-/g,'/')).getDay(); const ds = dk.split('-').reverse().join('.'); return `<option value="${dk}">${G_DAYS[dow]} (${ds})</option>`; }).join('');
-            if (!optionsHtml) optionsHtml = '<option value="">İş Günü Yok</option>';
-            html += `<div class="week-start-item"><span>${i+1}. Hafta <small style="opacity:.7;font-weight:400">(${w[0].slice(8)}.${w[0].slice(5,7)}–${w[w.length-1].slice(8)}.${w[w.length-1].slice(5,7)})</small>:</span>
+            if (!optionsHtml) optionsHtml = '<option value="" disabled>İş Günü Yok</option>';
+            html += `<div class="week-start-item"><span>${i+1}. Hafta${w.length ? ` <small style="opacity:.7;font-weight:400">(${w[0].slice(8)}.${w[0].slice(5,7)}–${w[w.length-1].slice(8)}.${w[w.length-1].slice(5,7)})</small>` : ''}:</span>
                 <select class="plan-week-visit-select" data-week="${i}"><option value="">-- Bu Hafta Ziyaret Yok --</option>${optionsHtml}</select></div>`;
         });
         $$('planWeekStartsContainer').innerHTML = html;
+        document.querySelectorAll('.plan-week-visit-select').forEach((x,i) => { if (prevSel[i] && [...x.options].some(o => o.value === prevSel[i])) x.value = prevSel[i]; });
+        updateWeekSummary(); renderImeWeeks(); renderImeGrid();
     }
     const nowD = new Date();
     $$('planMonthSelect').value = nowD.getFullYear() + '-' + String(nowD.getMonth()+1).padStart(2,'0');
@@ -1374,7 +1579,30 @@ document.addEventListener('DOMContentLoaded', function() {
             dayLoad[H]--; dayLoad[best.dst]++; best.it.dateKey = best.dst; best.it.weekIndex = dates.indexOf(best.dst);
         }
     }
+    function rebalanceIme(assigned, dates, dayLoad, capOf, floorOf) {
+        const dow = dk => new Date(dk.replace(/-/g,'/')).getDay();
+        const aff = (it,dk) => { let t=0; assigned.forEach(a => { if (a!==it && a.dateKey===dk) t += proxW(it.biz,a.biz); }); return t; };
+        const ex = dk => dayLoad[dk] - capOf(dk), un = dk => floorOf(dk) - dayLoad[dk];
+        for (let guard=0; guard<800; guard++) {
+            const H = dates.slice().sort((a,b) => ex(b)-ex(a) || dayLoad[b]-dayLoad[a])[0];
+            const Lw = dates.slice().sort((a,b) => un(b)-un(a) || dayLoad[a]-dayLoad[b])[0];
+            if (ex(H) <= 0 && un(Lw) <= 0) break;
+            const srcs = ex(H) > 0 ? dates.filter(d => ex(d) > 0).sort((a,b) => ex(b)-ex(a)) : [H];
+            let best=null, bestLoss=Infinity;
+            srcs.forEach(src => {
+                const dsts = ex(H) > 0 ? dates.filter(d => d !== src && dayLoad[d] < capOf(d)) : [Lw].filter(d => d !== src && dayLoad[d] < capOf(d) && dayLoad[src]-dayLoad[d] >= 2);
+                dsts.forEach(dst => assigned.filter(a => a.dateKey===src).forEach(it => {
+                    if (it.biz.schoolDays.has(dow(dst))) return;
+                    const loss = aff(it,src) - aff(it,dst) - 0.5*Math.max(0, un(dst));
+                    if (loss < bestLoss) { bestLoss = loss; best = {it, dst, src}; }
+                }));
+            });
+            if (!best) break;
+            dayLoad[best.src]--; dayLoad[best.dst]++; best.it.dateKey = best.dst; best.it.weekIndex = dates.indexOf(best.dst);
+        }
+    }
     function improveClusters(assigned, dates, dayLoad, cap, floor) {
+        const capAt = typeof cap === 'function' ? cap : () => cap, floorAt = typeof floor === 'function' ? floor : () => floor;
         const dow = dk => new Date(dk.replace(/-/g,'/')).getDay();
         const aff = (it,dk) => { let t=0; assigned.forEach(a => { if (a!==it && a.dateKey===dk) t += proxW(it.biz,a.biz); }); return t; };
         for (let pass=0; pass<6; pass++) {
@@ -1383,7 +1611,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const cur = aff(it, it.dateKey); let best=null, bestGain=0.001;
                 dates.forEach((dk,wi) => {
                     if (dk===it.dateKey || it.biz.schoolDays.has(dow(dk))) return;
-                    if (dayLoad[dk]+1 > cap || dayLoad[it.dateKey]-1 < floor) return;
+                    if (dayLoad[dk]+1 > capAt(dk) || dayLoad[it.dateKey]-1 < floorAt(it.dateKey)) return;
                     const g = aff(it,dk) - cur; if (g > bestGain) { bestGain = g; best = {dk, wi}; }
                 });
                 if (best) { dayLoad[it.dateKey]--; dayLoad[best.dk]++; it.dateKey = best.dk; it.weekIndex = best.wi; moved = true; }
@@ -1414,6 +1642,23 @@ document.addEventListener('DOMContentLoaded', function() {
         const maxPerVisitDay = Math.ceil(businesses.length / Math.max(selectedVisitDates.length,1)) + slack;
         const dayLoad = {}; selectedVisitDates.forEach(dk => dayLoad[dk]=0);
         const assigned = [];
+        // İME modu: günün kapasitesi = İME süresi / ziyaret süresi. Eksik kalırsa işletmeler yine de yerleştirilir, aşım raporlanır.
+        const imeMode = !!(opts && opts.imeCaps); let caps = null, floors = null, overflow = 0;
+        if (imeMode) {
+            const c = {}; let tot = 0; const nB = businesses.length, nD = Math.max(selectedVisitDates.length, 1);
+            selectedVisitDates.forEach(dk => { c[dk] = opts.imeCaps[dk] || 0; tot += c[dk]; });
+            caps = {}; floors = {};
+            if (tot >= nB) {
+                selectedVisitDates.forEach(dk => { caps[dk] = Math.min(c[dk], Math.ceil(nB*c[dk]/tot) + slack); });
+                let sum = selectedVisitDates.reduce((t,dk) => t + caps[dk], 0);
+                while (sum < nB) { const d = selectedVisitDates.filter(dk => caps[dk] < c[dk]).sort((a,b) => (c[b]-caps[b])-(c[a]-caps[a]))[0]; if (!d) break; caps[d]++; sum++; }
+            } else {
+                overflow = nB - tot;
+                selectedVisitDates.forEach(dk => { caps[dk] = c[dk] + (tot ? Math.ceil(overflow*c[dk]/tot) : Math.ceil(nB/nD)); });
+            }
+            selectedVisitDates.forEach(dk => { floors[dk] = Math.max(nB >= selectedVisitDates.length ? 1 : 0, Math.floor(nB*c[dk]/Math.max(tot,1)) - slack); floors[dk] = Math.min(floors[dk], caps[dk]); }); // işletme sayısı yetiyorsa her İME gününe en az 1 işletme
+        }
+        const capOf = dk => imeMode ? caps[dk] : maxPerVisitDay;
         const getOptions = (biz) => selectedVisitDates.map((dateKey,weekIndex) => ({weekIndex,dateKey})).filter((o) => !biz.schoolDays.has(new Date(o.dateKey.replace(/-/g,'/')).getDay()));
         businesses.forEach(biz => { biz.options = getOptions(biz); });
         const dowK = dk => new Date(dk.replace(/-/g,'/')).getDay();
@@ -1433,7 +1678,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 selectedVisitDates.forEach((dk,wi) => {
                     const feas = rest.filter(bz => bz.options.some(o=>o.dateKey===dk));
                     if (!feas.length) return;
-                    const room = Math.max(0, maxPerVisitDay - dayLoad[dk]);
+                    const room = Math.max(0, capOf(dk) - dayLoad[dk]);
                     const fit = Math.min(feas.length, room);
                     let aff=0; assigned.forEach(a => { if (a.dateKey===dk) aff += proxW(feas[0], a.biz); });
                     const score = fit*100 + Math.min(aff,10)*3 - dayLoad[dk] + (seed?rnd()*4:0);
@@ -1447,14 +1692,20 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         const floor = Math.max(0, Math.floor(assigned.length/Math.max(selectedVisitDates.length,1)) - slack);
-        rebalance(assigned, selectedVisitDates, dayLoad, maxPerVisitDay, floor);
-        if (!(opts && opts.fast)) improveClusters(assigned, selectedVisitDates, dayLoad, maxPerVisitDay, floor);
-        return { teacher, selectedVisitDates, assigned, totalBusinesses: businesses.length };
+        if (imeMode) {
+            rebalanceIme(assigned, selectedVisitDates, dayLoad, capOf, dk => floors[dk]);
+            if (!(opts && opts.fast)) improveClusters(assigned, selectedVisitDates, dayLoad, capOf, dk => floors[dk]);
+        } else {
+            rebalance(assigned, selectedVisitDates, dayLoad, maxPerVisitDay, floor);
+            if (!(opts && opts.fast)) improveClusters(assigned, selectedVisitDates, dayLoad, maxPerVisitDay, floor);
+        }
+        return { teacher, selectedVisitDates, assigned, totalBusinesses: businesses.length, imeMode, caps, overflow };
     }
     function planCost(p) {
         const loads = p.selectedVisitDates.map(dk => p.assigned.filter(a=>a.dateKey===dk).length);
-        const spread = loads.length ? Math.max(...loads)-Math.min(...loads) : 0;
-        return confCount(p)*60 + spread*3 + avgRegions(p)*p.selectedVisitDates.length*2;
+        let spread = loads.length ? Math.max(...loads)-Math.min(...loads) : 0;
+        if (p.imeMode && p.caps) { const u = p.selectedVisitDates.map((dk,k) => loads[k] / Math.max(1, p.caps[dk])); spread = u.length ? (Math.max(...u)-Math.min(...u))*10 : 0; }
+        return confCount(p)*60 + spread*3 + avgRegions(p)*p.selectedVisitDates.length*2 + (p.overflow||0)*200;
     }
     function computePlan(teacher, selectedVisitDates, opts) {
         const tries = (opts && opts.fast) ? 1 : 10;
@@ -1468,12 +1719,34 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!teacher) { alert("Lütfen bir öğretmen seçin."); return; }
         if (!records.some(r => !r.isArchived && r.ogretmen === teacher)) { alert("Bu öğretmene ait aktif kayıt bulunamadı. Önce Liste sekmesinden veri yükleyin."); return; }
         const selectedVisitDates = [...document.querySelectorAll('.plan-week-visit-select')].map(s => s.value).filter(v => v !== "");
-        if (!selectedVisitDates.length) { alert("Lütfen en az bir hafta için ziyaret günü seçin!"); return; }
+        if (!selectedVisitDates.length) { $$('weekBox').open = true; alert("Lütfen en az bir hafta için ziyaret günü seçin!"); return; }
         const opts = { slack: +$$('planSlackSel').value };
         activePlan = computePlan(teacher, selectedVisitDates, opts);
+        activePlan.source = 'week'; activePlan.skipped = [];
         activePlan.month = $$('planMonthSelect').value;
         currentWeekIndex = 0; renderPlanUI();
         showToast("Plan başarıyla oluşturuldu.");
+    });
+    // İME Saatleri bloğunun kendi Planı Oluştur düğmesi: gün seçimi yok, açık haftalardaki tüm İME'li günler kullanılır
+    $$('btnImeGenerate').addEventListener('click', function() {
+        const teacher = $$('planTeacherSelect').value;
+        if (!teacher) { alert("Önce üstteki Planlama Ayarları'ndan öğretmen seçin."); return; }
+        if (!records.some(r => !r.isArchived && r.ogretmen === teacher)) { alert("Bu öğretmene ait aktif kayıt bulunamadı. Önce Liste sekmesinden veri yükleyin."); return; }
+        if (!ime.on) { alert("İME kapalı. Önce \"İME'yi planlamada kullan\" kutusunu işaretleyin."); return; }
+        if (!imeOn()) { alert("En az bir gün için İME başlangıç ve bitiş saati girin."); return; }
+        const W = calculateWeeks(), dates = [], labels = [], imeCaps = {}, imeWins = {}, closed = [];
+        W.forEach((w, i) => {
+            if (ime.off.includes(W.mondays[i])) { closed.push(i+1); return; }
+            w.forEach(dk => { const cap = imeCapOn(dk); if (cap > 0) { dates.push(dk); labels.push(`${i+1}. Hafta · ${IME_SHORT[imeDow(dk)]}`); imeCaps[dk] = cap; imeWins[dk] = imeWin(imeDow(dk)); } });
+        });
+        if (!dates.length) { alert("Seçili ayda İME günü bulunamadı. Ayı, saatleri ve hafta işaretlerini kontrol edin."); return; }
+        activePlan = computePlan(teacher, dates, { slack: +$$('planSlackSel').value, imeCaps });
+        activePlan.source = 'ime'; activePlan.labels = labels; activePlan.imeWins = imeWins; activePlan.imeVisit = ime.visit;
+        activePlan.skipped = []; activePlan.closedWeeks = closed;
+        activePlan.month = $$('planMonthSelect').value;
+        currentWeekIndex = 0; renderPlanUI();
+        showToast("İME planı oluşturuldu.");
+        if (activePlan.overflow > 0) alert('İME süreleri yetmiyor: ' + activePlan.overflow + ' işletme kapasitenin dışında kaldı.\nZiyaret süresini kısaltın, İME saatlerini uzatın ya da ek hafta açın.');
     });
     $$('btnPlanSuggest').addEventListener('click', function() {
         const teacher = $$('planTeacherSelect').value;
@@ -1481,6 +1754,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const W = calculateWeeks(), sels = [...document.querySelectorAll('.plan-week-visit-select')];
         let idx = sels.map((x,i) => x.value ? i : -1).filter(i => i>=0);
         if (!idx.length) idx = W.map((_,i) => i);
+        idx = idx.filter(i => W[i].length);
         if (!idx.length) { alert("Önce ay seçin."); return; }
         let combos = 1; idx.forEach(i => combos *= W[i].length);
         if (combos > 6000) { alert("Seçenek çok fazla (" + combos + "). Bazı haftaları 'Ziyaret Yok' yapıp tekrar deneyin."); return; }
@@ -1491,7 +1765,7 @@ document.addEventListener('DOMContentLoaded', function() {
             W[idx[k]].forEach(dk => { picks.push(dk); rec(k+1, picks); picks.pop(); });
         };
         rec(0, []);
-        idx.forEach((wi,k) => { sels[wi].value = best[k]; });
+        idx.forEach((wi,k) => { sels[wi].value = best[k]; }); updateWeekSummary();
         $$('planSuggestInfo').innerHTML = `<b>Önerilen günler:</b> ${best.map((dk,k)=>(idx[k]+1)+'. hafta '+formatDisplayDate(dk)).join(' · ')}<br>Beklenen: ${confCount(bestP)} okul günü çakışması, ${tested} kombinasyon denendi (${Math.round(performance.now()-t0)} ms).`;
         $$('btnPlanGenerate').click();
     });
@@ -1499,16 +1773,36 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderPlanUI() {
         $$('planOutput').classList.remove('hidden');
         const plan = activePlan;
+        $$('planSkipNote').innerHTML = '<span style="opacity:.8">Kaynak: ' + (planIme(plan) ? 'İME Saatleri' : 'Haftalık Ziyaret Günleri') + '</span>'
+            + (plan.closedWeeks && plan.closedWeeks.length ? ' <span class="warn-text">· Kapalı hafta atlandı: ' + plan.closedWeeks.map(n => n + '. hafta').join(', ') + '</span>' : '');
         let statsHtml = `<div class="stat-box"><span class="num">${plan.totalBusinesses}</span><span class="lbl">Toplam İşletme</span></div>
             <div class="stat-box"><span class="num" style="color:var(--primary-dark)">${plan.assigned.length}</span><span class="lbl">Planlanan</span></div>
             <div class="stat-box"><span class="num">${confCount(plan)}</span><span class="lbl">Okul günü notu</span></div>
             <div class="stat-box"><span class="num">${avgRegions(plan).toFixed(1)}</span><span class="lbl">Bölge / gün</span></div>`;
-        plan.selectedVisitDates.forEach((dateKey,i) => {
-            const count = plan.assigned.filter(a=>a.dateKey===dateKey).length;
-            statsHtml += `<div class="stat-box"><span class="num" style="color:var(--text)">${count}</span><span class="lbl">${i+1}. Hafta<br><small style="opacity:.6">${formatDisplayDate(dateKey)}</small></span></div>`;
-        });
-        $$('planStatsGrid').innerHTML = statsHtml;
-        $$('planWeekTabs').innerHTML = plan.selectedVisitDates.map((dateKey,i) => `<button class="tab-btn ${i===currentWeekIndex?'active':''}" data-week="${i}">${i+1}. Hafta (${formatDisplayDate(dateKey)})</button>`).join('');
+        const cntOf = dk => plan.assigned.filter(a => a.dateKey === dk).length;
+        if (planIme(plan)) {
+            // İME planı: bir haftanın günleri tek çatı altında (3. Hafta > Pzt, Sal, Çar ...)
+            const wk = new Map();
+            plan.selectedVisitDates.forEach((dk, i) => { const k = planLabel(plan, i).split(' ·')[0]; if (!wk.has(k)) wk.set(k, []); wk.get(k).push(i); });
+            wk.forEach((idxs, k) => {
+                const total = idxs.reduce((t, i) => t + cntOf(plan.selectedVisitDates[i]), 0);
+                statsHtml += `<div class="wk-group"><div class="wk-title">${k} <span style="font-weight:400;opacity:.7">· ${total} işletme</span></div><div class="wk-days">`
+                    + idxs.map(i => { const dk = plan.selectedVisitDates[i]; return `<div class="stat-box"><span class="num" style="color:var(--text)">${cntOf(dk)}</span><span class="lbl">${IME_SHORT[imeDow(dk)]}<br><small style="opacity:.6">${formatDisplayDate(dk)}</small></span></div>`; }).join('')
+                    + `</div></div>`;
+            });
+            $$('planStatsGrid').innerHTML = statsHtml;
+            let tabs = '';
+            wk.forEach((idxs, k) => {
+                tabs += `<span class="wk-tabs"><b>${k}</b>` + idxs.map(i => { const dk = plan.selectedVisitDates[i]; return `<button class="tab-btn ${i===currentWeekIndex?'active':''}" data-week="${i}">${IME_SHORT[imeDow(dk)]} ${dk.slice(8)}.${dk.slice(5,7)}</button>`; }).join('') + `</span>`;
+            });
+            $$('planWeekTabs').innerHTML = tabs;
+        } else {
+            plan.selectedVisitDates.forEach((dateKey,i) => {
+                statsHtml += `<div class="stat-box"><span class="num" style="color:var(--text)">${cntOf(dateKey)}</span><span class="lbl">${planLabel(plan,i)}<br><small style="opacity:.6">${formatDisplayDate(dateKey)}</small></span></div>`;
+            });
+            $$('planStatsGrid').innerHTML = statsHtml;
+            $$('planWeekTabs').innerHTML = plan.selectedVisitDates.map((dateKey,i) => `<button class="tab-btn ${i===currentWeekIndex?'active':''}" data-week="${i}">${planLabel(plan,i)} (${formatDisplayDate(dateKey)})</button>`).join('');
+        }
         renderPlanTable();
     }
     function renderPlanTable() {
@@ -1516,13 +1810,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const targetDateKey = plan.selectedVisitDates[currentWeekIndex];
         let items = sortAssignedItems(plan.assigned.filter(a => a.dateKey === targetDateKey));
         let html = `<table><thead><tr><th>İşletme / Firma</th><th>Bölge</th><th>Öğrenci(ler)</th><th>Şube</th><th class="noprint" style="width:180px;">Başka Haftaya Taşı</th></tr></thead><tbody>`;
-        html += `<tr><td colspan="5" style="background:#f1f5f9;font-weight:700;"><b>${currentWeekIndex+1}. Hafta:</b> ${formatDisplayDate(targetDateKey)} — ${items.length} işletme<div style="font-weight:400;font-size:12px;margin-top:4px;opacity:.85">${regionChips(items)}</div></td></tr>`;
+        html += `<tr><td colspan="5" style="background:#f1f5f9;font-weight:700;"><b>${planLabel(plan,currentWeekIndex)}:</b> ${formatDisplayDate(targetDateKey)} ${planImeNote(plan, targetDateKey)} — ${items.length} işletme<div style="font-weight:400;font-size:12px;margin-top:4px;opacity:.85">${regionChips(items)}</div></td></tr>`;
         if (!items.length) {
             html += `<tr><td colspan="5" style="text-align:center;padding:20px;opacity:.6;">Bu güne atanmış ziyaret bulunmuyor.</td></tr>`;
         } else {
-            items.forEach(item => {
+            items.forEach((item, ix) => {
                 const actualIndex = plan.assigned.findIndex(x => x === item);
-                const optionsHtml = plan.selectedVisitDates.map((dk,idx) => `<option value="${dk}" ${dk===targetDateKey?'selected':''}>${idx+1}. Hafta (${formatDisplayDate(dk)})</option>`).join('');
+                const optionsHtml = plan.selectedVisitDates.map((dk,idx) => `<option value="${dk}" ${dk===targetDateKey?'selected':''}>${planLabel(plan,idx)} (${formatDisplayDate(dk)})</option>`).join('');
                 const mUrl = planMapsUrl(item.biz);
                 const hasCoord = !!item.biz.ll;
                 // Konum artık ayrı sütun değil: adresin solundaki 📍 ikonu tıklanabilir (Liste'deki koordinatı/adresi kullanır)
@@ -1532,7 +1826,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         : `<div style="font-size:11px;opacity:.7">📍 ${escapeHtml(item.biz.adres)}</div>`)
                     : '';
                 html += `<tr class="${item.biz.unk>0?'tr-warn':''}">
-                    <td><strong style="color:var(--primary-dark)">${escapeHtml(item.biz.name)}</strong>${adresLine}${item.biz.tel?`<div style="font-size:11px;opacity:.8">Tel: ${escapeHtml(item.biz.tel)}</div>`:''}${item.biz.ustas.size?`<div style="font-size:11px;opacity:.7">Usta: ${escapeHtml([...item.biz.ustas].join(', '))}</div>`:''}
+                    <td><strong style="color:var(--primary-dark)">${escapeHtml(item.biz.name)}</strong>${planImeSlot(plan, targetDateKey, ix) ? `<div style="font-size:11px;color:#0b5cad">Saat: ${planImeSlot(plan, targetDateKey, ix)}</div>` : ''}${adresLine}${item.biz.tel?`<div style="font-size:11px;opacity:.8">Tel: ${escapeHtml(item.biz.tel)}</div>`:''}${item.biz.ustas.size?`<div style="font-size:11px;opacity:.7">Usta: ${escapeHtml([...item.biz.ustas].join(', '))}</div>`:''}
                         ${item.biz.unk>0?'<span class="warn-text">⚠ Şube/okul günü belirsiz öğrenci var.</span>':''}${confText(item)?`<div style="color:#0b5cad;font-size:12px;">ℹ ${escapeHtml(confText(item))}</div>`:''}</td>
                     <td>${item.biz.bolge?`<span class="badge badge-bolge">${escapeHtml(item.biz.bolge)}</span>`:'-'}</td>
                     <td>${item.biz.stu.map(x => `<div>${escapeHtml(x.name + (x.no?' ('+x.no+')':''))}${x.dal?`<span style="font-size:11px;opacity:.75"> · ${escapeHtml(x.dal)}</span>`:''}${x.tel?`<span style="font-size:11px;opacity:.75"> — ${escapeHtml(x.tel)}</span>`:''}</div>`).join('')}</td>
@@ -1661,42 +1955,56 @@ document.addEventListener('DOMContentLoaded', function() {
             <p><strong>Öğretmen:</strong> ${escapeHtml(plan.teacher)} &nbsp;|&nbsp; <strong>Ay:</strong> ${monthText} &nbsp;|&nbsp; <strong>Toplam işletme:</strong> ${plan.totalBusinesses} &nbsp;|&nbsp; <strong>Planlanan:</strong> ${plan.assigned.length}</p></div>`;
         const hdrMini = `<div class="print-header" style="padding-bottom:4px;margin-bottom:6px"><strong style="font-size:1.2em">${school?escapeHtml(school)+' — ':''}HAFTALIK İŞLETME ZİYARET PLANI</strong><br>Öğretmen: ${escapeHtml(plan.teacher)} &nbsp;|&nbsp; Ay: ${monthText}</div>`;
         let html = fit ? '' : hdrFull;
-        const dates = $$('pScope').value === 'active' ? [plan.selectedVisitDates[currentWeekIndex]] : plan.selectedVisitDates;
-        dates.forEach((dateKey, k) => {
-            const wIdx = plan.selectedVisitDates.indexOf(dateKey);
-            const items = sortAssignedItems(plan.assigned.filter(a => a.dateKey === dateKey));
-            let g = `<div class="print-week-group ${!fit && k>0 ? 'newpage':''}">${fit?hdrMini:''}<h2>${wIdx+1}. Hafta: ${formatDisplayDate(dateKey)} — ${items.length} işletme</h2>`;
-            if (items.length) g += `<div class="chipline">${regionChips(items)}</div>`;
-            if (!items.length) g += `<p style="font-style:italic">Bu güne ait ziyaret planlanmadı.</p>`;
-            else {
-                const on = v => !!document.querySelector(`.pcol[value="${v}"]`)?.checked;
-                const colDefs = [
-                    { key:'_qr', title:'Konum (QR)', c:true, always: () => qrOn, td:b=>`<td class="c"><div class="qr">${qrSvg(b)}</div></td>` },
-                    { key:'bolge', title:'Bölge', c:false, td:b=>`<td>${escapeHtml(b.bolge||'-')}</td>` },
-                    { key:'isletme', title:'İşletme', c:false, always: () => true, td:b=>`<td><strong>${escapeHtml(b.name)}</strong></td>` },
-                    { key:'adres', title:'Adres', c:false, td:b=>`<td style="font-size:.85em">${escapeHtml(b.adres||'-')}</td>` },
-                    { key:'isltel', title:'İşletme Tel', c:false, td:b=>`<td style="white-space:nowrap">${escapeHtml(b.tel||'-')}</td>` },
-                    { key:'ogrenci', title:'Öğrenci(ler)', c:false, td:b=>`<td>${b.stu.map(x=>escapeHtml(x.name)).join('<br>')||'-'}</td>` },
-                    { key:'ogrtel', title:'Öğrenci Tel', c:false, td:b=>`<td style="white-space:nowrap">${b.stu.map(x=>escapeHtml(x.tel||'-')).join('<br>')}</td>` },
-                    { key:'dal', title:'Dal', c:false, td:b=>`<td>${[...new Set(b.stu.map(x=>x.dal).filter(Boolean))].map(escapeHtml).join('<br>')||'-'}</td>` },
-                    { key:'sube', title:'Şube', c:false, td:b=>`<td>${[...new Set(b.stu.map(x=>x.sube).filter(Boolean))].map(escapeHtml).join('<br>')||'-'}</td>` },
-                    { key:'usta', title:'Usta Öğretici', c:false, td:b=>`<td>${[...b.ustas].map(escapeHtml).join('<br>')||'-'}</td>` },
-                    { key:'yapildi', title:'Yapıldı', c:true, td:()=>`<td class="c"><span class="cb"></span></td>` },
-                    { key:'not', title:'Ziyaret Notu', c:false, td:()=>`<td class="note"></td>` },
-                ];
-                const active = colDefs.filter(c => c.always ? c.always() : on(c.key.startsWith('_')?c.key.slice(1):c.key));
-                const cols = ['Sıra'].concat(active.map(c=>c.title));
-                const thead = `<thead><tr>${cols.map(c => `<th class="${c==='Sıra'?'c':''}">${c}</th>`).join('')}</tr></thead>`;
-                const rows = items.map((it,i) => {
-                    const b = it.biz;
-                    let tds = [`<td class="c">${i+1}</td>`];
-                    active.forEach(c => tds.push(c.key==='isletme' ? `<td><strong>${escapeHtml(b.name)}</strong>${confText(it)?`<div style="font-size:.85em;font-style:italic">ℹ ${escapeHtml(confText(it))}</div>`:''}</td>` : c.td(b)));
-                    return `<tr>${tds.join('')}</tr>`;
+        let dates = plan.selectedVisitDates;
+        const weekOf = dk => planLabel(plan, plan.selectedVisitDates.indexOf(dk)).split(' ·')[0];
+        // İME planında bir haftanın tüm günleri tek grupta (tek sayfa); diğer planda her gün ayrı
+        let groups = [];
+        if (planIme(plan)) { const mp = new Map(); dates.forEach(dk => { const k = weekOf(dk); if (!mp.has(k)) mp.set(k, []); mp.get(k).push(dk); }); groups = [...mp.values()]; }
+        else groups = dates.map(dk => [dk]);
+        if ($$('pScope').value === 'active') { const cur = plan.selectedVisitDates[currentWeekIndex]; groups = groups.filter(g => g.includes(cur)); }
+        const on = v => !!document.querySelector(`.pcol[value="${v}"]`)?.checked;
+        const colDefs = [
+            { key:'_saat', title:'Saat', c:true, always: () => planIme(plan), td:(b,i,ctx) => `<td class="c">${ctx.multi ? `<strong>${IME_SHORT[imeDow(ctx.dk)] || ''}</strong> ${ctx.dk.slice(8)}.${ctx.dk.slice(5,7)}<br>` : ''}${escapeHtml(planImeSlot(plan, ctx.dk, i) || '-').replace(' (İME dışı)','<br><small>İME dışı</small>')}</td>` },
+            { key:'_qr', title:'Konum (QR)', c:true, always: () => qrOn, td:b=>`<td class="c"><div class="qr">${qrSvg(b)}</div></td>` },
+            { key:'bolge', title:'Bölge', c:false, td:b=>`<td>${escapeHtml(b.bolge||'-')}</td>` },
+            { key:'isletme', title:'İşletme', c:false, always: () => true, td:b=>`<td><strong>${escapeHtml(b.name)}</strong></td>` },
+            { key:'adres', title:'Adres', c:false, td:b=>`<td style="font-size:.85em">${escapeHtml(b.adres||'-')}</td>` },
+            { key:'isltel', title:'İşletme Tel', c:false, td:b=>`<td style="white-space:nowrap">${escapeHtml(b.tel||'-')}</td>` },
+            { key:'ogrenci', title:'Öğrenci(ler)', c:false, td:b=>`<td>${b.stu.map(x=>escapeHtml(x.name)).join('<br>')||'-'}</td>` },
+            { key:'ogrtel', title:'Öğrenci Tel', c:false, td:b=>`<td style="white-space:nowrap">${b.stu.map(x=>escapeHtml(x.tel||'-')).join('<br>')}</td>` },
+            { key:'dal', title:'Dal', c:false, td:b=>`<td>${[...new Set(b.stu.map(x=>x.dal).filter(Boolean))].map(escapeHtml).join('<br>')||'-'}</td>` },
+            { key:'sube', title:'Şube', c:false, td:b=>`<td>${[...new Set(b.stu.map(x=>x.sube).filter(Boolean))].map(escapeHtml).join('<br>')||'-'}</td>` },
+            { key:'usta', title:'Usta Öğretici', c:false, td:b=>`<td>${[...b.ustas].map(escapeHtml).join('<br>')||'-'}</td>` },
+            { key:'yapildi', title:'Yapıldı', c:true, td:()=>`<td class="c"><span class="cb"></span></td>` },
+            { key:'not', title:'Ziyaret Notu', c:false, td:()=>`<td class="note"></td>` },
+        ];
+        const active = colDefs.filter(c => c.always ? c.always() : on(c.key.startsWith('_')?c.key.slice(1):c.key));
+        const thead = `<thead><tr>${['Sıra'].concat(active.map(c=>c.title)).map(c => `<th class="${c==='Sıra'?'c':''}">${c}</th>`).join('')}</tr></thead>`;
+        // Bir grubun (hafta) tüm günleri TEK tabloda; gün geçişlerinde yalnızca çizgi. Sıra numarası hafta boyunca devam eder.
+        const dshort = dk => { const a = dk.split('-'); return `${IME_SHORT[imeDow(dk)] || ''} ${a[2]}.${a[1]}`; };
+        const groupTable = grp => {
+            const rows = []; let n = 0, all = [];
+            grp.forEach(dk => {
+                const items = sortAssignedItems(plan.assigned.filter(a => a.dateKey === dk)); all = all.concat(items);
+                items.forEach((it, i) => {
+                    const b = it.biz, ctx = { dk, multi: grp.length > 1 }; n++;
+                    const tds = [`<td class="c">${n}</td>`];
+                    active.forEach(c => tds.push(c.key==='isletme' ? `<td><strong>${escapeHtml(b.name)}</strong>${confText(it)?`<div style="font-size:.85em;font-style:italic">ℹ ${escapeHtml(confText(it))}</div>`:''}</td>` : c.td(b, i, ctx)));
+                    rows.push(`<tr class="${i === 0 && rows.length ? 'daystart' : ''}">${tds.join('')}</tr>`);
                 });
-                g += `<table>${thead}<tbody>${rows.join('')}</tbody></table>`;
-            }
-            g += `</div>`;
-            html += fit ? `<div class="fitwrap" data-lbl="${wIdx+1}. hafta">${g}</div>` : g;
+            });
+            return { all, html: all.length ? `<table>${thead}<tbody>${rows.join('')}</tbody></table>` : `<p style="font-style:italic">Bu haftaya ait ziyaret planlanmadı.</p>` };
+        };
+        groups.forEach((grp, k) => {
+            const gt = groupTable(grp), all = gt.all;
+            const lbl = planIme(plan) ? weekOf(grp[0]) : planLabel(plan, plan.selectedVisitDates.indexOf(grp[0]));
+            let head;
+            if (planIme(plan)) head = `<h2>${lbl}: ${grp.map(dk => `${dshort(dk)}${planImeText(plan, dk) ? ' · İME ' + planImeText(plan, dk) : ''}`).join(' &nbsp;|&nbsp; ')} — ${all.length} işletme</h2>`;
+            else head = `<h2>${lbl}: ${formatDisplayDate(grp[0])}${planImeText(plan, grp[0]) ? ' · İME ' + planImeText(plan, grp[0]) : ''} — ${all.length} işletme</h2>`;
+            let g = `<div class="print-week-group ${!fit && k>0 ? 'newpage':''}">${fit?hdrMini:''}${head}`;
+            if (all.length) g += `<div class="chipline">${regionChips(all)}</div>`;
+            g += gt.html + `</div>`;
+            html += fit ? `<div class="fitwrap" data-lbl="${lbl}">${g}</div>` : g;
         });
         $$('planPrintArea').innerHTML = html;
         if (fit) { land = fitPages(orient); pageStyle.textContent = `@page { size: A4 ${land?'landscape':'portrait'}; }`; }
@@ -1738,15 +2046,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const FONT = { name: 'Times New Roman', size: 11 }, thin = { style: 'thin', color: { argb: 'FF000000' } };
         const box = { top: thin, left: thin, bottom: thin, right: thin };
         const ROWS = 25;
-        const idxs = allWeeks ? plan.selectedVisitDates.map((_,i) => i) : [currentWeekIndex];
-        idxs.forEach(wi => {
-            const dateKey = plan.selectedVisitDates[wi];
-            const [dTxt, dayName] = formatDisplayDate(dateKey).split(' ');
+        // Hafta bazlı: aynı haftanın tüm ziyaret günleri tek listede (gün sırasıyla)
+        const wkMap = {}; plan.selectedVisitDates.forEach((dk, i) => { const m = imeMonday(dk); (wkMap[m] = wkMap[m] || []).push(i); });
+        const wkGroups = Object.keys(wkMap).sort().map(m => wkMap[m]);
+        const curMon = imeMonday(plan.selectedVisitDates[currentWeekIndex]);
+        const useGroups = allWeeks ? wkGroups : wkGroups.filter(g => imeMonday(plan.selectedVisitDates[g[0]]) === curMon);
+        useGroups.forEach(g => {
+            const wi = g[0], dateKey = plan.selectedVisitDates[wi];
             const endTxt = weekEndText(dateKey);
-            const items = sortAssignedItems(plan.assigned.filter(a => a.dateKey === dateKey));
+            let items = []; g.forEach(i => { items = items.concat(sortAssignedItems(plan.assigned.filter(a => a.dateKey === plan.selectedVisitDates[i]))); });
             const pages = Math.max(1, Math.ceil(items.length / ROWS));
             for (let p = 0; p < pages; p++) {
-                const ws = wb.addWorksheet(`${wi+1}. Hafta` + (pages>1?` (${p+1})`:''), { pageSetup: { paperSize: 9, orientation: 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 1, horizontalCentered: true, margins: { left:.4, right:.4, top:.5, bottom:.5, header:.2, footer:.2 } } });
+                const ws = wb.addWorksheet(planLabel(plan, wi).split(' ·')[0].replace(/[\\\/?*\[\]:]/g,'') + (pages>1?` (${p+1})`:''), { pageSetup: { paperSize: 9, orientation: 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 1, horizontalCentered: true, margins: { left:.4, right:.4, top:.5, bottom:.5, header:.2, footer:.2 } } });
                 ws.columns = [5,48,7,9,13,28,13,24].map(w => ({ width: w }));
                 const cell = (addr, v, o={}) => { const c = ws.getCell(addr); c.value = v; c.font = Object.assign({}, FONT, o.font||{}); c.alignment = Object.assign({ vertical:'middle', horizontal:'center', wrapText:true }, o.al||{}); if (o.border!==false) c.border = box; return c; };
                 ws.mergeCells('A1:H1'); cell('A1', 'KOORDİNATÖR ÖĞRETMEN GÖREV TESLİM LİSTESİ', { font:{ bold:true, size:14 } }); ws.getRow(1).height = 26;
@@ -1777,7 +2088,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const buf = await wb.xlsx.writeBuffer();
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
-        a.download = `Gorev_Teslim_Listesi_${plan.teacher.replace(/[\\/:*?"<>|]/g,'_')}_${plan.month}${allWeeks?'':'_'+(currentWeekIndex+1)+'.hafta'}.xlsx`;
+        a.download = `Gorev_Teslim_Listesi_${plan.teacher.replace(/[\\/:*?"<>|]/g,'_')}_${plan.month}${allWeeks?'':'_'+(parseInt(planLabel(plan,currentWeekIndex))||currentWeekIndex+1)+'.hafta'}.xlsx`;
         a.click();
     }
     $$('btnTeslimWeek').addEventListener('click', () => exportTeslimListesi(false));
