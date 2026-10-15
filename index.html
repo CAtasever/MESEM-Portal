@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v4.2 – Son güncelleme: 2026-10-15 -->
+<!-- MESEM Portal – Sürüm v4.3 – Son güncelleme: 2026-10-15 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v4.2</title>
+<title>MESEM Portal v4.3</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -308,7 +308,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v4.2</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v4.3</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="loc">İşletme Konum</a>
@@ -724,7 +724,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let msData = { ogretmen: [], bolge: [], sinif: [], sube: [], dal: [] };
     let msSelected = { ogretmen: [], bolge: [], sinif: [], sube: [], dal: [] };
     let renderTimer = null, toastTimer = null;
-    const MAIN_PAGE = 200;
+    const MAIN_PAGE = 100;
     let mainLimit = MAIN_PAGE;   // Ana listede çizilecek üst sınır (filtre/sıralama tüm kayıtlarda çalışır)
 
     const genId = () => 'ID-' + Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -1569,7 +1569,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         return [...m.values()].sort((a, b) => collator.compare(a.name, b.name));
     }
-    const LOC_PAGE = 200;
+    const LOC_PAGE = 100;
     let locLimit = LOC_PAGE;
     const TR_BOUNDS = { latMin: 35.8, latMax: 42.2, lonMin: 25.6, lonMax: 44.9 };
     function coordOutsideTR(v) { const ll = parseLL(v); return !!ll && (ll[0] < TR_BOUNDS.latMin || ll[0] > TR_BOUNDS.latMax || ll[1] < TR_BOUNDS.lonMin || ll[1] > TR_BOUNDS.lonMax); }
