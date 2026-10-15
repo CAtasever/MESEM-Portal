@@ -1,11 +1,11 @@
-<!-- MESEM Portal (Birleşik) — Sürüm v3.5 — Son güncelleme: 2026-10-11 -->
+<!-- MESEM Portal (Birleşik) — Sürüm v3.7 — Son güncelleme: 2026-10-11 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v3.5</title>
+<title>MESEM Portal v3.7</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.0.3/qrcode.min.js"></script>
@@ -148,8 +148,10 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 #imeCard { padding: 12px 14px; }
 #imeCard .card-title { margin-bottom: 6px; }
 #imeCard.ime-off #imeBody { opacity: .5; }
-#imeCard .ime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px; margin-top: 6px; }
-#imeCard .ime-row { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+#imeCard .ime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 8px 14px; margin-top: 6px; }
+#imeCard .ime-row { font-size: 12px; }
+#imeCard .ime-line { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; white-space: nowrap; }
+#imeCard .ime-cap { margin: 2px 0 0 76px; font-size: 11px; min-height: 14px; opacity: .8; }
 #imeCard .ime-row b { width: 70px; font-weight: 600; }
 #imeCard .ime-row select { padding: 3px 4px; font-size: 12px; width: auto; min-width: 0; }
 #imeCard .ime-row .tsel { display: inline-flex; align-items: center; gap: 2px; }
@@ -270,7 +272,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v3.5</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v3.7</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="loc">İşletme Konum</a>
@@ -646,6 +648,28 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Başlatma kuyruğu: olay bağlama ve ilk çizimler onInit(...) ile kuyruğa alınır, tüm tanımlar bittikten sonra
+    // dosya sırasıyla çalışır. Böylece 'tanımlanmadan kullanıldı' (TDZ) hataları yapısal olarak olmaz.
+    /* İÇİNDEKİLER (bölüm başlıklarını aynen arayarak bulun; dosya sırasıyla):
+       - YENİ: Şube -> okul günü ayrıştırma (v18'den)
+       - VERİ: kaydet / yükle / normalize
+       - MULTI-SELECT (Şube filtresi eklendi)
+       - LİSTE: çizim ve filtre
+       - KURALLAR
+       - EXCEL İÇE AKTARMA: "Şube" sütunu artık okunuyor (v18 + v25 birleşimi)
+       - RESMİ TATİLLER (v18'den)
+       - İME durumu: tek program, plandan bağımsız bölüm. Kutu açık + en az bir gün saati girilmişse plan İME'yi kullanır
+       - İME arayüzü
+       - İŞLETME KONUM sekmesi: Liste'deki koordinat (Nokta Konum) ile eşlenik
+       - PLAN MOTORU: hafta hesabı
+       - PLAN EKRANI
+       - QR'LI YAZDIRMA (v18'den sadeleştirilmiş)
+       - YAZDIRMA: plan çıktısı
+       - ÖNİZLEME (v18'den)
+       - TESLİM LİSTESİ (Koordinatör Öğretmen Görev Teslim Listesi, ExcelJS)
+       - BAŞLANGIÇ
+    */
+    const __initQueue = []; const onInit = fn => __initQueue.push(fn);
 
     /* =========================================================
        ORTAK ALTYAPI (v25 temelli): veri modeli + bölge motoru
@@ -770,6 +794,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    /* --- VERİ: kaydet / yükle / normalize --- */
     function saveData() {
         try {
             localStorage.setItem('mesemRecordsBirlesikV1', JSON.stringify(records));
@@ -913,6 +938,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     function triggerRender() { clearTimeout(renderTimer); renderTimer = setTimeout(() => renderTable('main'), 100); }
 
+    /* --- LİSTE: çizim ve filtre --- */
     function renderTable(type) {
         let tbody = type === 'main' ? document.getElementById('tableBody') : document.getElementById('archiveBody');
         let searchElem = type === 'main' ? document.getElementById('searchInput') : document.getElementById('archiveSearchInput');
@@ -1336,17 +1362,23 @@ document.addEventListener('DOMContentLoaded', function() {
             return `<span class="badge badge-warn" style="cursor:pointer;" data-del-holiday="${dk}" title="Kaldırmak için tıklayın">${d}.${m}.${y} ✕</span>`;
         }).join('') || '<span style="font-size:12px;opacity:.6">Henüz tatil eklenmedi.</span>';
     }
+    onInit(() => {
     $$('btnAddHoliday').addEventListener('click', () => {
         const v = $$('planHolidayInput').value; if (!v) return;
         planHolidays.add(v); saveHolidays(); renderHolidayChips(); renderPlanWeekStarts();
         activePlan = null; $$('planOutput').classList.add('hidden'); $$('planHolidayInput').value = '';
     });
+    });
+    onInit(() => {
     $$('planHolidayChips').addEventListener('click', e => {
         const dk = e.target.closest('[data-del-holiday]'); if (!dk) return;
         planHolidays.delete(dk.dataset.delHoliday); saveHolidays(); renderHolidayChips(); renderPlanWeekStarts();
         activePlan = null; $$('planOutput').classList.add('hidden');
     });
+    });
+    onInit(() => {
     renderHolidayChips();
+    });
 
     function populatePlanTeachers() {
         const teachers = [...new Set(records.filter(r => !r.isArchived).map(r => r.ogretmen).filter(Boolean))].sort((a,b) => a.localeCompare(b,'tr-TR'));
@@ -1422,7 +1454,7 @@ document.addEventListener('DOMContentLoaded', function() {
         $$('imeGrid').innerHTML = IME_DAYS.map(([d, name]) => {
             const v = ime.days[d] || { s: '', e: '' };
             const bad = v.s && v.e && v.e <= v.s;
-            return `<div class="ime-row ${bad?'bad':''}"><b>${name}</b>${imeTimeSel(d,'s',v.s)} – ${imeTimeSel(d,'e',v.e)}${imeCap(d) ? `<span style="opacity:.7">${imeCap(d)} işletme</span>` : ''}${bad?'<span class="warn-text">bitiş &gt; başlangıç olmalı</span>':''}</div>`;
+            return `<div class="ime-row ${bad?'bad':''}"><div class="ime-line"><b>${name}</b>${imeTimeSel(d,'s',v.s)} – ${imeTimeSel(d,'e',v.e)}</div><div class="ime-cap">${bad ? '<span class="warn-text">bitiş başlangıçtan sonra olmalı</span>' : (imeCap(d) ? `en fazla <b style="width:auto">${imeCap(d)}</b> işletme` : '')}</div></div>`;
         }).join('');
         $$('imeVisit').value = ime.visit; $$('imeVisit').disabled = !ime.on;
         document.querySelectorAll('#imeWeeks input').forEach(x => x.disabled = !ime.on); $$('btnImeGenerate').disabled = !ime.on;
@@ -1430,7 +1462,10 @@ document.addEventListener('DOMContentLoaded', function() {
         $$('imeSummary').textContent = !ime.on ? '· kapalı' : (days.length ? `· ${days.length} gün, hafta başına en fazla ${tot} ziyaret` : '· saat girilmedi');
     }
     function imeChanged() { saveIme(); renderImeGrid(); if (activePlan) renderPlanTable(); }
+    onInit(() => {
     $$('imeOn').addEventListener('change', e => { ime.on = e.target.checked; imeChanged(); });
+    });
+    onInit(() => {
     $$('imeGrid').addEventListener('change', e => {
         const el = e.target.closest('[data-ime]'); if (!el) return;
         const d = el.dataset.ime, k = el.dataset.k, row = el.closest('.ime-row');
@@ -1439,17 +1474,24 @@ document.addEventListener('DOMContentLoaded', function() {
         const part = el.dataset.part; imeChanged();
         const back = $$('imeGrid').querySelector(`[data-ime="${d}"][data-k="${k}"][data-part="${part}"]`); if (back) back.focus();   // odak kaybolmasın
     });
+    });
+    onInit(() => {
     $$('imeVisit').addEventListener('change', e => { ime.visit = Math.min(240, Math.max(5, parseInt(e.target.value) || 40)); imeChanged(); });
+    });
+    onInit(() => {
     $$('imeWeeks').addEventListener('change', e => {
         const el = e.target.closest('[data-wk]'); if (!el) return;
         ime.off = ime.off.filter(x => x !== el.dataset.wk); if (!el.checked) ime.off.push(el.dataset.wk);
         imeChanged();
     });
+    });
     function updateWeekSummary() {
         const n = [...document.querySelectorAll('.plan-week-visit-select')].filter(x => x.value).length;
         $$('weekSummary').textContent = n ? `· ${n} hafta seçili` : '· seçim yok';
     }
+    onInit(() => {
     $$('planWeekStartsContainer').addEventListener('change', updateWeekSummary);
+    });
 
     /* --- İŞLETME KONUM sekmesi: Liste'deki koordinat (Nokta Konum) ile eşlenik --- */
     function parseCoordInput(t) {
@@ -1485,6 +1527,7 @@ document.addEventListener('DOMContentLoaded', function() {
         $$('locCount').textContent = `${list.length} / ${all.length} işletme · ${all.filter(g => g.koord).length} konumlu`;
     }
     function setBizCoord(key, value) { records.forEach(r => { if (bizKey(r.isletme) === key) r.koordinat = value; }); saveData(); }
+    onInit(() => {
     $$('locBody').addEventListener('change', e => {
         const el = e.target.closest('.loc-input'); if (!el) return;
         const r = parseCoordInput(el.value), msg = el.parentNode.querySelector('.loc-msg');
@@ -1493,11 +1536,15 @@ document.addEventListener('DOMContentLoaded', function() {
         $$('locCount').textContent = $$('locCount').textContent;   // sayaç aşağıda yenilenir
         setTimeout(() => { if ($$('view-loc').classList.contains('active')) renderLoc(); }, 600);
     });
+    });
+    onInit(() => {
     $$('locSearch').addEventListener('input', renderLoc); $$('locOnlyMissing').addEventListener('change', renderLoc);
+    });
 
     function dateToKey(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
     function formatDisplayDate(key) { const [y,m,d] = key.split('-').map(Number); const dt = new Date(y,m-1,d); return String(d).padStart(2,'0')+'.'+String(m).padStart(2,'0')+'.'+y+' '+G_DAYS[dt.getDay()]; }
 
+    /* --- PLAN MOTORU: hafta hesabı --- */
     function calculateWeeks() {
         const val = $$('planMonthSelect').value; if (!val) return [];
         const [year, month] = val.split('-').map(Number);
@@ -1528,9 +1575,15 @@ document.addEventListener('DOMContentLoaded', function() {
         updateWeekSummary(); renderImeWeeks(); renderImeGrid();
     }
     const nowD = new Date();
+    onInit(() => {
     $$('planMonthSelect').value = nowD.getFullYear() + '-' + String(nowD.getMonth()+1).padStart(2,'0');
+    });
+    onInit(() => {
     $$('planMonthSelect').addEventListener('change', () => { renderPlanWeekStarts(); activePlan = null; $$('planOutput').classList.add('hidden'); });
+    });
+    onInit(() => {
     renderPlanWeekStarts();
+    });
 
     function parseLL(geo) { const m = String(geo||'').match(/(-?\d{1,3}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/); return m ? [parseFloat(m[1]), parseFloat(m[2])] : null; }
     function kmBetween(a,b) { const R=6371, rad=x=>x*Math.PI/180, dLa=rad(b[0]-a[0]), dLo=rad(b[1]-a[1]); const h=Math.sin(dLa/2)**2+Math.cos(rad(a[0]))*Math.cos(rad(b[0]))*Math.sin(dLo/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
@@ -1714,6 +1767,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return best;
     }
 
+    onInit(() => {
     $$('btnPlanGenerate').addEventListener('click', function() {
         const teacher = $$('planTeacherSelect').value;
         if (!teacher) { alert("Lütfen bir öğretmen seçin."); return; }
@@ -1727,7 +1781,9 @@ document.addEventListener('DOMContentLoaded', function() {
         currentWeekIndex = 0; renderPlanUI();
         showToast("Plan başarıyla oluşturuldu.");
     });
+    });
     // İME Saatleri bloğunun kendi Planı Oluştur düğmesi: gün seçimi yok, açık haftalardaki tüm İME'li günler kullanılır
+    onInit(() => {
     $$('btnImeGenerate').addEventListener('click', function() {
         const teacher = $$('planTeacherSelect').value;
         if (!teacher) { alert("Önce üstteki Planlama Ayarları'ndan öğretmen seçin."); return; }
@@ -1748,6 +1804,8 @@ document.addEventListener('DOMContentLoaded', function() {
         showToast("İME planı oluşturuldu.");
         if (activePlan.overflow > 0) alert('İME süreleri yetmiyor: ' + activePlan.overflow + ' işletme kapasitenin dışında kaldı.\nZiyaret süresini kısaltın, İME saatlerini uzatın ya da ek hafta açın.');
     });
+    });
+    onInit(() => {
     $$('btnPlanSuggest').addEventListener('click', function() {
         const teacher = $$('planTeacherSelect').value;
         if (!teacher) { alert("Lütfen bir öğretmen seçin."); return; }
@@ -1769,7 +1827,9 @@ document.addEventListener('DOMContentLoaded', function() {
         $$('planSuggestInfo').innerHTML = `<b>Önerilen günler:</b> ${best.map((dk,k)=>(idx[k]+1)+'. hafta '+formatDisplayDate(dk)).join(' · ')}<br>Beklenen: ${confCount(bestP)} okul günü çakışması, ${tested} kombinasyon denendi (${Math.round(performance.now()-t0)} ms).`;
         $$('btnPlanGenerate').click();
     });
+    });
 
+    /* --- PLAN EKRANI --- */
     function renderPlanUI() {
         $$('planOutput').classList.remove('hidden');
         const plan = activePlan;
@@ -1838,13 +1898,18 @@ document.addEventListener('DOMContentLoaded', function() {
         html += `</tbody></table>`;
         $$('planTableContainer').innerHTML = html;
     }
+    onInit(() => {
     $$('planWeekTabs').addEventListener('click', e => { const b = e.target.closest('.tab-btn'); if (b) { currentWeekIndex = +b.dataset.week; renderPlanUI(); } });
+    });
+    onInit(() => {
     $$('planTableContainer').addEventListener('change', e => {
         const sel = e.target.closest('select[data-idx]'); if (!sel) return;
         const item = activePlan.assigned[+sel.dataset.idx];
         item.dateKey = sel.value; item.weekIndex = activePlan.selectedVisitDates.indexOf(sel.value);
         showToast("İşletme başka güne taşındı."); renderPlanUI();
     });
+    });
+    onInit(() => {
     $$('btnPlanExportExcel').addEventListener('click', () => {
         if (!activePlan) return;
         const plan = activePlan;
@@ -1863,6 +1928,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ws['!merges'] = [{s:{r:0,c:0}, e:{r:0,c:3}}];
         const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Ziyaret_Plani");
         XLSX.writeFile(wb, `Ziyaret_Plani_${plan.teacher.replace(/\s+/g,'_')}.xlsx`);
+    });
     });
 
     /* --- QR'LI YAZDIRMA (v18'den sadeleştirilmiş) --- */
@@ -1939,6 +2005,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return land;
     }
 
+    /* --- YAZDIRMA: plan çıktısı --- */
     function renderPlanPrintArea() {
         const plan = activePlan; if (!plan) return;
         const fit = $$('pFit').checked;
@@ -2011,8 +2078,12 @@ document.addEventListener('DOMContentLoaded', function() {
         else $$('planFitInfo').textContent = '';
         window.__planLand = land;
     }
+    onInit(() => {
     document.querySelectorAll('#pOrient,#pQrMode,#pScope,#pSchool,#pQrOn,#pFit').forEach(el => { el.addEventListener('change', renderPlanPrintArea); el.addEventListener('input', renderPlanPrintArea); });
+    });
+    onInit(() => {
     document.querySelectorAll('.pcol').forEach(el => el.addEventListener('change', renderPlanPrintArea));
+    });
 
     /* --- ÖNİZLEME (v18'den) --- */
     function openPlanPreview() {
@@ -2028,10 +2099,18 @@ document.addEventListener('DOMContentLoaded', function() {
         host.style.zoom = Math.min(1.15, avail / px);
         $$('pvInfo').textContent = '— ' + (fit ? host.querySelectorAll('.fitwrap').length + ' sayfa' : 'akışlı düzen') + ' · A4 ' + (land ? 'yatay' : 'dikey');
     }
+    onInit(() => {
     $$('btnPlanPreview').addEventListener('click', openPlanPreview);
+    });
+    onInit(() => {
     $$('pvClose').addEventListener('click', () => $$('planPreviewModal').classList.add('hidden'));
+    });
+    onInit(() => {
     $$('pvPrint').addEventListener('click', () => { $$('planPreviewModal').classList.add('hidden'); renderPlanPrintArea(); window.print(); });
+    });
+    onInit(() => {
     $$('btnPlanPrint').addEventListener('click', () => { renderPlanPrintArea(); window.print(); });
+    });
 
     /* --- TESLİM LİSTESİ (Koordinatör Öğretmen Görev Teslim Listesi, ExcelJS) --- */
     function weekEndText(dateKey) {
@@ -2091,10 +2170,15 @@ document.addEventListener('DOMContentLoaded', function() {
         a.download = `Gorev_Teslim_Listesi_${plan.teacher.replace(/[\\/:*?"<>|]/g,'_')}_${plan.month}${allWeeks?'':'_'+(parseInt(planLabel(plan,currentWeekIndex))||currentWeekIndex+1)+'.hafta'}.xlsx`;
         a.click();
     }
+    onInit(() => {
     $$('btnTeslimWeek').addEventListener('click', () => exportTeslimListesi(false));
+    });
+    onInit(() => {
     $$('btnTeslimAll').addEventListener('click', () => exportTeslimListesi(true));
+    });
 
     /* --- BAŞLANGIÇ --- */
+    __initQueue.forEach(fn => fn());   // bağlama ve ilk çizim ifadeleri (dosya sırasıyla)
     bindAllEvents();
     initData();
     compileRules();
