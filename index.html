@@ -1,17 +1,18 @@
-<!-- MESEM Portal (Birleşik) — Sürüm v3.7 — Son güncelleme: 2026-10-11 -->
+<!-- MESEM Portal – Sürüm v4.0 – Son güncelleme: 2026-10-15 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v3.7</title>
+<title>MESEM Portal v4.0</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.0.3/qrcode.min.js"></script>
 <style>
 /* ===== Font Awesome (ikon fontu, v25'ten) ===== */
-@font-face{font-family:"Font Awesome 6 Free";font-style:normal;font-weight:900;font-display:block;src:url(data:font/woff2;base64,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) format("woff2")}
+/* Font Awesome 6 CDN üzerinden yükleniyor */
 .fas,.fa-solid{-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;display:inline-block;font-style:normal;font-variant:normal;line-height:1;text-rendering:auto;font-family:"Font Awesome 6 Free";font-weight:900}
 .fa-sort-down:before{content:"\f0dd"}.fa-archive:before{content:"\f187"}.fa-list:before{content:"\f03a"}.fa-edit:before{content:"\f044"}.fa-eye-slash:before{content:"\f070"}.fa-file-import:before{content:"\f56f"}.fa-sync:before{content:"\f021"}.fa-sort:before{content:"\f0dc"}.fa-file-excel:before{content:"\f1c3"}.fa-eye:before{content:"\f06e"}.fa-sort-up:before{content:"\f0de"}.fa-comment-dots:before{content:"\f4ad"}.fa-trash:before{content:"\f1f8"}.fa-angle-double-up:before{content:"\f102"}.fa-undo:before{content:"\f0e2"}.fa-cog:before{content:"\f013"}.fa-download:before{content:"\f019"}.fa-upload:before{content:"\f093"}.fa-map-marker-alt:before{content:"\f3c5"}.fa-arrow-down:before{content:"\f063"}.fa-chevron-down:before{content:"\f078"}.fa-arrow-up:before{content:"\f062"}.fa-user-graduate:before{content:"\f501"}.fa-building:before{content:"\f1ad"}.fa-history:before{content:"\f1da"}.fa-briefcase:before{content:"\f0b1"}.fa-database:before{content:"\f1c0"}.fa-print:before{content:"\f02f"}.fa-calendar-alt:before{content:"\f073"}.fa-magic:before{content:"\f0d0"}.fa-right-left:before{content:"\f0ec"}
 
@@ -60,6 +61,9 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-
 .btn-warning { background-color: #f59e0b; } .btn-warning:hover { background-color: #d97706; }
 .btn-import input[type="file"] { position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; width: 100%; }
 
+.more-wrap { display: none; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 14px; margin-top: 8px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; }
+.more-wrap .more-info { font-size: 13px; color: #64748b; }
+.more-wrap button { min-height: 44px; padding: 0 16px; cursor: pointer; }
 .table-container { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: visible; flex-shrink:0;}
 table { width: 100%; border-collapse: collapse; text-align: left; min-width: 1400px; }
 th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
@@ -272,7 +276,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v3.7</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v4.0</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="loc">İşletme Konum</a>
@@ -352,6 +356,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
+        <div class="more-wrap" id="mainMoreWrap"></div>
       </div>
     </div>
 
@@ -685,6 +690,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let msData = { ogretmen: [], bolge: [], sinif: [], sube: [], dal: [] };
     let msSelected = { ogretmen: [], bolge: [], sinif: [], sube: [], dal: [] };
     let renderTimer = null, toastTimer = null;
+    const MAIN_PAGE = 200;
+    let mainLimit = MAIN_PAGE;   // Ana listede çizilecek üst sınır (filtre/sıralama tüm kayıtlarda çalışır)
 
     const genId = () => 'ID-' + Math.random().toString(36).slice(2, 8).toUpperCase();
     const collator = new Intl.Collator('tr', {numeric: true, sensitivity: 'base'});
@@ -728,6 +735,10 @@ document.addEventListener('DOMContentLoaded', function() {
             let st = document.getElementById('planPageStyle');
             if (!st) { st = document.createElement('style'); st.id = 'planPageStyle'; document.head.appendChild(st); }
             st.textContent = '@page { size: A4 landscape; margin: 8mm; }';
+            const prevLimit = mainLimit;
+            mainLimit = Infinity; renderTable('main');
+            const restore = () => { window.removeEventListener('afterprint', restore); mainLimit = prevLimit; renderTable('main'); };
+            window.addEventListener('afterprint', restore);
             window.print();
         });
         document.getElementById('btnDeleteAllRules').addEventListener('click', () => {
@@ -764,6 +775,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
         document.getElementById('mainTableHead').addEventListener('click', e => { const s = e.target.closest('.sortable'); if (s) sortBy(s.dataset.col); });
         document.getElementById('tableBody').addEventListener('click', handleTableActions);
+        document.getElementById('mainMoreWrap').addEventListener('click', e => { if (e.target.closest('#mainMoreBtn')) { mainLimit += MAIN_PAGE; renderTable('main'); } });
         document.getElementById('archiveBody').addEventListener('click', handleTableActions);
         document.getElementById('rulesListContainer').addEventListener('click', handleRuleActions);
         document.querySelectorAll('.multi-select-header').forEach(el => el.addEventListener('click', e => toggleMs(e.currentTarget.dataset.ms)));
@@ -873,6 +885,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function sortBy(col) {
+        mainLimit = MAIN_PAGE;
         if (sortCol === col) sortDesc = !sortDesc; else { sortCol = col; sortDesc = false; }
         document.querySelectorAll('th i').forEach(i => i.className = 'fas fa-sort');
         document.querySelectorAll('th').forEach(th => th.classList.remove('active-sort'));
@@ -936,7 +949,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         updateMsHeader(type, titleText); triggerRender();
     }
-    function triggerRender() { clearTimeout(renderTimer); renderTimer = setTimeout(() => renderTable('main'), 100); }
+    function triggerRender() { mainLimit = MAIN_PAGE; clearTimeout(renderTimer); renderTimer = setTimeout(() => renderTable('main'), 100); }
 
     /* --- LİSTE: çizim ve filtre --- */
     function renderTable(type) {
@@ -951,7 +964,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         let parts = [];
         let idxMap = new Map(records.map((x,i) => [x,i]));
-        filtered.forEach(rr => {
+        let shown = type === 'main' ? filtered.slice(0, mainLimit) : filtered;
+        shown.forEach(rr => {
             let idx = idxMap.get(rr);
             let r = escRec(rr);
             let hasCoord = rr.koordinat && rr.koordinat.trim().length > 0;
@@ -996,6 +1010,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         tbody.innerHTML = parts.join('');
+        if (type === 'main') renderMainMore(filtered.length, shown.length);
+    }
+    function renderMainMore(total, shown) {
+        const wrap = document.getElementById('mainMoreWrap');
+        if (total <= shown) { wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
+        wrap.style.display = 'flex';
+        wrap.innerHTML = `<span class="more-info">${shown} / ${total} kayıt gösteriliyor</span>` +
+            `<button type="button" class="btn btn-import" id="mainMoreBtn">Daha fazla göster (+${Math.min(MAIN_PAGE, total - shown)})</button>`;
     }
 
     function handleTableActions(e) {
