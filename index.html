@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v4.0 – Son güncelleme: 2026-10-15 -->
+<!-- MESEM Portal – Sürüm v4.2 – Son güncelleme: 2026-10-15 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v4.0</title>
+<title>MESEM Portal v4.2</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -219,6 +219,38 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
     .week-starts { flex-direction: column; } .week-start-item { flex-direction: column; align-items: stretch; }
     .week-start-item select { width: 100%; }
 }
+/* ===== v4.2: Mobil uyumluluk ===== */
+@media (max-width: 768px) {
+    /* Ana liste: daha az sütun, okunabilir genişlik */
+    #mainTable th:nth-child(1), #mainTable td:nth-child(1),
+    #mainTable th:nth-child(10), #mainTable td:nth-child(10) { display: none; }
+    /* iOS: 16px altı girdilerde odaklanınca sayfa yakınlaşmasını önler */
+    .search-compact, .loc-input, #planSettingsCard select, #planSettingsCard input[type=month], #planSettingsCard input[type=date] { font-size: 16px; }
+    #planSettingsCard select, #planSettingsCard input { padding: 10px 8px; }
+}
+@media (max-width: 640px) {
+    /* Konum sekmesi: tablo yerine satır kartları */
+    #locTable { display: block; }
+    #locTable thead { display: none; }
+    #locTable tbody, #locTable tr, #locTable td { display: block; width: 100% !important; }
+    #locTable tr { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+    #locTable td { border: none !important; padding: 4px 0 !important; }
+    #locTable td:nth-child(2) { color: #64748b; }
+    #locTable td:nth-child(4) { display: inline-block; width: auto !important; margin-top: 4px; }
+    #locTable .loc-gps { min-width: 44px; min-height: 44px !important; }
+    #locTable .map-icon { min-height: 44px; min-width: 44px; line-height: 36px; }
+}
+/* Dokunmatik cihazlar: küçük ikonlar için 44px dokunma alanı */
+@media (pointer: coarse) {
+    .action-icon, .map-icon, .note-icon { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; padding: 0; box-sizing: border-box; }
+    .btn { min-height: 44px; }
+}
+/* Dokunmatik cihazlarda :hover takılı kalmasın */
+@media (hover: none) {
+    tbody tr:hover td { background-color: transparent !important; }
+    .action-icon:hover { transform: none; }
+}
+
 /* ===== Planlama: QR'lı yazdırma + tek sayfaya otomatik sığdırma (v18'den) ===== */
 .print-wrapper { display: none; font-size: 10pt; font-family: "Segoe UI", Arial, sans-serif; }
 .print-wrapper.measuring { display: block !important; position: absolute; left: -10000px; top: 0; visibility: hidden; }
@@ -276,7 +308,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v4.0</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v4.2</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="loc">İşletme Konum</a>
@@ -368,6 +400,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
             <div class="toolbar-row">
                 <input type="text" id="locSearch" class="search-compact" style="width:280px;" placeholder="İşletme veya adres ara...">
                 <label class="chk"><input type="checkbox" id="locOnlyMissing"> Yalnızca konumu olmayanlar</label>
+                <label class="chk"><input type="checkbox" id="locOnlyConflict"> Çakışan konumlar</label>
                 <div class="record-count" id="locCount"></div>
             </div>
             <div class="help-text" style="font-size:12px; opacity:.75;">Konum alanına <b>41.0082, 28.9784</b> yazın ya da Google Maps linkini yapıştırın. Bu alan Liste'deki <b>Nokta Konum</b> ile aynı veridir; değişiklik işletmenin tüm satırlarına ve Liste'ye yansır.</div>
@@ -378,6 +411,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
                 <tbody id="locBody"></tbody>
             </table>
         </div>
+        <div class="more-wrap" id="locMoreWrap"></div>
       </div>
     </div>
 
@@ -1535,32 +1569,88 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         return [...m.values()].sort((a, b) => collator.compare(a.name, b.name));
     }
+    const LOC_PAGE = 200;
+    let locLimit = LOC_PAGE;
+    const TR_BOUNDS = { latMin: 35.8, latMax: 42.2, lonMin: 25.6, lonMax: 44.9 };
+    function coordOutsideTR(v) { const ll = parseLL(v); return !!ll && (ll[0] < TR_BOUNDS.latMin || ll[0] > TR_BOUNDS.latMax || ll[1] < TR_BOUNDS.lonMin || ll[1] > TR_BOUNDS.lonMax); }
+    function filterLocGroups(all) {
+        const q = normTR($$('locSearch').value.trim()), only = $$('locOnlyMissing').checked, conf = $$('locOnlyConflict').checked;
+        return all.filter(g => (!only || !g.koord) && (!conf || g.coords.size > 1) && (!q || normTR(g.name + ' ' + g.adres).includes(q)));
+    }
+    function locRowHtml(g) {
+        const url = planMapsUrl({ ll: parseLL(g.koord), adres: g.adres, name: g.name });
+        const warn = [];
+        if (g.coords.size > 1) warn.push('Satırlarda farklı konumlar var; kaydedince hepsi aynı olur.');
+        if (g.koord && coordOutsideTR(g.koord)) warn.push('Türkiye sınırları dışında görünüyor; kontrol edin.');
+        return `<tr><td><strong>${escapeHtml(g.name)}</strong><div style="font-size:11px;opacity:.65">${g.count} kayıt</div></td>
+            <td style="font-size:12px">${escapeHtml(g.adres || '-')}</td>
+            <td><div style="display:flex;gap:6px;align-items:center;">
+                <input type="text" class="loc-input" data-key="${escapeHtml(g.key)}" value="${escapeHtml(g.koord)}" placeholder="41.0082, 28.9784 ya da Google Maps linki" style="flex:1;min-width:0;">
+                <button type="button" class="btn btn-import loc-gps" title="Bulunduğum konumu al" style="min-height:36px;padding:0 10px;white-space:nowrap;"><i class="fas fa-crosshairs"></i></button>
+                </div>
+                <div class="loc-msg" style="font-size:11px;min-height:14px;">${warn.map(w => `<span class="warn-text">${w}</span>`).join('<br>')}</div></td>
+            <td class="narrow-cell">${url ? `<a href="${url}" target="_blank" class="map-icon" title="${g.koord ? 'Koordinatla aç' : 'Adresle ara'}"><i class="fas fa-map-marker-alt"></i></a>` : '-'}</td></tr>`;
+    }
+    function renderLocMore(total, shown) {
+        const wrap = document.getElementById('locMoreWrap');
+        if (total <= shown) { wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
+        wrap.style.display = 'flex';
+        wrap.innerHTML = `<span class="more-info">${shown} / ${total} işletme gösteriliyor</span>` +
+            `<button type="button" class="btn btn-import" id="locMoreBtn">Daha fazla göster (+${Math.min(LOC_PAGE, total - shown)})</button>`;
+    }
+    function updateLocCount(listLen, all) { $$('locCount').textContent = `${listLen} / ${all.length} işletme · ${all.filter(g => g.koord).length} konumlu`; }
     function renderLoc() {
-        const q = normTR($$('locSearch').value.trim()), only = $$('locOnlyMissing').checked;
-        const all = locGroups(), list = all.filter(g => (!only || !g.koord) && (!q || normTR(g.name + ' ' + g.adres).includes(q)));
-        $$('locBody').innerHTML = list.map(g => {
-            const url = planMapsUrl({ ll: parseLL(g.koord), adres: g.adres, name: g.name });
-            return `<tr><td><strong>${escapeHtml(g.name)}</strong><div style="font-size:11px;opacity:.65">${g.count} kayıt</div></td>
-                <td style="font-size:12px">${escapeHtml(g.adres || '-')}</td>
-                <td><input type="text" class="loc-input" data-key="${escapeHtml(g.key)}" value="${escapeHtml(g.koord)}" placeholder="41.0082, 28.9784 ya da Google Maps linki" style="width:100%;">
-                    <div class="loc-msg" style="font-size:11px;min-height:14px;">${g.coords.size > 1 ? '<span class="warn-text">Satırlarda farklı konumlar var; kaydedince hepsi aynı olur.</span>' : ''}</div></td>
-                <td class="narrow-cell">${url ? `<a href="${url}" target="_blank" class="map-icon" title="${g.koord ? 'Koordinatla aç' : 'Adresle ara'}"><i class="fas fa-map-marker-alt"></i></a>` : '-'}</td></tr>`;
-        }).join('') || '<tr><td colspan="4" style="text-align:center;padding:20px;opacity:.6;">Gösterilecek işletme yok.</td></tr>';
-        $$('locCount').textContent = `${list.length} / ${all.length} işletme · ${all.filter(g => g.koord).length} konumlu`;
+        const all = locGroups(), list = filterLocGroups(all), shown = list.slice(0, locLimit);
+        $$('locBody').innerHTML = shown.map(locRowHtml).join('') || '<tr><td colspan="4" style="text-align:center;padding:20px;opacity:.6;">Gösterilecek işletme yok.</td></tr>';
+        renderLocMore(list.length, shown.length);
+        updateLocCount(list.length, all);
     }
     function setBizCoord(key, value) { records.forEach(r => { if (bizKey(r.isletme) === key) r.koordinat = value; }); saveData(); }
+    // Kayıt sonrası: sayaç ve Liste/Plan anında tazelenir; satır yeniden çizilmez (yazma akışı bozulmaz)
+    function afterLocSave() {
+        const all = locGroups(); updateLocCount(filterLocGroups(all).length, all);
+        renderTable('main');
+        if (activePlan) renderPlanTable();
+    }
+    function applyLocCoord(el, raw) {
+        const msg = el.closest('td') ? el.closest('td').querySelector('.loc-msg') : null;
+        const r = parseCoordInput(raw);
+        if (r.err) { if (msg) msg.innerHTML = `<span class="warn-text">${r.err}</span>`; el.style.borderColor = '#ef4444'; return false; }
+        setBizCoord(el.dataset.key, r.v); el.value = r.v; el.style.borderColor = '';
+        const tr = coordOutsideTR(r.v) ? '<br><span class="warn-text">Türkiye sınırları dışında görünüyor; kontrol edin.</span>' : '';
+        if (msg) msg.innerHTML = '<span style="color:#15803d">Kaydedildi</span>' + tr;
+        afterLocSave();
+        return true;
+    }
+    function getLocForRow(btn) {
+        const el = btn.closest('td').querySelector('.loc-input');
+        if (!navigator.geolocation) return showToast('Bu tarayıcı konum özelliğini desteklemiyor.');
+        btn.disabled = true;
+        navigator.geolocation.getCurrentPosition(pos => {
+            btn.disabled = false;
+            const c = pos.coords, raw = c.latitude.toFixed(6) + ', ' + c.longitude.toFixed(6);
+            el.value = raw;
+            if (applyLocCoord(el, raw)) showToast('Konum kaydedildi (doğruluk ~' + Math.round(c.accuracy) + ' m).');
+        }, err => {
+            btn.disabled = false;
+            const m = {1:'Konum izni verilmedi.',2:'Konum belirlenemedi.',3:'Konum alma süresi doldu.'};
+            showToast(m[err.code] || 'Konum alınamadı.');
+        }, {enableHighAccuracy: true, timeout: 20000, maximumAge: 0});
+    }
     onInit(() => {
     $$('locBody').addEventListener('change', e => {
         const el = e.target.closest('.loc-input'); if (!el) return;
-        const r = parseCoordInput(el.value), msg = el.parentNode.querySelector('.loc-msg');
-        if (r.err) { msg.innerHTML = `<span class="warn-text">${r.err}</span>`; el.style.borderColor = '#ef4444'; return; }
-        setBizCoord(el.dataset.key, r.v); el.value = r.v; el.style.borderColor = ''; msg.innerHTML = '<span style="color:#15803d">Kaydedildi</span>';
-        $$('locCount').textContent = $$('locCount').textContent;   // sayaç aşağıda yenilenir
-        setTimeout(() => { if ($$('view-loc').classList.contains('active')) renderLoc(); }, 600);
+        applyLocCoord(el, el.value);
     });
+    $$('locBody').addEventListener('click', e => {
+        const btn = e.target.closest('.loc-gps'); if (btn) getLocForRow(btn);
+    });
+    $$('locMoreWrap').addEventListener('click', e => { if (e.target.closest('#locMoreBtn')) { locLimit += LOC_PAGE; renderLoc(); } });
     });
     onInit(() => {
-    $$('locSearch').addEventListener('input', renderLoc); $$('locOnlyMissing').addEventListener('change', renderLoc);
+    $$('locSearch').addEventListener('input', () => { locLimit = LOC_PAGE; renderLoc(); });
+    $$('locOnlyMissing').addEventListener('change', () => { locLimit = LOC_PAGE; renderLoc(); });
+    $$('locOnlyConflict').addEventListener('change', () => { locLimit = LOC_PAGE; renderLoc(); });
     });
 
     function dateToKey(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
