@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v4.7 – Son güncelleme: 2026-10-15 -->
+<!-- MESEM Portal – Sürüm v4.8 – Son güncelleme: 2026-10-15 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v4.7</title>
+<title>MESEM Portal v4.8</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -251,6 +251,42 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
     .action-icon:hover { transform: none; }
 }
 
+/* ===== v4.8: İşletme Konum mobil ===== */
+.chip { position: relative; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: #fff; font-size: 13px; font-weight: 600; cursor: pointer; user-select: none; }
+.chip input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; pointer-events: none; }
+.chip:has(input:checked) { background: var(--primary); border-color: var(--primary); color: #fff; }
+.loc-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.loc-filter-toggle { display: none; }
+.loc-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; margin: 2px 0; }
+.loc-badge.ok { background: #dcfce7; color: #166534; }
+.loc-badge.no { background: #fee2e2; color: #991b1b; }
+.loc-line { display: flex; gap: 6px; align-items: center; }
+.loc-line .loc-input { flex: 1; min-width: 0; }
+.loc-gps { min-height: 36px; padding: 0 10px; white-space: nowrap; }
+.loc-msg { font-size: 11px; min-height: 14px; }
+.btn-lbl, .nav-lbl { display: none; }
+#locBody tr.loc-saved td { background: #ecfdf5 !important; transition: background .4s; }
+@media (max-width: 768px) {
+    .loc-filter-toggle { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; }
+    .loc-search { width: 100% !important; min-height: 44px; box-sizing: border-box; }
+    .loc-filters { display: none; width: 100%; }
+    .loc-toolbar.open .loc-filters { display: flex; }
+    .loc-help { display: none; }
+    .loc-toolbar.open ~ .loc-help { display: block; }
+    .nav-lbl { display: inline; }
+}
+@media (max-width: 640px) {
+    #locTable .loc-line { flex-wrap: wrap; }
+    #locTable .loc-line .loc-input { flex: 1 1 100%; height: 44px; min-height: 44px; box-sizing: border-box; font-size: 16px; }
+    #locTable .loc-gps { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; gap: 6px; }
+    #locTable .btn-lbl { display: inline; }
+    #locTable .loc-msg:empty { display: none; }
+    #locTable td:nth-child(4) .loc-map { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; text-decoration: none; }
+    #locTable tr.loc-saved td { background: #ecfdf5 !important; }
+    #locMoreWrap { flex-direction: column; align-items: stretch; }
+    #locMoreWrap .btn { width: 100%; min-height: 44px; }
+}
+
 /* ===== Planlama: QR'lı yazdırma + tek sayfaya otomatik sığdırma (v18'den) ===== */
 .print-wrapper { display: none; font-size: 10pt; font-family: "Segoe UI", Arial, sans-serif; }
 .print-wrapper.measuring { display: block !important; position: absolute; left: -10000px; top: 0; visibility: hidden; }
@@ -318,14 +354,14 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v4.7</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v4.8</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="loc">İşletme Konum</a>
         <a class="nav-tab" data-tab="plan">Haftalık Planlama</a>
         <a class="nav-tab" data-tab="rules">Kurallar</a>
         <a class="nav-tab" data-tab="archive">Arşiv</a>
-        <a id="btnFactoryReset" title="Sistemi Sıfırla"><i class="fas fa-sync"></i></a>
+        <a id="btnFactoryReset" title="Sistemi Sıfırla"><i class="fas fa-sync"></i><span class="nav-lbl"> Sıfırla</span></a>
     </div>
 </div>
 
@@ -407,13 +443,16 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
     <div id="view-loc" class="view-section">
       <div class="list-view-inner">
         <div class="action-bar">
-            <div class="toolbar-row">
-                <input type="text" id="locSearch" class="search-compact" style="width:280px;" placeholder="İşletme veya adres ara...">
-                <label class="chk"><input type="checkbox" id="locOnlyMissing"> Yalnızca konumu olmayanlar</label>
-                <label class="chk"><input type="checkbox" id="locOnlyConflict"> Çakışan konumlar</label>
+            <div class="toolbar-row loc-toolbar" id="locToolbar">
+                <input type="text" id="locSearch" class="search-compact loc-search" placeholder="İşletme veya adres ara..." enterkeyhint="search">
+                <button type="button" class="btn btn-cancel loc-filter-toggle" id="locFilterToggle" aria-expanded="false"><i class="fas fa-filter"></i> Filtre</button>
+                <div class="loc-filters" id="locFilters">
+                    <label class="chip"><input type="checkbox" id="locOnlyMissing"> Yalnızca konumsuz</label>
+                    <label class="chip"><input type="checkbox" id="locOnlyConflict"> Çakışan konumlar</label>
+                </div>
                 <div class="record-count" id="locCount"></div>
             </div>
-            <div class="help-text" style="font-size:12px; opacity:.75;">Konum alanına <b>41.0082, 28.9784</b> yazın ya da Google Maps linkini yapıştırın. Bu alan Liste'deki <b>Nokta Konum</b> ile aynı veridir; değişiklik işletmenin tüm satırlarına ve Liste'ye yansır.</div>
+            <div class="help-text loc-help" style="font-size:12px; opacity:.75;">Konum alanına <b>41.0082, 28.9784</b> yazın ya da Google Maps linkini yapıştırın. Bu alan Liste'deki <b>Nokta Konum</b> ile aynı veridir; değişiklik işletmenin tüm satırlarına ve Liste'ye yansır.</div>
         </div>
         <div class="table-container">
             <table id="locTable" style="min-width:0;">
@@ -1594,14 +1633,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const warn = [];
         if (g.coords.size > 1) warn.push('Satırlarda farklı konumlar var; kaydedince hepsi aynı olur.');
         if (g.koord && coordOutsideTR(g.koord)) warn.push('Türkiye sınırları dışında görünüyor; kontrol edin.');
-        return `<tr><td><strong>${escapeHtml(g.name)}</strong><div style="font-size:11px;opacity:.65">${g.count} kayıt</div></td>
+        const hasKoord = !!g.koord;
+        return `<tr><td><strong>${escapeHtml(g.name)}</strong><br><span class="loc-badge ${hasKoord ? 'ok' : 'no'}">${hasKoord ? 'Konumlu' : 'Konumsuz'}</span><div style="font-size:11px;opacity:.65">${g.count} kayıt</div></td>
             <td style="font-size:12px">${escapeHtml(g.adres || '-')}</td>
-            <td><div style="display:flex;gap:6px;align-items:center;">
-                <input type="text" class="loc-input" data-key="${escapeHtml(g.key)}" value="${escapeHtml(g.koord)}" placeholder="41.0082, 28.9784 ya da Google Maps linki" style="flex:1;min-width:0;">
-                <button type="button" class="btn btn-import loc-gps" title="Bulunduğum konumu al" style="min-height:36px;padding:0 10px;white-space:nowrap;"><i class="fas fa-crosshairs"></i></button>
+            <td><div class="loc-line">
+                <input type="text" class="loc-input" data-key="${escapeHtml(g.key)}" value="${escapeHtml(g.koord)}" placeholder="41.0082, 28.9784 veya harita linki" enterkeyhint="done" inputmode="text" autocomplete="off">
+                <button type="button" class="btn btn-import loc-gps" title="Bulunduğum konumu al"><i class="fas fa-crosshairs"></i><span class="btn-lbl"> Konumum</span></button>
                 </div>
-                <div class="loc-msg" style="font-size:11px;min-height:14px;">${warn.map(w => `<span class="warn-text">${w}</span>`).join('<br>')}</div></td>
-            <td class="narrow-cell">${url ? `<a href="${url}" target="_blank" class="map-icon" title="${g.koord ? 'Koordinatla aç' : 'Adresle ara'}"><i class="fas fa-map-marker-alt"></i></a>` : '-'}</td></tr>`;
+                <div class="loc-msg">${warn.map(w => `<span class="warn-text">${w}</span>`).join('<br>')}</div></td>
+            <td class="narrow-cell">${url ? `<a href="${url}" target="_blank" class="map-icon loc-map" title="${g.koord ? 'Koordinatla aç' : 'Adresle ara'}"><i class="fas fa-map-marker-alt"></i><span class="btn-lbl"> Haritada aç</span></a>` : '-'}</td></tr>`;
     }
     function renderLocMore(total, shown) {
         const wrap = document.getElementById('locMoreWrap');
@@ -1625,12 +1665,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (activePlan) renderPlanTable();
     }
     function applyLocCoord(el, raw) {
-        const msg = el.closest('td') ? el.closest('td').querySelector('.loc-msg') : null;
+        const tr = el.closest('tr'), msg = tr ? tr.querySelector('.loc-msg') : null;
         const r = parseCoordInput(raw);
         if (r.err) { if (msg) msg.innerHTML = `<span class="warn-text">${r.err}</span>`; el.style.borderColor = '#ef4444'; return false; }
         setBizCoord(el.dataset.key, r.v); el.value = r.v; el.style.borderColor = '';
-        const tr = coordOutsideTR(r.v) ? '<br><span class="warn-text">Türkiye sınırları dışında görünüyor; kontrol edin.</span>' : '';
-        if (msg) msg.innerHTML = '<span style="color:#15803d">Kaydedildi</span>' + tr;
+        const tw = coordOutsideTR(r.v) ? '<br><span class="warn-text">Türkiye sınırları dışında görünüyor; kontrol edin.</span>' : '';
+        if (msg) msg.innerHTML = '<span style="color:#15803d">Kaydedildi</span>' + tw;
+        const badge = tr ? tr.querySelector('.loc-badge') : null;
+        if (badge) { badge.className = 'loc-badge ' + (r.v ? 'ok' : 'no'); badge.textContent = r.v ? 'Konumlu' : 'Konumsuz'; }
+        if (tr) { tr.classList.add('loc-saved'); clearTimeout(tr._t); tr._t = setTimeout(() => tr.classList.remove('loc-saved'), 1500); }
         afterLocSave();
         return true;
     }
@@ -1663,6 +1706,18 @@ document.addEventListener('DOMContentLoaded', function() {
     $$('locSearch').addEventListener('input', () => { locLimit = LOC_PAGE; renderLoc(); });
     $$('locOnlyMissing').addEventListener('change', () => { locLimit = LOC_PAGE; renderLoc(); });
     $$('locOnlyConflict').addEventListener('change', () => { locLimit = LOC_PAGE; renderLoc(); });
+    });
+    onInit(() => {
+    $$('locFilterToggle').addEventListener('click', () => {
+        const open = $$('locToolbar').classList.toggle('open');
+        $$('locFilterToggle').setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    $$('locBody').addEventListener('keydown', e => {
+        const el = e.target.closest('.loc-input'); if (el && e.key === 'Enter') { e.preventDefault(); el.blur(); }
+    });
+    $$('locBody').addEventListener('focusin', e => {
+        const el = e.target.closest('.loc-input'); if (el) setTimeout(() => el.scrollIntoView({ block: 'center', behavior: 'smooth' }), 300);
+    });
     });
 
     function dateToKey(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
