@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v5.0 – Son güncelleme: 2026-10-15 -->
+<!-- MESEM Portal – Sürüm v5.1 – Son güncelleme: 2026-10-15 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.0</title>
+<title>MESEM Portal v5.1</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -297,7 +297,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 .loc-mini-stage { position: relative; height: 240px; overflow: hidden; background: #e5e7eb; border-radius: 8px; }
 .loc-mini-tiles { position: absolute; width: 768px; height: 768px; display: grid; grid-template-columns: repeat(3, 256px); grid-template-rows: repeat(3, 256px); }
 .loc-mini-tiles img { width: 256px; height: 256px; display: block; }
-.loc-mini-pin { position: absolute; left: 50%; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: #ef4444; border: 3px solid #fff; box-shadow: 0 0 0 2px rgba(239,68,68,.35), 0 1px 4px rgba(0,0,0,.4); pointer-events: none; }
+.loc-mini-pin { position: absolute; z-index: 1; left: 50%; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: #ef4444; border: 3px solid #fff; box-shadow: 0 0 0 2px rgba(239,68,68,.35), 0 1px 4px rgba(0,0,0,.4); pointer-events: none; }
 .loc-mini-attr { position: absolute; right: 4px; bottom: 4px; font-size: 10px; background: rgba(255,255,255,.85); padding: 1px 6px; border-radius: 4px; }
 .loc-mini-attr a { color: #334155; }
 .loc-show { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
@@ -307,6 +307,11 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
     #locTable .loc-actions .btn, #locTable .loc-map { font-size: 13px; padding: 0 6px; }
     .loc-mini-stage { height: 220px; }
 }
+
+/* ===== v5.1: Mini harita yükleme hatası ===== */
+.loc-mini-fail { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; padding: 16px; background: rgba(248,250,252,.96); font-size: 13px; color: #334155; }
+.loc-mini-fail[hidden] { display: none; }
+.loc-mini-fail a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 16px; border-radius: 8px; background: #3b82f6; color: #fff; font-weight: 600; text-decoration: none; }
 
 /* ===== Planlama: QR'lı yazdırma + tek sayfaya otomatik sığdırma (v18'den) ===== */
 .print-wrapper { display: none; font-size: 10pt; font-family: "Segoe UI", Arial, sans-serif; }
@@ -375,7 +380,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.0</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.1</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="loc">İşletme Konum</a>
@@ -482,6 +487,10 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
             </div>
             <div class="loc-mini-stage">
                 <div class="loc-mini-tiles" id="locMiniTiles"></div>
+                <div class="loc-mini-fail" id="locMiniFail" hidden>
+                    <div>Harita yüklenemedi. İnternet bağlantınız veya ağınız harita sunucusunu engelliyor olabilir.</div>
+                    <a id="locMiniFailLink" href="#" target="_blank" rel="noopener">Haritada aç</a>
+                </div>
                 <div class="loc-mini-pin"></div>
                 <div class="loc-mini-attr"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap katkıcıları</a></div>
             </div>
@@ -1713,9 +1722,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const fx = t.x - cx, fy = t.y - cy;
         let html = '';
         for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-            html += `<img src="https://tile.openstreetmap.org/${LOC_MINI_Z}/${cx + dx}/${cy + dy}.png" width="256" height="256" alt="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin">`;
+            html += `<img src="https://tile.openstreetmap.org/${LOC_MINI_Z}/${cx + dx}/${cy + dy}.png" width="256" height="256" alt="" referrerpolicy="strict-origin-when-cross-origin">`;
         }
         const tiles = $$('locMiniTiles'); tiles.innerHTML = html;
+        const fail = $$('locMiniFail'), imgs = [...tiles.querySelectorAll('img')]; let bad = 0;
+        fail.hidden = true;
+        $$('locMiniFailLink').href = planMapsUrl({ ll, adres: g.adres, name: g.name });
+        imgs.forEach(im => {
+            im.addEventListener('load', () => { fail.hidden = true; bad = 0; });
+            im.addEventListener('error', () => { bad++; if (bad === imgs.length) fail.hidden = false; });
+        });
         const stage = tiles.parentElement, W = stage.clientWidth || 350, H = stage.clientHeight || 240;
         tiles.style.left = (W / 2 - (256 + fx * 256)) + 'px';
         tiles.style.top = (H / 2 - (256 + fy * 256)) + 'px';
