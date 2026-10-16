@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v4.8 – Son güncelleme: 2026-10-15 -->
+<!-- MESEM Portal – Sürüm v5.0 – Son güncelleme: 2026-10-15 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v4.8</title>
+<title>MESEM Portal v5.0</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -260,8 +260,8 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 .loc-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; margin: 2px 0; }
 .loc-badge.ok { background: #dcfce7; color: #166534; }
 .loc-badge.no { background: #fee2e2; color: #991b1b; }
-.loc-line { display: flex; gap: 6px; align-items: center; }
-.loc-line .loc-input { flex: 1; min-width: 0; }
+.loc-input { width: 100%; box-sizing: border-box; }
+.loc-actions { display: flex; gap: 6px; align-items: center; justify-content: center; flex-wrap: nowrap; }
 .loc-gps { min-height: 36px; padding: 0 10px; white-space: nowrap; }
 .loc-msg { font-size: 11px; min-height: 14px; }
 .btn-lbl, .nav-lbl { display: none; }
@@ -276,15 +276,36 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
     .nav-lbl { display: inline; }
 }
 @media (max-width: 640px) {
-    #locTable .loc-line { flex-wrap: wrap; }
-    #locTable .loc-line .loc-input { flex: 1 1 100%; height: 44px; min-height: 44px; box-sizing: border-box; font-size: 16px; }
-    #locTable .loc-gps { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; gap: 6px; }
+    #locTable .loc-input { height: 44px; min-height: 44px; font-size: 16px; }
+    #locTable td:nth-child(4) { display: block !important; width: 100% !important; margin-top: 6px; }
+    #locTable .loc-actions { display: flex; gap: 8px; width: 100%; }
+    #locTable .loc-gps, #locTable .loc-map { flex: 1 1 0; min-width: 0; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px; font-size: 14px; text-decoration: none; box-sizing: border-box; }
+    #locTable .loc-map { border: 1px solid var(--border); color: #ef4444; }
     #locTable .btn-lbl { display: inline; }
     #locTable .loc-msg:empty { display: none; }
-    #locTable td:nth-child(4) .loc-map { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; text-decoration: none; }
     #locTable tr.loc-saved td { background: #ecfdf5 !important; }
     #locMoreWrap { flex-direction: column; align-items: stretch; }
     #locMoreWrap .btn { width: 100%; min-height: 44px; }
+}
+
+/* ===== v5.0: İşletme Konum mini harita ===== */
+.loc-mini { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; }
+.loc-mini[hidden] { display: none; }
+.loc-mini-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+.loc-mini-info { font-size: 12px; color: #64748b; }
+.loc-mini-close { background: none; border: 0; font-size: 18px; cursor: pointer; min-width: 44px; min-height: 44px; color: #334155; }
+.loc-mini-stage { position: relative; height: 240px; overflow: hidden; background: #e5e7eb; border-radius: 8px; }
+.loc-mini-tiles { position: absolute; width: 768px; height: 768px; display: grid; grid-template-columns: repeat(3, 256px); grid-template-rows: repeat(3, 256px); }
+.loc-mini-tiles img { width: 256px; height: 256px; display: block; }
+.loc-mini-pin { position: absolute; left: 50%; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: #ef4444; border: 3px solid #fff; box-shadow: 0 0 0 2px rgba(239,68,68,.35), 0 1px 4px rgba(0,0,0,.4); pointer-events: none; }
+.loc-mini-attr { position: absolute; right: 4px; bottom: 4px; font-size: 10px; background: rgba(255,255,255,.85); padding: 1px 6px; border-radius: 4px; }
+.loc-mini-attr a { color: #334155; }
+.loc-show { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+@media (max-width: 640px) {
+    #locTable .loc-show { flex: 1 1 0; min-width: 0; min-height: 44px; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+    #locTable .loc-show .btn-lbl { display: inline; }
+    #locTable .loc-actions .btn, #locTable .loc-map { font-size: 13px; padding: 0 6px; }
+    .loc-mini-stage { height: 220px; }
 }
 
 /* ===== Planlama: QR'lı yazdırma + tek sayfaya otomatik sığdırma (v18'den) ===== */
@@ -354,7 +375,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v4.8</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.0</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="loc">İşletme Konum</a>
@@ -454,9 +475,20 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
             </div>
             <div class="help-text loc-help" style="font-size:12px; opacity:.75;">Konum alanına <b>41.0082, 28.9784</b> yazın ya da Google Maps linkini yapıştırın. Bu alan Liste'deki <b>Nokta Konum</b> ile aynı veridir; değişiklik işletmenin tüm satırlarına ve Liste'ye yansır.</div>
         </div>
+        <div class="loc-mini" id="locMini" hidden>
+            <div class="loc-mini-head">
+                <div><b id="locMiniTitle"></b><div class="loc-mini-info" id="locMiniInfo"></div></div>
+                <button type="button" class="loc-mini-close" id="locMiniClose" aria-label="Mini haritayı kapat"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="loc-mini-stage">
+                <div class="loc-mini-tiles" id="locMiniTiles"></div>
+                <div class="loc-mini-pin"></div>
+                <div class="loc-mini-attr"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap katkıcıları</a></div>
+            </div>
+        </div>
         <div class="table-container">
             <table id="locTable" style="min-width:0;">
-                <thead><tr><th style="width:28%">İşletme</th><th style="width:34%">Adres</th><th style="width:30%">Konum (Nokta Konum)</th><th style="width:8%">Harita</th></tr></thead>
+                <thead><tr><th style="width:26%">İşletme</th><th style="width:30%">Adres</th><th style="width:32%">Konum (Nokta Konum)</th><th style="width:12%">İşlem</th></tr></thead>
                 <tbody id="locBody"></tbody>
             </table>
         </div>
@@ -1636,12 +1668,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const hasKoord = !!g.koord;
         return `<tr><td><strong>${escapeHtml(g.name)}</strong><br><span class="loc-badge ${hasKoord ? 'ok' : 'no'}">${hasKoord ? 'Konumlu' : 'Konumsuz'}</span><div style="font-size:11px;opacity:.65">${g.count} kayıt</div></td>
             <td style="font-size:12px">${escapeHtml(g.adres || '-')}</td>
-            <td><div class="loc-line">
-                <input type="text" class="loc-input" data-key="${escapeHtml(g.key)}" value="${escapeHtml(g.koord)}" placeholder="41.0082, 28.9784 veya harita linki" enterkeyhint="done" inputmode="text" autocomplete="off">
-                <button type="button" class="btn btn-import loc-gps" title="Bulunduğum konumu al"><i class="fas fa-crosshairs"></i><span class="btn-lbl"> Konumum</span></button>
-                </div>
+            <td><input type="text" class="loc-input" data-key="${escapeHtml(g.key)}" value="${escapeHtml(g.koord)}" placeholder="41.0082, 28.9784 veya harita linki" enterkeyhint="done" inputmode="text" autocomplete="off">
                 <div class="loc-msg">${warn.map(w => `<span class="warn-text">${w}</span>`).join('<br>')}</div></td>
-            <td class="narrow-cell">${url ? `<a href="${url}" target="_blank" class="map-icon loc-map" title="${g.koord ? 'Koordinatla aç' : 'Adresle ara'}"><i class="fas fa-map-marker-alt"></i><span class="btn-lbl"> Haritada aç</span></a>` : '-'}</td></tr>`;
+            <td class="loc-actions-cell"><div class="loc-actions">
+                <button type="button" class="btn btn-import loc-gps" title="Bulunduğum konumu al"><i class="fas fa-crosshairs"></i><span class="btn-lbl"> Konumum</span></button>
+                <button type="button" class="btn btn-cancel loc-show" data-key="${escapeHtml(g.key)}" title="Mini haritada göster"><i class="fas fa-map"></i><span class="btn-lbl"> Göster</span></button>
+                ${url ? `<a href="${url}" target="_blank" class="map-icon loc-map" title="${g.koord ? 'Koordinatla aç' : 'Adresle ara'}"><i class="fas fa-map-marker-alt"></i><span class="btn-lbl"> Haritada aç</span></a>` : ''}
+                </div></td></tr>`;
     }
     function renderLocMore(total, shown) {
         const wrap = document.getElementById('locMoreWrap');
@@ -1657,10 +1690,49 @@ document.addEventListener('DOMContentLoaded', function() {
         renderLocMore(list.length, shown.length);
         updateLocCount(list.length, all);
     }
+    /* --- v5.0: Mini harita (OSM karoları, kütüphane yok) --- */
+    let locMiniKey = null;
+    const LOC_MINI_Z = 16;
+    function lonLatToTile(lat, lon, z) {
+        const n = Math.pow(2, z);
+        const x = (lon + 180) / 360 * n;
+        const latR = lat * Math.PI / 180;
+        const y = (1 - Math.log(Math.tan(latR) + 1 / Math.cos(latR)) / Math.PI) / 2 * n;
+        return { x, y };
+    }
+    function renderLocMini() {
+        const box = $$('locMini');
+        if (!locMiniKey) { box.hidden = true; return; }
+        const g = locGroups().find(x => x.key === locMiniKey);
+        box.hidden = false;
+        $$('locMiniTitle').textContent = g ? g.name : '';
+        const ll = g ? parseLL(g.koord) : null;
+        if (!ll) { $$('locMiniInfo').textContent = 'Bu işletmenin konumu yok.'; $$('locMiniTiles').innerHTML = ''; return; }
+        $$('locMiniInfo').textContent = g.koord + (g.adres ? ' · ' + g.adres : '');
+        const t = lonLatToTile(ll[0], ll[1], LOC_MINI_Z), cx = Math.floor(t.x), cy = Math.floor(t.y);
+        const fx = t.x - cx, fy = t.y - cy;
+        let html = '';
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+            html += `<img src="https://tile.openstreetmap.org/${LOC_MINI_Z}/${cx + dx}/${cy + dy}.png" width="256" height="256" alt="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin">`;
+        }
+        const tiles = $$('locMiniTiles'); tiles.innerHTML = html;
+        const stage = tiles.parentElement, W = stage.clientWidth || 350, H = stage.clientHeight || 240;
+        tiles.style.left = (W / 2 - (256 + fx * 256)) + 'px';
+        tiles.style.top = (H / 2 - (256 + fy * 256)) + 'px';
+    }
+    onInit(() => {
+    $$('locBody').addEventListener('click', e => {
+        const sh = e.target.closest('.loc-show'); if (!sh) return;
+        locMiniKey = sh.dataset.key; renderLocMini();
+        $$('locMini').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    $$('locMiniClose').addEventListener('click', () => { locMiniKey = null; renderLocMini(); });
+    });
     function setBizCoord(key, value) { records.forEach(r => { if (bizKey(r.isletme) === key) r.koordinat = value; }); saveData(); }
     // Kayıt sonrası: sayaç ve Liste/Plan anında tazelenir; satır yeniden çizilmez (yazma akışı bozulmaz)
     function afterLocSave() {
         const all = locGroups(); updateLocCount(filterLocGroups(all).length, all);
+        if (locMiniKey) renderLocMini();
         renderTable('main');
         if (activePlan) renderPlanTable();
     }
@@ -1678,7 +1750,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return true;
     }
     function getLocForRow(btn) {
-        const el = btn.closest('td').querySelector('.loc-input');
+        const el = btn.closest('tr').querySelector('.loc-input');
         if (!navigator.geolocation) return showToast('Bu tarayıcı konum özelliğini desteklemiyor.');
         btn.disabled = true;
         navigator.geolocation.getCurrentPosition(pos => {
