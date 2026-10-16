@@ -42,25 +42,3 @@ Güncel sürüm: **v4.7**
 | `mesemHolidaysBirlesikV1` | Tatil günleri |
 
 Yedek dosyası sürüm etiketi `birlesik1` olarak yazılır; bu değer uyumluluk için değiştirilmez.
-
-## Sürüm geçmişi (özet)
-
-- **v4.7** – İME saat seçicileri 09:00–17:00 ile sınırlandı; eski kayıtlar kırpılır.
-- **v4.6** – İME varsayılanı Pazartesi–Cuma 09:00–17:00; öğle arası 11:50–12:40.
-- **v4.5** – Plan yazdırma ve önizleme taşması giderildi; sığdırma algoritması iyileştirildi.
-- **v4.4** – Liste yazdırmada alt bilgi ve kelime kırılmaları düzeltildi.
-- **v4.3** – Liste ve konum sayfa boyutu 100.
-- **v4.2** – Mobil uyumluluk (dokunma alanları, konum kartları, iOS girdi boyutu).
-- **v4.1** – İşletme Konum: sayfalama, GPS, uyarılar, anında tazeleme.
-- **v4.0** – Ana liste sayfalaması ve yazdırma düzeltmesi; sürüm etiketi.
-
-## Bilinen sınırlamalar
-
-- Planlama yazdırması gerçek verilerle ve farklı yazıcılarda tam olarak doğrulanmadı.
-- Dikey yazdırmada liste sütunları sıkışık olabilir.
-- Arşiv listesi henüz sayfalanmıyor.
-- Mobil cihazlarda test sınırlı; dokunma ve yazdırma davranışı cihaza göre değişebilir.
-
-## Lisans
-
-Lisans henüz belirlenmedi. Yayımlamadan önce bir `LICENSE` dosyası eklenmelidir.
