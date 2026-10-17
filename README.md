@@ -236,29 +236,6 @@ Tümü `cdnjs.cloudflare.com` üzerinden yüklenir; dosya yerelde de çalışır
 
 ---
 
-## Sürüm notları
-
-### v5.27
-- **Excel içe aktarma:** Onay penceresi açıkken liste artık değişmiş halde görünmüyor; bölge hesabı ve çizim yalnızca onaydan sonra yapılıyor.
-- **Excel iptali:** İptalde depoya yeniden yazma yapılmıyor; gereksiz yazmadan doğan yanlış kota uyarısı giderildi.
-- **Yedek yükleme:** İME verisi doğrulanıyor (geçersiz saat/gün değerleri alınmıyor).
-- **Depolama uyarıları:** Son yedek zamanı ve toplu değişiklik geri alma verisi yazılırken oluşan hatalar artık sessizce yutulmuyor.
-
-### v5.26
-- **Excel içe aktarma hata yolu:** İşlem sırasında hata olursa bellekteki yarım değişiklikler geri alınıyor; sonraki bir kayıtla kalıcı hale gelmesi engellendi.
-
-### v5.25
-- **Yedek kapsamı:** JSON yedeğe İME ayarları (`ime`) ve resmi tatiller (`holidays`) eklendi. Eski yedekler geri uyumlu olarak yüklenir.
-- **Excel iptali:** İçe aktarma iptalinde sayfa yenilense bile içe aktarılan verinin geri gelmesi düzeltildi.
-- **Arşiv sayfalama:** Arşiv listesi ana liste gibi sayfalı çiziliyor; arama tüm arşivde çalışıyor.
-- **Depolama kotası:** Kota dolduğunda net uyarı gösteriliyor.
-- **Sekme eşitleme:** Başka sekmede yapılan değişiklikler otomatik yansıtılıyor.
-
-### v5.24
-- Sekme geçiş önbelleği: Veri değişmediyse sekme yeniden çizilmez.
-
----
-
 ## Geliştirici notları
 
 - **Mimari:** Tek HTML dosyası; stil, işaretleme ve betik aynı dosyada. Derleme veya paket yöneticisi yoktur.
