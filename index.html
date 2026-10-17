@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v5.13 – Son güncelleme: 2026-10-15 -->
+<!-- MESEM Portal – Sürüm v5.14 – Son güncelleme: 2026-10-15 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.13</title>
+<title>MESEM Portal v5.14</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -413,6 +413,20 @@ button.chip { font-family: inherit; color: var(--text); }
     .bar-chart .bar-row { grid-template-columns: 1fr; gap: 4px; }
 }
 
+/* ===== v5.14: İstatistik yazdırma ===== */
+.stats-toolbar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.stats-print-head { display: none; font-size: 16px; margin: 0 0 8px; }
+@media print {
+    .stats-print-head { display: block; }
+    #view-stats .stats-toolbar, #view-stats .noprint { display: none !important; }
+    #view-stats .card, #view-stats .stat-box, .bar-row, .stats-kpis { break-inside: avoid; page-break-inside: avoid; }
+    #view-stats .card { box-shadow: none; border: 1px solid #999; margin-bottom: 8px; }
+    .bar, .bar-s, .bar-b, .stat-box .num { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    .bar-s { background: #3b82f6 !important; } .bar-b { background: #10b981 !important; }
+    .bar-row { border-bottom: 1px solid #ddd; }
+    .help-text { color: #333; }
+}
+
 /* ===== Planlama: QR'lı yazdırma + tek sayfaya otomatik sığdırma (v18'den) ===== */
 .print-wrapper { display: none; font-size: 10pt; font-family: "Segoe UI", Arial, sans-serif; }
 .print-wrapper.measuring { display: block !important; position: absolute; left: -10000px; top: 0; visibility: hidden; }
@@ -480,7 +494,7 @@ button.chip { font-family: inherit; color: var(--text); }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.13</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.14</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="stats">İstatistik</a>
@@ -728,6 +742,8 @@ button.chip { font-family: inherit; color: var(--text); }
     <!-- ================= BÖLGE KURALLARI (v25) ================= -->
     <div id="view-stats" class="view-section">
         <div class="list-view-inner">
+            <div class="stats-toolbar noprint"><button type="button" class="btn btn-print" id="btnStatsPrint"><i class="fas fa-print"></i>&nbsp;Yazdır</button></div>
+            <h2 class="stats-print-head" id="statsPrintHead"></h2>
             <div class="stats-kpis" id="statsKpis"></div>
             <div class="card"><h3 class="card-title">Alanlara göre</h3><div id="statsAlan" class="bar-chart"></div></div>
             <div class="card"><h3 class="card-title">Dallara göre</h3><div id="statsDal" class="bar-chart"></div></div>
@@ -1226,6 +1242,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const konumlu = new Set(active.filter(r => r.koordinat && r.isletme).map(r => bizKey(r.isletme)));
         const bolgeSay = new Set(active.map(r => r.bolge).filter(Boolean)).size;
         const kpi = [['Öğrenci', active.length], ['İşletme', biz.size], ['Konumlu işletme', biz.size ? Math.round(konumlu.size / biz.size * 100) + '%' : '-'], ['Bölge', bolgeSay]];
+        $$('statsPrintHead').textContent = 'MESEM Portal · İstatistik · ' + new Date().toLocaleDateString('tr-TR');
         $$('statsKpis').innerHTML = kpi.map(([l, v]) => `<div class="stat-box"><span class="num">${v}</span><span class="lbl">${l}</span></div>`).join('');
         const group = keyFn => {
             const m = new Map();
@@ -1236,6 +1253,7 @@ document.addEventListener('DOMContentLoaded', function() {
         drawBars('statsDal', group(r => String(r.dal || '').trim()));
         drawBars('statsOgretmen', group(r => String(r.ogretmen || '').trim()), r => r.biz ? ` · ${(r.students / r.biz).toFixed(1)} öğr./işl.` : '');
     }
+    onInit(() => { $$('btnStatsPrint').addEventListener('click', () => { renderStats(); window.print(); }); });
     function triggerRender() { mainLimit = MAIN_PAGE; clearTimeout(renderTimer); renderTimer = setTimeout(() => renderTable('main'), 100); }
 
     /* --- LİSTE: çizim ve filtre --- */
