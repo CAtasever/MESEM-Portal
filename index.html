@@ -1,4 +1,4 @@
-<!-- MESEM Portal – Sürüm v5.24 – Son güncelleme: 2026-10-17 -->
+<!-- MESEM Portal – Sürüm v5.27 – Son güncelleme: 2026-10-17 -->
 <!-- SÜRÜM NOTU: Her yeni sürümde sürüm numarası 3 yerde birlikte güncellenmelidir: (1) bu satırdaki başlık yorumu, (2) <title> etiketi, (3) sayfadaki "MESEM Portal" başlığının yanındaki küçük sürüm rozeti (id="homeLink" içindeki <span>). -->
 <!DOCTYPE html>
 <html lang="tr">
@@ -6,7 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.24</title>
+<title>MESEM Portal v5.27</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -527,7 +527,7 @@ button.chip { font-family: inherit; color: var(--text); }
 
 <div class="navbar">
     <!-- Sürüm rozeti: her yeni sürümde güncelle (dosya başındaki SÜRÜM NOTU'na bakın) -->
-        <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.24</span></h1>
+        <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.27</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="stats">İstatistik</a>
@@ -874,6 +874,7 @@ button.chip { font-family: inherit; color: var(--text); }
                 <tbody id="archiveBody"></tbody>
             </table>
         </div>
+        <div class="more-wrap" id="archiveMoreWrap"></div>
       </div>
     </div>
 </div>
@@ -1002,6 +1003,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const tabRendered = {}, tabScroll = {};
     const MAIN_PAGE = 100;
     let mainLimit = MAIN_PAGE;   // Ana listede çizilecek üst sınır (filtre/sıralama tüm kayıtlarda çalışır)
+    const ARCHIVE_PAGE = 100;
+    let archiveLimit = ARCHIVE_PAGE;
 
     const genId = () => 'ID-' + Math.random().toString(36).slice(2, 8).toUpperCase();
     const collator = new Intl.Collator('tr', {numeric: true, sensitivity: 'base'});
@@ -1043,7 +1046,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('btnFactoryReset').addEventListener('click', factoryReset);
         document.getElementById('btnGetLocation').addEventListener('click', getMyLocation);
         document.getElementById('searchInput').addEventListener('input', triggerRender);
-        document.getElementById('archiveSearchInput').addEventListener('input', () => renderTable('archive'));
+        document.getElementById('archiveSearchInput').addEventListener('input', () => { archiveLimit = ARCHIVE_PAGE; renderTable('archive'); });
         document.getElementById('ruleSearchInput').addEventListener('input', renderRules);
         document.getElementById('btnExportExcel').addEventListener('click', exportToExcel);
         document.getElementById('btnPrint').addEventListener('click', () => {
@@ -1092,6 +1095,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('tableBody').addEventListener('click', handleTableActions);
         document.getElementById('mainMoreWrap').addEventListener('click', e => { if (e.target.closest('#mainMoreBtn')) { mainLimit += MAIN_PAGE; renderTable('main'); } });
         document.getElementById('archiveBody').addEventListener('click', handleTableActions);
+        document.getElementById('archiveMoreWrap').addEventListener('click', e => { if (e.target.closest('#archiveMoreBtn')) { archiveLimit += ARCHIVE_PAGE; renderTable('archive'); } });
         document.getElementById('rulesListContainer').addEventListener('click', handleRuleActions);
         document.querySelectorAll('.multi-select-header').forEach(el => el.addEventListener('click', e => toggleMs(e.currentTarget.dataset.ms)));
         document.addEventListener('click', e => { if (!e.target.closest('.multi-select')) document.querySelectorAll('.multi-select-options').forEach(el => el.classList.remove('open')); });
@@ -1122,12 +1126,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /* --- VERİ: kaydet / yükle / normalize --- */
+    function storageWriteError(e) {
+        const quota = e && (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014);
+        showToast(quota
+            ? 'Tarayıcı deposu doldu. Yedek Al, sonra gerekirse arşiv/kayıt azaltın.'
+            : 'UYARI: Veri tarayıcıya kaydedilemedi! Lütfen Yedek Al ile yedekleyin.');
+    }
     function saveData() {
         dataVersion++;
         try {
             localStorage.setItem('mesemRecordsBirlesikV1', JSON.stringify(records));
             localStorage.setItem('mesemRulesBirlesikV1', JSON.stringify(regionRules));
-        } catch(e) { showToast('UYARI: Veri tarayıcıya kaydedilemedi! Lütfen Yedek Al ile yedekleyin.'); }
+        } catch(e) { storageWriteError(e); }
     }
 
     function factoryReset() {
@@ -1183,12 +1193,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function exportBackup() {
-        const blob = new Blob([JSON.stringify({version:'birlesik1', date:new Date().toISOString(), records:records, rules:regionRules}, null, 1)], {type:'application/json'});
+        // version 'birlesik1' uyumluluk için değişmez; ime/holidays alanları eski yükleyicilerce yok sayılır
+        const blob = new Blob([JSON.stringify({version:'birlesik1', date:new Date().toISOString(), records:records, rules:regionRules, ime:ime, holidays:[...planHolidays].sort()}, null, 1)], {type:'application/json'});
         const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
         a.download = 'MESEM_Yedek_' + new Date().toISOString().slice(0,10) + '.json';
         document.body.appendChild(a); a.click(); a.remove();
         setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-        try { localStorage.setItem('mesemLastBackupV1', String(Date.now())); } catch(e) {}
+        try { localStorage.setItem('mesemLastBackupV1', String(Date.now())); } catch(e) { storageWriteError(e); }
         showToast('Tam yedek (arşiv dahil) indirildi.');
     }
 
@@ -1464,7 +1475,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         let parts = [];
         let idxMap = new Map(records.map((x,i) => [x,i]));
-        let shown = type === 'main' ? filtered.slice(0, mainLimit) : filtered;
+        let shown = type === 'main' ? filtered.slice(0, mainLimit) : filtered.slice(0, archiveLimit);
         shown.forEach(rr => {
             let idx = idxMap.get(rr);
             let r = escRec(rr);
@@ -1511,6 +1522,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         tbody.innerHTML = parts.join('');
         if (type === 'main') renderMainMore(filtered.length, shown.length);
+        else renderArchiveMore(filtered.length, shown.length);
     }
     function renderMainMore(total, shown) {
         const wrap = document.getElementById('mainMoreWrap');
@@ -1518,6 +1530,14 @@ document.addEventListener('DOMContentLoaded', function() {
         wrap.style.display = 'flex';
         wrap.innerHTML = `<span class="more-info">${shown} / ${total} kayıt gösteriliyor</span>` +
             `<button type="button" class="btn btn-import" id="mainMoreBtn">Daha fazla göster (+${Math.min(MAIN_PAGE, total - shown)})</button>`;
+    }
+    function renderArchiveMore(total, shown) {
+        const wrap = document.getElementById('archiveMoreWrap');
+        if (!wrap) return;
+        if (total <= shown) { wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
+        wrap.style.display = 'flex';
+        wrap.innerHTML = `<span class="more-info">${shown} / ${total} kayıt gösteriliyor</span>` +
+            `<button type="button" class="btn btn-import" id="archiveMoreBtn">Daha fazla göster (+${Math.min(ARCHIVE_PAGE, total - shown)})</button>`;
     }
 
     function handleTableActions(e) {
@@ -1797,8 +1817,34 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 let d = JSON.parse(e.target.result);
                 if (!d || !Array.isArray(d.records) || !Array.isArray(d.rules)) { alert('Geçersiz veya bozuk yedek dosyası!'); inputElem.value=''; return; }
-                if (!confirm(d.records.length + ' adet öğrenci kaydı ve ' + d.rules.length + ' adet bölge kuralı yüklenecek. Mevcut veriler silinecek. Onaylıyor musunuz?')) { inputElem.value=''; return; }
+                const hasIme = d.ime && typeof d.ime === 'object';
+                const hasHolidays = Array.isArray(d.holidays);
+                let msg = d.records.length + ' adet öğrenci kaydı ve ' + d.rules.length + ' adet bölge kuralı yüklenecek. Mevcut kayıt ve kurallar silinecek.';
+                if (hasIme) msg += '\nİME saat ayarları da yüklenecek.';
+                if (hasHolidays) msg += '\nTatil günleri de yüklenecek (' + d.holidays.length + ').';
+                if (!hasIme && !hasHolidays) msg += '\n(Eski yedek: mevcut İME ve tatil ayarlarına dokunulmaz.)';
+                msg += '\nOnaylıyor musunuz?';
+                if (!confirm(msg)) { inputElem.value=''; return; }
                 records = d.records; regionRules = d.rules; normalizeData(); localStorage.removeItem(BULK_UNDO_KEY); saveData();
+                if (hasIme) {
+                    // v5.27: bozuk yedek İME ekranını bozmasın; yalnızca geçerli SS:DD değerleri alınır
+                    const okT = v => typeof v === 'string' && (v === '' || /^\d{1,2}:\d{2}$/.test(v));
+                    const dd = (d.ime.days && typeof d.ime.days === 'object') ? d.ime.days : {};
+                    const days = {};
+                    IME_DAYS.forEach(([k]) => { const v = dd[k]; if (v && typeof v === 'object' && okT(v.s) && okT(v.e)) days[k] = { s: v.s, e: v.e }; });
+                    ime.on = d.ime.on !== false;
+                    ime.days = days;
+                    ime.visit = parseInt(d.ime.visit) || 40;
+                    ime.off = Array.isArray(d.ime.off) ? d.ime.off.filter(x => typeof x === 'string') : [];
+                    saveIme();
+                    renderImeGrid();
+                }
+                if (hasHolidays) {
+                    planHolidays = new Set(d.holidays.filter(x => typeof x === 'string'));
+                    saveHolidays();
+                    renderHolidayChips();
+                    renderPlanWeekStarts();
+                }
                 compileRules(); recalculateRegions(); renderRules(); updateFilters(); updateRegionDatalist(); renderTable('main'); renderTable('archive'); populatePlanTeachers();
                 showToast('Yedek başarıyla yüklendi.');
             } catch(err) { alert('HATA: Yedek dosyası okunamadı!'); }
@@ -1812,6 +1858,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let f = e.target.files[0]; if (!f) return;
         let reader = new FileReader();
         reader.onload = function(evt) {
+            let snapshot = null, committed = false; // v5.26/v5.27: hata yolunda belleği geri almak için try dışında
             try {
                 let data = new Uint8Array(evt.target.result);
                 let wb = XLSX.read(data, {type: 'array'});
@@ -1820,7 +1867,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 let usedKeyless = new Set(), noNoCount = 0, rowsRead = json.length;
                 let touchedThisImport = new Set();
                 let updatedIdsThisSession = new Set(); // sadece "kaç kayıt güncellendi" sayacı için; eşleştirmeyi ENGELLEMEZ
-                let added = 0, updated = 0, skipped = 0, snapshot = JSON.stringify(records);
+                snapshot = JSON.stringify(records);
+                let added = 0, updated = 0, skipped = 0;
                 let byId = new Map(), byNo = new Map(), byOgrId = new Map();
                 records.forEach(r => { byId.set(String(r.internalId), r); if (r.ogrNo && !byNo.has(String(r.ogrNo))) byNo.set(String(r.ogrNo), r); if (r.ogrId && !byOgrId.has(String(r.ogrId))) byOgrId.set(String(r.ogrId), r); });
                 const pick = (row, keys) => { for (const k of keys) { const v = str(row[k]); if (v) return v; } return ''; };
@@ -1888,21 +1936,26 @@ document.addEventListener('DOMContentLoaded', function() {
                         updatedIdsThisSession.add(internalId); added++; if (!ogrId && !oNo && !id) usedKeyless.add(internalId);
                     }
                 });
-                recalculateRegions(); renderTable('main'); saveData();
-
+                // v5.27: onaydan önce çizim/kayıt yok (confirm eşzamanlı; kullanıcı eski listeyi görür). Bölge hesabı ve çizim onaydan sonra.
                 const subeEksik = records.filter(r => !r.isArchived && !r.sube).length;
                 let msg = `${rowsRead} satır okundu: ${added} yeni kayıt, ${updated} güncelleme.\n(${skipped} boş satır atlandı)`;
                 if (noNoCount > 0) msg += `\n${noNoCount} öğrencinin numarası yok; yine de listeye dahil edildi.`;
                 if (subeEksik > 0) msg += `\n\nUYARI: ${subeEksik} kayıtta "Şube" bilgisi yok. Bu kayıtlar Haftalık Planlama'da gün belirsiz ⚠ olarak işaretlenecek.`;
                 msg += `\n\nListeye uygulansın mı?`;
                 if (!confirm(msg)) {
-                    records = JSON.parse(snapshot);
-                    recalculateRegions(); renderTable('main'); showToast('İçe aktarma işlemi iptal edildi.');
+                    records = JSON.parse(snapshot); // depoya hiç yazılmadı; yalnızca bellek eski haline döner
+                    showToast('İçe aktarma işlemi iptal edildi.');
                     e.target.value = ''; return;
                 }
+                recalculateRegions(); renderTable('main');
+                saveData(); committed = true;
                 populatePlanTeachers();
                 showToast(`Yükleme Bitti: ${added} Yeni, ${updated} Güncellendi.`);
-            } catch(err) { alert("Hata: Excel yüklenirken bir sorun oluştu."); }
+            } catch(err) {
+                // onaydan önce/sırasında hata: yarım kalmış bellek durumu sonraki bir saveData ile kalıcılaşmasın
+                if (snapshot && !committed) { try { records = JSON.parse(snapshot); } catch(_) {} }
+                alert("Hata: Excel yüklenirken bir sorun oluştu.");
+            }
             e.target.value = '';
         };
         reader.readAsArrayBuffer(f);
@@ -1944,7 +1997,7 @@ document.addEventListener('DOMContentLoaded', function() {
     /* --- RESMİ TATİLLER (v18'den) --- */
     let planHolidays = new Set();
     (function loadHolidays() { try { const s = JSON.parse(localStorage.getItem('mesemHolidaysBirlesikV1')||'[]'); if (Array.isArray(s)) planHolidays = new Set(s); } catch(e) {} })();
-    function saveHolidays() { try { localStorage.setItem('mesemHolidaysBirlesikV1', JSON.stringify([...planHolidays].sort())); } catch(e) {} }
+    function saveHolidays() { try { localStorage.setItem('mesemHolidaysBirlesikV1', JSON.stringify([...planHolidays].sort())); } catch(e) { storageWriteError(e); } }
     function renderHolidayChips() {
         const c = $$('planHolidayChips');
         c.innerHTML = [...planHolidays].sort().map(dk => {
@@ -1988,7 +2041,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const IME_DEFAULT_DAYS = () => Object.fromEntries(IME_DAYS.map(([d]) => [d, { s: '09:00', e: '17:00' }]));
     let ime = { on: true, days: IME_DEFAULT_DAYS(), visit: 40, off: [] };
     try { const x = JSON.parse(localStorage.getItem(IME_KEY) || 'null'); if (x && typeof x === 'object') { ime.on = x.on !== false; ime.days = x.days || {}; ime.visit = parseInt(x.visit) || 40; ime.off = Array.isArray(x.off) ? x.off : []; } } catch(e) {}
-    function saveIme() { try { localStorage.setItem(IME_KEY, JSON.stringify(ime)); } catch(e) {} }
+    function saveIme() { try { localStorage.setItem(IME_KEY, JSON.stringify(ime)); } catch(e) { storageWriteError(e); } }
     function imeMins(t) { if (!t) return null; const a = t.split(':').map(Number); return a[0]*60 + a[1]; }
     function imeFmt(m) { return String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m%60).padStart(2,'0'); }
     const IME_MIN = 9*60, IME_MAX = 17*60;   // İME çalışma penceresi: 09:00–17:00
@@ -2199,7 +2252,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!changed.length) return showToast('Seçilen kayıtların öğretmeni zaten bu.');
         const note = hidden ? `\nSeçililerden ${hidden} kayıt şu an arama/filtre nedeniyle görünmüyor; onlar da değişecek.` : '';
         if (!confirm(`${changed.length} kaydın öğretmeni "${target}" olarak değiştirilecek.${note}\nAçık plan varsa yeniden hesaplanacak. Devam edilsin mi?`)) return;
-        try { localStorage.setItem(BULK_UNDO_KEY, JSON.stringify({ at: new Date().toISOString(), items: changed.map(r => ({ id: String(r.internalId), old: r.ogretmen })) })); } catch(e) {}
+        try { localStorage.setItem(BULK_UNDO_KEY, JSON.stringify({ at: new Date().toISOString(), items: changed.map(r => ({ id: String(r.internalId), old: r.ogretmen })) })); } catch(e) { storageWriteError(e); }
         changed.forEach(r => { r.ogretmen = target; bulkSel.delete(String(r.internalId)); });
         $$('bulkTeacherInput').value = '';
         afterTeacherChange(`${changed.length} kaydın öğretmeni değiştirildi.`);
@@ -2961,6 +3014,36 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     onInit(() => {
     $$('btnTeslimAll').addEventListener('click', () => exportTeslimListesi(true));
+    });
+
+    function reloadPersistedState() {
+        initData();
+        try {
+            const x = JSON.parse(localStorage.getItem(IME_KEY) || 'null');
+            if (x && typeof x === 'object') {
+                ime.on = x.on !== false;
+                ime.days = x.days || {};
+                ime.visit = parseInt(x.visit) || 40;
+                ime.off = Array.isArray(x.off) ? x.off : [];
+            }
+        } catch (e) {}
+        try {
+            const s = JSON.parse(localStorage.getItem('mesemHolidaysBirlesikV1') || '[]');
+            if (Array.isArray(s)) planHolidays = new Set(s);
+        } catch (e) {}
+        compileRules(); recalculateRegions(); updateFilters(); updateRegionDatalist();
+        dataVersion++;
+        Object.keys(tabRendered).forEach(k => { delete tabRendered[k]; });
+        renderTable('main'); renderTable('archive'); renderRules(); populatePlanTeachers();
+        renderLoc(); renderHolidayChips(); renderPlanWeekStarts(); renderImeGrid();
+        showToast('Veri başka bir sekmeden güncellendi.');
+    }
+    let storageSyncTimer = null;
+    window.addEventListener('storage', e => {
+        const keys = ['mesemRecordsBirlesikV1', 'mesemRulesBirlesikV1', 'mesemHolidaysBirlesikV1', IME_KEY];
+        if (!e.key || !keys.includes(e.key)) return;
+        clearTimeout(storageSyncTimer);
+        storageSyncTimer = setTimeout(reloadPersistedState, 150);
     });
 
     /* --- BAŞLANGIÇ --- */
