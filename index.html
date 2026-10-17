@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v5.6 – Son güncelleme: 2026-10-15 -->
+<!-- MESEM Portal – Sürüm v5.7 – Son güncelleme: 2026-10-15 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.6</title>
+<title>MESEM Portal v5.7</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -379,6 +379,24 @@ button.chip { font-family: inherit; color: var(--text); }
 #locTable .sort-ind { font-size: 10px; opacity: .7; }
 #locTable thead th { position: sticky; top: 0; background: #f1f5f9; z-index: 3; }
 
+/* ===== v5.7: Toplu öğretmen değişikliği ===== */
+.bulk-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; margin-bottom: 8px; }
+.bulk-count { font-size: 13px; font-weight: 700; color: var(--primary-dark); margin-right: 4px; }
+.bulk-bar input[type=text] { padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; min-width: 180px; }
+.bulk-bar .btn { padding: 6px 10px; font-size: 12px; }
+.bulk-bar [hidden] { display: none !important; }
+.sel-wrap { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+.rec-sel { width: 15px; height: 15px; margin: 0; cursor: pointer; flex-shrink: 0; }
+@media print { .rec-sel { display: none !important; } .id-txt { display: inline !important; } }
+@media (max-width: 768px) {
+    #mainTable th:nth-child(1), #mainTable td:nth-child(1) { display: table-cell !important; width: 40px !important; min-width: 40px !important; max-width: 40px !important; padding: 4px !important; }
+    #mainTable .id-txt { display: none; }
+    .bulk-bar { flex-direction: column; align-items: stretch; }
+    .bulk-bar input[type=text] { min-width: 0; width: 100%; font-size: 16px; min-height: 44px; box-sizing: border-box; }
+    .bulk-bar .btn { min-height: 44px; font-size: 13px; }
+    .bulk-count { margin-right: 0; }
+}
+
 /* ===== Planlama: QR'lı yazdırma + tek sayfaya otomatik sığdırma (v18'den) ===== */
 .print-wrapper { display: none; font-size: 10pt; font-family: "Segoe UI", Arial, sans-serif; }
 .print-wrapper.measuring { display: block !important; position: absolute; left: -10000px; top: 0; visibility: hidden; }
@@ -446,7 +464,7 @@ button.chip { font-family: inherit; color: var(--text); }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.6</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.7</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="loc">İşletme Konum</a>
@@ -501,6 +519,15 @@ button.chip { font-family: inherit; color: var(--text); }
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="bulk-bar noprint" id="bulkBar">
+            <span class="bulk-count" id="bulkCount">0 kayıt seçili</span>
+            <button type="button" class="btn btn-cancel" id="bulkSelVisible">Görünenleri seç</button>
+            <button type="button" class="btn btn-cancel" id="bulkClear">Seçimi temizle</button>
+            <input type="text" id="bulkTeacherInput" list="bulkTeacherList" placeholder="Yeni öğretmen adı" autocomplete="off">
+            <datalist id="bulkTeacherList"></datalist>
+            <button type="button" class="btn btn-primary" id="bulkApply">Öğretmeni değiştir</button>
+            <button type="button" class="btn btn-warning" id="bulkUndo" hidden>Son değişikliği geri al</button>
         </div>
         <div class="table-container">
             <table id="mainTable">
@@ -1167,7 +1194,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let subeBadge = subeDayBadge;
             if (type === 'main') {
                 parts.push(`<tr>
-                    <td class="col-id"><span style="font-size:11px; color:#64748b;">${r.internalId}</span></td>
+                    <td class="col-id"><label class="sel-wrap"><input type="checkbox" class="rec-sel" data-id="${escapeHtml(String(rr.internalId))}" ${bulkSel.has(String(rr.internalId)) ? 'checked' : ''}><span class="id-txt" style="font-size:11px; color:#64748b;">${r.internalId}</span></label></td>
                     <td><strong>${ogrNoDisp}</strong></td>
                     <td>${r.adSoyad}</td>
                     <td>${r.ogrTel}</td>
@@ -1859,6 +1886,63 @@ document.addEventListener('DOMContentLoaded', function() {
         renderLocMore(list.length, shown.length);
         updateLocCount(list.length, all);
     }
+    /* --- v5.7: Toplu öğretmen değişikliği --- */
+    const BULK_UNDO_KEY = 'mesemBulkUndoV1';
+    const bulkSel = new Set();
+    function updateBulkBar() {
+        $$('bulkCount').textContent = `${bulkSel.size} kayıt seçili`;
+        const dl = [...new Set(records.filter(r => !r.isArchived && r.ogretmen).map(r => r.ogretmen))].sort(collator.compare);
+        $$('bulkTeacherList').innerHTML = dl.map(t => `<option value="${escapeHtml(t)}">`).join('');
+        $$('bulkUndo').hidden = !localStorage.getItem(BULK_UNDO_KEY);
+    }
+    function applyBulkTeacher() {
+        const target = $$('bulkTeacherInput').value.trim();
+        if (!bulkSel.size) return showToast('Önce en az bir kayıt seçin.');
+        if (!target) return showToast('Yeni öğretmen adını girin.');
+        const changed = records.filter(r => bulkSel.has(String(r.internalId)) && r.ogretmen !== target);
+        if (!changed.length) return showToast('Seçilen kayıtların öğretmeni zaten bu.');
+        if (!confirm(`${changed.length} kaydın öğretmeni "${target}" olarak değiştirilecek.\nPlan (varsa) yeniden hesaplanacak. Devam edilsin mi?`)) return;
+        try { localStorage.setItem(BULK_UNDO_KEY, JSON.stringify({ at: new Date().toISOString(), items: changed.map(r => ({ id: String(r.internalId), old: r.ogretmen })) })); } catch(e) {}
+        changed.forEach(r => { r.ogretmen = target; });
+        bulkSel.clear();
+        $$('bulkTeacherInput').value = '';
+        afterTeacherChange(`${changed.length} kaydın öğretmeni değiştirildi.`);
+    }
+    function undoBulkTeacher() {
+        let u = null; try { u = JSON.parse(localStorage.getItem(BULK_UNDO_KEY) || 'null'); } catch(e) {}
+        if (!u || !Array.isArray(u.items)) return showToast('Geri alınacak değişiklik yok.');
+        if (!confirm(`${u.items.length} kaydın öğretmeni önceki haline döndürülecek. Devam edilsin mi?`)) return;
+        const map = new Map(u.items.map(i => [i.id, i.old]));
+        records.forEach(r => { const k = String(r.internalId); if (map.has(k)) r.ogretmen = map.get(k); });
+        localStorage.removeItem(BULK_UNDO_KEY);
+        afterTeacherChange('Son toplu değişiklik geri alındı.');
+    }
+    function afterTeacherChange(msg) {
+        saveData(); populatePlanTeachers(); updateFilters(); renderTable('main'); renderTable('archive');
+        updateBulkBar();
+        recomputePlanAfterTeacherChange();
+        showToast(msg);
+    }
+    // Açık plan varsa, aynı öğretmen ve aynı ziyaret günleriyle yeniden hesaplanır
+    function recomputePlanAfterTeacherChange() {
+        if (!activePlan) return;
+        const teacher = $$('planTeacherSelect').value;
+        if (teacher && records.some(r => !r.isArchived && r.ogretmen === teacher)) {
+            (activePlan.source === 'ime' ? $$('btnImeGenerate') : $$('btnPlanGenerate')).click();
+        } else { activePlan = null; $$('planOutput').classList.add('hidden'); }
+    }
+    onInit(() => {
+    $$('tableBody').addEventListener('change', e => {
+        const cb = e.target.closest('.rec-sel'); if (!cb) return;
+        cb.checked ? bulkSel.add(cb.dataset.id) : bulkSel.delete(cb.dataset.id);
+        updateBulkBar();
+    });
+    $$('bulkSelVisible').addEventListener('click', () => { document.querySelectorAll('#tableBody .rec-sel').forEach(cb => { cb.checked = true; bulkSel.add(cb.dataset.id); }); updateBulkBar(); });
+    $$('bulkClear').addEventListener('click', () => { bulkSel.clear(); document.querySelectorAll('#tableBody .rec-sel').forEach(cb => { cb.checked = false; }); updateBulkBar(); });
+    $$('bulkApply').addEventListener('click', applyBulkTeacher);
+    $$('bulkUndo').addEventListener('click', undoBulkTeacher);
+    updateBulkBar();
+    });
     function setBizCoord(key, value) { records.forEach(r => { if (bizKey(r.isletme) === key) r.koordinat = value; }); saveData(); }
     // Kayıt sonrası: sayaç ve Liste/Plan anında tazelenir; satır yeniden çizilmez (yazma akışı bozulmaz)
     function afterLocSave() {
