@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v5.2 – Son güncelleme: 2026-10-15 -->
+<!-- MESEM Portal – Sürüm v5.3 – Son güncelleme: 2026-10-15 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.2</title>
+<title>MESEM Portal v5.3</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -288,6 +288,19 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
     #locMoreWrap .btn { width: 100%; min-height: 44px; }
 }
 
+/* ===== v5.3: Kurallar ===== */
+.rule-test { margin-bottom: 12px; padding: 10px; border: 1px dashed var(--border); border-radius: 8px; background: #f8fafc; }
+.rule-test input { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; box-sizing: border-box; }
+.rule-test-result { font-size: 12px; margin-top: 6px; color: #334155; min-height: 16px; }
+.rule-count { font-size: 11px; color: #64748b; margin-left: auto; white-space: nowrap; }
+.rule-warn { font-size: 12px; color: #b45309; margin-top: 4px; }
+.rules-form-toggle { display: none; }
+@media (max-width: 900px) {
+    .rules-form-toggle { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; width: 100%; margin-bottom: 10px; }
+    .rules-form-body { display: none; }
+    .rules-form-body.open { display: block; }
+}
+
 /* ===== Planlama: QR'lı yazdırma + tek sayfaya otomatik sığdırma (v18'den) ===== */
 .print-wrapper { display: none; font-size: 10pt; font-family: "Segoe UI", Arial, sans-serif; }
 .print-wrapper.measuring { display: block !important; position: absolute; left: -10000px; top: 0; visibility: hidden; }
@@ -355,7 +368,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.2</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.3</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="loc">İşletme Konum</a>
@@ -588,10 +601,17 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
     <div id="view-rules" class="view-section">
         <div class="rules-container">
             <div class="rules-form">
+                <button type="button" class="btn btn-cancel rules-form-toggle" id="btnRulesFormToggle" aria-expanded="false"><i class="fas fa-plus"></i>&nbsp;Kural formu</button>
+                <div class="rules-form-body" id="rulesFormBody">
                 <h3 id="ruleFormTitle">Bölge Kuralı Ekle / Düzenle</h3>
                 <p style="font-size:12px; color:#64748b; margin-bottom:15px;">Kurallar <strong style="color:var(--primary-dark)">yukarıdan aşağıya</strong> sırayla çalışır. Üstteki kuralın her zaman önceliği vardır. Bu kurallar hem Liste hem Planlama sekmesinde ortak kullanılır.</p>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <input type="text" id="ruleSearchInput" placeholder="Kurallarda Ara..." style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; outline:none; font-size:13px;">
+                </div>
+                <div class="rule-test">
+                    <label style="font-size:12px; font-weight:600;">Adres testi</label>
+                    <input type="text" id="ruleTestInput" placeholder="Bir adres yazın, hangi kuralın eşleştiğini görün" autocomplete="off">
+                    <div id="ruleTestResult" class="rule-test-result"></div>
                 </div>
                 <input type="hidden" id="editRuleIndex" value="-1">
                 <div class="form-group">
@@ -606,11 +626,13 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
                 <div class="form-group">
                     <label>Küme (isteğe bağlı)</label>
                     <input type="text" id="ruleCluster" placeholder="Örn: Dudullu Sanayi">
-                    <span class="help-text">Koordinat verisi olmayan işletmelerde yakınlık hesabı için kullanılır. Birbirine yakın bölgelere aynı küme adını verin.</span>
+                    <span class="help-text">Küme, birbirine yakın bölgeleri gruplar (ör. aynı sanayi sitesinin farklı caddeleri). Koordinatı olmayan işletmelerde ziyaret planı bu gruplara göre yakınlığı hesaplar. Yakın bölgelere aynı küme adını verin.</span>
                 </div>
+                <label class="chk" style="margin-top:8px;"><input type="checkbox" id="ruleAddTop"> Yeni kuralı en üste ekle</label>
                 <div style="display:flex; gap:10px; margin-top:auto;">
                     <button class="btn btn-cancel" style="flex:1; justify-content:center;" id="btnResetRuleForm">İptal</button>
                     <button class="btn btn-primary" style="flex:2; justify-content:center;" id="btnSaveRule">Kaydet</button>
+                </div>
                 </div>
             </div>
             <div class="rules-list-wrapper">
@@ -828,7 +850,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('btnDeleteAllRules').addEventListener('click', () => {
             if (!regionRules.length) { showToast('Silinecek kural yok.'); return; }
             if (!confirm(regionRules.length + ' bölge kuralının TÜMÜ silinecek.\nManuel bölge atanmayanların bölgesi "Belirtilmemiş / Diğer" olur.\nÖnce İndir ile yedek almanız önerilir. Devam edilsin mi?')) return;
-            regionRules = []; resetRuleForm(); compileRules(); recalculateRegions(); renderRules(); renderTable('main'); updateRegionDatalist(); saveData();
+            regionRules = []; resetRuleForm(); compileRules(); recalculateRegions(); renderRules(); renderTable('main'); refreshPlanIfOpen(); updateRegionDatalist(); saveData();
             showToast('Tüm kurallar silindi.');
         });
         // Aşağı kaydırırken üst başlık gizlenir, en üste dönünce görünür
@@ -1194,15 +1216,19 @@ document.addEventListener('DOMContentLoaded', function() {
         let c = document.getElementById('rulesListContainer');
         let sInput = document.getElementById('ruleSearchInput').value.toLocaleLowerCase('tr-TR');
         let parts = [];
+        const conflicts = ruleConflicts();
         regionRules.forEach((rule, idx) => {
             if (sInput) { let s = `${rule.name} ${Array.isArray(rule.keywords)?rule.keywords.join(' '):rule.keywords}`.toLocaleLowerCase('tr-TR'); if (!s.includes(sInput)) return; }
             let eyeIcon = rule.active === false ? 'fa-eye-slash' : 'fa-eye';
             let kwsString = Array.isArray(rule.keywords) ? rule.keywords.join(', ') : rule.keywords;
             let inactiveClass = rule.active === false ? 'inactive-rule' : '';
+            const cnt = ruleRecordCount(rule.name);
+            const warn = conflicts.get(idx) || [];
             parts.push(`<div class="rule-card ${inactiveClass}">
                 <div style="flex:1;">
-                    <div class="rule-card-header"><span class="rule-badge">#${idx+1}</span><h4>${escapeHtml(rule.name)}</h4>${rule.cluster ? `<span class="rule-badge" title="Küme" style="background:#e0e7ff;color:#4338ca;">🔗 ${escapeHtml(rule.cluster)}</span>` : ''}</div>
+                    <div class="rule-card-header"><span class="rule-badge">#${idx+1}</span><h4>${escapeHtml(rule.name)}</h4>${rule.cluster ? `<span class="rule-badge" title="Küme" style="background:#e0e7ff;color:#4338ca;">🔗 ${escapeHtml(rule.cluster)}</span>` : ''}<span class="rule-count">${cnt} kayıt</span></div>
                     <details><summary>Kelimeleri Gör</summary><div class="rule-card-keywords">${escapeHtml(kwsString)}</div></details>
+                    ${warn.map(w => `<div class="rule-warn">⚠ ${escapeHtml(w)}</div>`).join('')}
                 </div>
                 <div class="rule-card-actions">
                     <i class="fas ${eyeIcon} action-icon" data-action="toggleActive" data-idx="${idx}" title="Aç / Kapat"></i>
@@ -1216,6 +1242,38 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         c.innerHTML = parts.join('');
     }
+    function refreshPlanIfOpen() { if (activePlan) renderPlanTable(); }
+    function ruleRecordCount(name) { return records.filter(r => !r.isArchived && r.bolge === name).length; }
+    function manualRecordCount(name) { return records.filter(r => !r.isArchived && r.manuelBolge && r.bolge === name).length; }
+    // Aktif kurallarda, üstteki bir kuralla aynı anahtar kelimeyi paylaşan alt kuralları işaretler
+    function ruleConflicts() {
+        const out = new Map(), seen = new Map();
+        regionRules.forEach((rule, idx) => {
+            if (rule.active === false) return;
+            const kws = kwArray(rule.keywords).map(normTR);
+            const msgs = [];
+            kws.forEach(k => { if (seen.has(k)) msgs.push(`"${k}" kelimesi üstteki "${seen.get(k)}" kuralında da var; o önce eşleşir.`); });
+            if (msgs.length) out.set(idx, msgs);
+            kws.forEach(k => { if (!seen.has(k)) seen.set(k, rule.name); });
+        });
+        return out;
+    }
+    function testRuleAddress() {
+        const q = document.getElementById('ruleTestInput').value, out = document.getElementById('ruleTestResult');
+        if (!q.trim()) { out.innerHTML = ''; return; }
+        const addr = normTR(q);
+        const hit = compiledRules.find(rule => rule.regexes.some(re => re.test(addr)));
+        out.innerHTML = hit
+            ? `Eşleşen kural: <b>${escapeHtml(hit.name)}</b>${hit.cluster ? ` · 🔗 ${escapeHtml(hit.cluster)}` : ''}`
+            : 'Hiçbir kural eşleşmiyor → <b>Belirtilmemiş / Diğer</b>';
+    }
+    onInit(() => {
+    $$('ruleTestInput').addEventListener('input', testRuleAddress);
+    $$('btnRulesFormToggle').addEventListener('click', () => {
+        const open = $$('rulesFormBody').classList.toggle('open');
+        $$('btnRulesFormToggle').setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    });
     function handleRuleActions(e) {
         const btn = e.target.closest('.action-icon'); if (!btn) return;
         const action = btn.dataset.action, idx = Number(btn.dataset.idx);
@@ -1236,11 +1294,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function toggleRuleActive(idx) {
         if (regionRules[idx].active === undefined) regionRules[idx].active = true;
         regionRules[idx].active = !regionRules[idx].active;
-        compileRules(); renderRules(); recalculateRegions(); renderTable('main'); saveData();
+        compileRules(); renderRules(); recalculateRegions(); renderTable('main'); refreshPlanIfOpen(); saveData();
         showToast(regionRules[idx].active ? "Kural aktif edildi." : "Kural pasif yapıldı.");
     }
-    function moveToTop(idx) { if (idx===0) return; resetRuleForm(); let it = regionRules.splice(idx,1)[0]; regionRules.unshift(it); compileRules(); renderRules(); recalculateRegions(); renderTable('main'); saveData(); }
-    function moveRule(idx, dir) { let t = idx+dir; if (t<0||t>=regionRules.length) return; resetRuleForm(); let tmp=regionRules[idx]; regionRules[idx]=regionRules[t]; regionRules[t]=tmp; compileRules(); renderRules(); recalculateRegions(); renderTable('main'); saveData(); }
+    function moveToTop(idx) { if (idx===0) return; resetRuleForm(); let it = regionRules.splice(idx,1)[0]; regionRules.unshift(it); compileRules(); renderRules(); recalculateRegions(); renderTable('main'); refreshPlanIfOpen(); saveData(); }
+    function moveRule(idx, dir) { let t = idx+dir; if (t<0||t>=regionRules.length) return; resetRuleForm(); let tmp=regionRules[idx]; regionRules[idx]=regionRules[t]; regionRules[t]=tmp; compileRules(); renderRules(); recalculateRegions(); renderTable('main'); refreshPlanIfOpen(); saveData(); }
     function editRule(idx) {
         let rule = regionRules[idx];
         document.getElementById('ruleName').value = rule.name;
@@ -1248,6 +1306,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('ruleCluster').value = rule.cluster || '';
         document.getElementById('editRuleIndex').value = idx;
         document.getElementById('ruleFormTitle').innerText = "Kuralı Düzenle";
+        $$('rulesFormBody').classList.add('open'); $$('btnRulesFormToggle').setAttribute('aria-expanded', 'true');
         window.scrollTo({top:0, behavior:'smooth'});
     }
     function resetRuleForm() {
@@ -1262,25 +1321,40 @@ document.addEventListener('DOMContentLoaded', function() {
         let idx = parseInt(document.getElementById('editRuleIndex').value);
         if (!name || !kws) { alert("Boş bırakılamaz!"); return; }
         let kwArr = kws.split(',').map(x=>x.trim()).filter(x=>x.length>0);
-        if (idx > -1) { regionRules[idx].name = name; regionRules[idx].keywords = kwArr; regionRules[idx].cluster = cluster; }
-        else {
+        let msg;
+        if (idx > -1) {
+            const oldName = regionRules[idx].name;
+            if (regionRules.some((r,i) => i !== idx && String(r.name).toLowerCase() === name.toLowerCase())) { alert("Bu isimde başka bir kural var."); return; }
+            if (oldName !== name) records.forEach(r => { if (r.manuelBolge && r.bolge === oldName) r.bolge = name; }); // elle atananların bağını yeni adla taşı
+            regionRules[idx].name = name; regionRules[idx].keywords = kwArr; regionRules[idx].cluster = cluster;
+            msg = "Kural güncellendi.";
+        } else {
             let eIdx = regionRules.findIndex(r => r.name.toLowerCase() === name.toLowerCase());
             if (eIdx >= 0) {
                 let existingKws = kwArray(regionRules[eIdx].keywords).map(x=>x.toLowerCase());
                 let toAdd = kwArr.filter(x => !existingKws.includes(x.toLowerCase()));
                 if (toAdd.length) regionRules[eIdx].keywords = kwArray(regionRules[eIdx].keywords).concat(toAdd);
                 if (cluster) regionRules[eIdx].cluster = cluster;
-            } else regionRules.unshift({name:name, keywords:kwArr, cluster:cluster, active:true});
+                msg = toAdd.length ? `"${regionRules[eIdx].name}" kuralına ${toAdd.length} kelime eklendi.` : `"${regionRules[eIdx].name}" kuralındaki kelimelerin hepsi zaten vardı.`;
+            } else {
+                const rule = {name:name, keywords:kwArr, cluster:cluster, active:true};
+                if (document.getElementById('ruleAddTop').checked) regionRules.unshift(rule); else regionRules.push(rule);
+                msg = "Yeni kural eklendi.";
+            }
         }
-        resetRuleForm(); compileRules(); renderRules(); recalculateRegions(); renderTable('main'); updateRegionDatalist(); saveData();
-        showToast("Kural kaydedildi, liste güncellendi.");
+        resetRuleForm(); compileRules(); renderRules(); recalculateRegions(); renderTable('main'); refreshPlanIfOpen(); updateRegionDatalist(); saveData();
+        showToast(msg + " Liste güncellendi.");
     }
     function deleteRule(idx) {
-        if (confirm("Silmek istediğinize emin misiniz?")) {
-            regionRules.splice(idx,1); resetRuleForm();
-            compileRules(); renderRules(); recalculateRegions(); renderTable('main'); updateRegionDatalist(); saveData();
-            showToast("Kural silindi.");
-        }
+        const rule = regionRules[idx]; if (!rule) return;
+        const n = ruleRecordCount(rule.name), m = manualRecordCount(rule.name);
+        let msg = `"${rule.name}" kuralı silinecek.\nBu bölgedeki ${n} kayıt yeniden hesaplanacak.`;
+        if (m) msg += `\n${m} kayıt elle atanmış bölgeydi; bunlar otomatik atamaya dönecek.`;
+        if (!confirm(msg + '\nDevam edilsin mi?')) return;
+        records.forEach(r => { if (r.manuelBolge && r.bolge === rule.name) r.manuelBolge = false; });
+        regionRules.splice(idx,1); resetRuleForm();
+        compileRules(); renderRules(); recalculateRegions(); renderTable('main'); refreshPlanIfOpen(); updateRegionDatalist(); saveData();
+        showToast("Kural silindi.");
     }
     function exportRulesData() {
         const blob = new Blob([JSON.stringify(regionRules, null, 2)], {type:'application/json'});
@@ -1295,13 +1369,28 @@ document.addEventListener('DOMContentLoaded', function() {
         reader.onload = function(evt) {
             try {
                 let d = JSON.parse(evt.target.result);
-                if (Array.isArray(d)) {
-                    if (confirm("Mevcut kurallarınız tamamen silinip dosyadaki kurallar eklenecek. Onaylıyor musunuz?")) {
-                        regionRules = d; normalizeData(); resetRuleForm();
-                        compileRules(); recalculateRegions(); renderRules(); updateRegionDatalist(); renderTable('main'); saveData();
-                        showToast("Kurallar başarıyla yüklendi.");
-                    }
-                } else alert("Geçersiz kural dosyası!");
+                if (!Array.isArray(d)) { alert("Geçersiz kural dosyası!"); return; }
+                const valid = d.filter(r => r && typeof r.name === 'string' && r.name.trim() && kwArray(r.keywords).length);
+                const skipped = d.length - valid.length;
+                if (!valid.length) { alert("Dosyada geçerli kural bulunamadı."); return; }
+                const replace = confirm(`${valid.length} kural bulundu${skipped ? ` (${skipped} geçersiz kayıt atlanacak)` : ''}.\n\nTamam: mevcut kurallar silinip dosyadaki kurallarla değiştirilecek.\nİptal: dosyadaki kurallar mevcut listeye eklenecek (aynı adlılar birleşir).`);
+                if (replace) {
+                    regionRules = valid.map(r => ({ name: r.name.trim(), keywords: kwArray(r.keywords), cluster: r.cluster || '', active: r.active !== false }));
+                    showToast(`Kurallar değiştirildi (${valid.length}).`);
+                } else {
+                    let added = 0, merged = 0;
+                    valid.forEach(r => {
+                        const name = r.name.trim(), kws = kwArray(r.keywords), ex = regionRules.find(x => String(x.name).toLowerCase() === name.toLowerCase());
+                        if (ex) {
+                            const have = kwArray(ex.keywords).map(x => x.toLowerCase());
+                            const extra = kws.filter(k => !have.includes(k.toLowerCase()));
+                            if (extra.length) { ex.keywords = kwArray(ex.keywords).concat(extra); merged++; }
+                        } else { regionRules.push({ name, keywords: kws, cluster: r.cluster || '', active: r.active !== false }); added++; }
+                    });
+                    showToast(`Birleştirildi: ${added} yeni kural, ${merged} kurala kelime eklendi.`);
+                }
+                normalizeData(); resetRuleForm();
+                compileRules(); recalculateRegions(); renderRules(); updateRegionDatalist(); renderTable('main'); refreshPlanIfOpen(); saveData();
             } catch(err) { alert("Hata oluştu: " + err.message); }
             e.target.value = '';
         };
