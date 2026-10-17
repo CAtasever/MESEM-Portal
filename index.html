@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v5.22 – Son güncelleme: 2026-10-17 -->
+<!-- MESEM Portal – Sürüm v5.23 – Son güncelleme: 2026-10-17 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.22</title>
+<title>MESEM Portal v5.23</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -525,7 +525,7 @@ button.chip { font-family: inherit; color: var(--text); }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.22</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.23</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="stats">İstatistik</a>
@@ -1315,7 +1315,7 @@ document.addEventListener('DOMContentLoaded', function() {
        Tek sayfa: içerik, yazdırma kurallarıyla (sp-mode) gerçek genişlikte ÖLÇÜLÜR; ikili aramayla sayfaya sığan
        en büyük ölçek bulunur. Yön "Otomatik" ise yatay/dikey denenir, yazının daha büyük kaldığı yön seçilir.
        @page boyutu da buna göre ayarlandığı için yazdırma penceresindeki varsayılan yön fark etmez. */
-    const SP_MARGIN = 8, SP_MIN_Z = 0.25;
+    const SP_MARGIN = 8, SP_MIN_Z = 0.25, SP_SAFE = 7; // v5.23: SP_SAFE = sayfa altında bırakılan güvenlik payı (mm)
     let spLastInfo = null;
     function statsLeavePrintMode() {
         const view = $$('view-stats'), inner = view.querySelector('.list-view-inner');
@@ -1345,14 +1345,14 @@ document.addEventListener('DOMContentLoaded', function() {
         let land = orient === 'landscape', z = 1, ok = true;
         if (single) {
             const fitFor = isLand => {
-                const W = (isLand ? 297 : 210) - 2 * SP_MARGIN, H = (isLand ? 210 : 297) - 2 * SP_MARGIN - 3;
+                const W = (isLand ? 297 : 210) - 2 * SP_MARGIN, H = (isLand ? 210 : 297) - 2 * SP_MARGIN - SP_SAFE;
                 const maxCols = textOnly ? (isLand ? 4 : 3) : (isLand ? 3 : 2); // uzun listeler sayfa genişliğine göre sütunlara bölünür (grafiksizde daha dar satırlar: daha çok sütun)
                 view.querySelectorAll('.bar-chart').forEach(el => { el.style.columnCount = Math.max(1, Math.min(maxCols, Math.floor(el.querySelectorAll('.bar-row').length / 4))); });
                 const probe = document.createElement('div');
                 probe.style.cssText = 'position:absolute;left:-9999px;width:1px;height:' + H + 'mm';
                 document.body.appendChild(probe); const ph = probe.offsetHeight; probe.remove();
                 // Genişlik 1/z oranında büyütülüp içerik z ile küçültülür; yükseklik = ölçülen * z
-                const measure = zz => { inner.style.width = (W / zz) + 'mm'; inner.style.transform = zz < 1 ? `scale(${zz})` : 'none'; return inner.offsetHeight * zz; };
+                const measure = zz => { inner.style.width = (W / zz) + 'mm'; inner.style.transform = zz < 1 ? `scale(${zz})` : 'none'; return inner.getBoundingClientRect().height; }; // v5.23: kesirli (ölçeklenmiş) gerçek yükseklik; offsetHeight yuvarlıyordu
                 let zz = 1;
                 if (measure(1) > ph) {
                     let lo = SP_MIN_Z, hi = 1;
@@ -1369,7 +1369,10 @@ document.addEventListener('DOMContentLoaded', function() {
             } else res = fitFor(land);
             land = res.land; z = res.z; ok = res.ok;
             // Ölçeklenmiş içeriğin kapladığı gerçek yüksekliği sabitle: boş ikinci sayfa oluşmasın
-            view.style.setProperty('height', Math.ceil(res.h) + 'px', 'important');
+            // v5.23: kırpma kenarı içeriğin bittiği yere değil, sayfanın gerçek alt sınırına (-1mm) konur.
+            // İçerik güvenlik payıyla (SP_SAFE) bu sınırın üstünde biter; yazdırmada birkaç pikselin kayması artık kesmez.
+            // Yükseklik sayfa alanını aşmadığı için ikinci (boş) sayfa da oluşmaz.
+            view.style.setProperty('height', ((res.land ? 210 : 297) - 2 * SP_MARGIN - 1) + 'mm', 'important');
             view.style.setProperty('overflow', 'hidden', 'important');
         } else if (orient === 'auto') land = false;
         let st = document.getElementById('statsPageStyle');
