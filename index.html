@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v5.18 – Son güncelleme: 2026-10-17 -->
+<!-- MESEM Portal – Sürüm v5.21 – Son güncelleme: 2026-10-17 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.18</title>
+<title>MESEM Portal v5.21</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -525,7 +525,7 @@ button.chip { font-family: inherit; color: var(--text); }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.18</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.21</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="stats">İstatistik</a>
@@ -780,6 +780,7 @@ button.chip { font-family: inherit; color: var(--text); }
                     <label class="chk"><input type="checkbox" class="sp-card" data-card="cardAlan" checked> Alanlar</label>
                     <label class="chk"><input type="checkbox" class="sp-card" data-card="cardDal" checked> Dallar</label>
                     <label class="chk"><input type="checkbox" class="sp-card" data-card="cardOgretmen" checked> Öğretmenler</label>
+                    <label class="chk"><input type="checkbox" class="sp-card" data-card="cardBolge" checked> Bölgeler</label>
                     <select id="statsPrintStyle"><option value="chart">Grafikli</option><option value="text">Grafiksiz (yalnızca sayılar)</option></select>
                     <select id="statsPrintLayout"><option value="each">Her grafik ayrı sayfada</option><option value="single">Hepsi tek sayfada</option></select>
                     <select id="statsPrintOrient" title="Sayfa yönü"><option value="auto">Yön: Otomatik</option><option value="portrait">Dikey</option><option value="landscape">Yatay</option></select>
@@ -792,6 +793,7 @@ button.chip { font-family: inherit; color: var(--text); }
             <div class="card" id="cardAlan"><h3 class="card-title">Alanlara göre</h3><div id="statsAlan" class="bar-chart"></div></div>
             <div class="card" id="cardDal"><h3 class="card-title">Dallara göre</h3><div id="statsDal" class="bar-chart"></div></div>
             <div class="card" id="cardOgretmen"><h3 class="card-title">Öğretmenlere göre</h3><div id="statsOgretmen" class="bar-chart"></div></div>
+            <div class="card" id="cardBolge"><h3 class="card-title">Bölgelere göre</h3><div id="statsBolge" class="bar-chart"></div></div>
             <p class="help-text" style="font-size:12px;">Bir işletmede birden fazla dal veya öğretmen olabileceğinden işletme sayıları gruplar arasında toplanmaz. Üstteki İşletme kartı tekil toplamı gösterir. Arşivdeki kayıtlar dahil değildir.</p>
         </div>
     </div>
@@ -1045,7 +1047,7 @@ document.addEventListener('DOMContentLoaded', function() {
             st.textContent = '@page { size: A4 landscape; margin: 8mm; }';
             const prevLimit = mainLimit;
             mainLimit = Infinity; renderTable('main');
-            const restore = () => { window.removeEventListener('afterprint', restore); mainLimit = prevLimit; renderTable('main'); };
+            const restore = () => { window.removeEventListener('afterprint', restore); document.getElementById('planPageStyle')?.remove(); mainLimit = prevLimit; renderTable('main'); };
             window.addEventListener('afterprint', restore);
             window.print();
         });
@@ -1150,10 +1152,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (tabId === 'loc') renderLoc();
     }
 
-    function showToast(msg) {
+    function showToast(msg, ms) {
         let t = document.getElementById('toast');
         t.innerText = msg; t.style.display = 'block';
-        clearTimeout(toastTimer); toastTimer = setTimeout(() => t.style.display = 'none', 3000);
+        clearTimeout(toastTimer); toastTimer = setTimeout(() => t.style.display = 'none', ms || 3000);
     }
 
     function exportBackup() {
@@ -1162,8 +1164,19 @@ document.addEventListener('DOMContentLoaded', function() {
         a.download = 'MESEM_Yedek_' + new Date().toISOString().slice(0,10) + '.json';
         document.body.appendChild(a); a.click(); a.remove();
         setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        try { localStorage.setItem('mesemLastBackupV1', String(Date.now())); } catch(e) {}
         showToast('Tam yedek (arşiv dahil) indirildi.');
     }
+
+    onInit(() => {
+        try {
+            if (!records || !records.length) return;
+            const last = parseInt(localStorage.getItem('mesemLastBackupV1'), 10);
+            const days = last ? Math.floor((Date.now() - last) / 86400000) : null;
+            if (days === null) showToast('Hatırlatma: Henüz yedek almadınız. Veri kaybı olmaması için Yedek Al düğmesini kullanın.', 7000);
+            else if (days > 7) showToast('Hatırlatma: Son yedek ' + days + ' gün önce alındı. Lütfen Yedek Al ile yedekleyin.', 7000);
+        } catch(e) {}
+    });
 
     function compileRules() {
         compiledRules = [];
@@ -1296,6 +1309,7 @@ document.addEventListener('DOMContentLoaded', function() {
         drawBars('statsAlan', group(alanOf));
         drawBars('statsDal', group(r => String(r.dal || '').trim()));
         drawBars('statsOgretmen', group(r => String(r.ogretmen || '').trim()), r => r.biz ? ` · ${(r.students / r.biz).toFixed(1)} öğr./işl.` : '');
+        drawBars('statsBolge', group(r => String(r.bolge || '').trim()));
     }
     /* --- İSTATİSTİK YAZDIRMA (v5.18) ---
        Tek sayfa: içerik, yazdırma kurallarıyla (sp-mode) gerçek genişlikte ÖLÇÜLÜR; ikili aramayla sayfaya sığan
@@ -1390,6 +1404,8 @@ document.addEventListener('DOMContentLoaded', function() {
         window.addEventListener('afterprint', () => { statsLeavePrintMode(); updateStatsFitInfo(); }, { once: true });
     }
     window.addEventListener('beforeprint', prepareStatsPrint);
+    // v5.19: Liste/Plan yazdırma @page ayarı yazdırma bitince temizlenir
+    window.addEventListener('afterprint', () => { document.getElementById('planPageStyle')?.remove(); });
     onInit(() => {
         $$('btnStatsPrint').addEventListener('click', () => window.print());
         document.querySelector('#view-stats .stats-toolbar').addEventListener('change', updateStatsFitInfo);
