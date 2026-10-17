@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v5.16 – Son güncelleme: 2026-10-15 -->
+<!-- MESEM Portal – Sürüm v5.17 – Son güncelleme: 2026-10-15 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.16</title>
+<title>MESEM Portal v5.17</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -535,7 +535,7 @@ button.chip { font-family: inherit; color: var(--text); }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.16</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.17</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="stats">İstatistik</a>
@@ -790,7 +790,8 @@ button.chip { font-family: inherit; color: var(--text); }
                     <label class="chk"><input type="checkbox" class="sp-card" data-card="cardAlan" checked> Alanlar</label>
                     <label class="chk"><input type="checkbox" class="sp-card" data-card="cardDal" checked> Dallar</label>
                     <label class="chk"><input type="checkbox" class="sp-card" data-card="cardOgretmen" checked> Öğretmenler</label>
-                    <select id="statsPrintLayout"><option value="each">Her grafik ayrı sayfada</option><option value="single">Hepsi tek sayfada</option><option value="text">Grafiksiz (yalnızca sayılar)</option></select>
+                    <select id="statsPrintStyle"><option value="chart">Grafikli</option><option value="text">Grafiksiz (yalnızca sayılar)</option></select>
+                    <select id="statsPrintLayout"><option value="each">Her grafik ayrı sayfada</option><option value="single">Hepsi tek sayfada</option></select>
                 </div>
                 <button type="button" class="btn btn-print" id="btnStatsPrint"><i class="fas fa-print"></i>&nbsp;Yazdır</button>
             </div>
@@ -1309,20 +1310,21 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!$$('view-stats').classList.contains('active')) return;
         renderStats();
         const view = $$('view-stats'), inner = view.querySelector('.list-view-inner');
-        const layout = $$('statsPrintLayout').value;
+        const layout = $$('statsPrintLayout').value, textOnly = $$('statsPrintStyle').value === 'text';
         const chosen = [...document.querySelectorAll('#view-stats .sp-card')];
         chosen.forEach(c => document.getElementById(c.dataset.card).classList.toggle('stats-hide-print', !c.checked));
         const on = chosen.filter(c => c.checked).map(c => document.getElementById(c.dataset.card));
         on.forEach((el, i) => el.classList.toggle('sp-break', layout === 'each' && i < on.length - 1));
         view.classList.remove('stats-print-each', 'stats-print-single', 'stats-print-text');
-        view.classList.add({ each: 'stats-print-each', single: 'stats-print-single', text: 'stats-print-text' }[layout]);
+        view.classList.add(layout === 'each' ? 'stats-print-each' : 'stats-print-single');
+        view.classList.toggle('stats-print-text', textOnly);
         inner.style.zoom = '';
         if (layout === 'single') {
             // Tek sayfa: seçilen satır, kart ve özet sayısına göre tahmini yükseklik (mm) hesaplanır, sayfa yüksekliğine sığacak şekilde küçültülür
             const rows = on.reduce((t, el) => t + el.querySelectorAll('.bar-row').length, 0);
             const kpi = on.some(el => el.id === 'statsKpis') ? 1 : 0;
             const cards = on.filter(el => el.id !== 'statsKpis').length;
-            const needMm = rows * 8 + cards * 16 + kpi * 35 + 22;
+            const needMm = rows * (textOnly ? 5 : 8) + cards * 16 + kpi * 35 + 22;
             inner.style.zoom = Math.min(1, 270 / needMm).toFixed(3);
         }
         window.addEventListener('afterprint', () => {
