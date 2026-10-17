@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v5.10 – Son güncelleme: 2026-10-15 -->
+<!-- MESEM Portal – Sürüm v5.11 – Son güncelleme: 2026-10-15 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.10</title>
+<title>MESEM Portal v5.11</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -397,6 +397,22 @@ button.chip { font-family: inherit; color: var(--text); }
     .bulk-count { margin-right: 0; }
 }
 
+/* ===== v5.11: İstatistik ===== */
+.stats-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px; }
+.bar-chart .bar-row { display: grid; grid-template-columns: 240px 1fr; gap: 8px; align-items: center; padding: 4px 0; border-bottom: 1px solid #f1f5f9; }
+.bar-label { font-size: 12px; font-weight: 600; }
+.bar-sub { display: block; font-size: 11px; font-weight: 400; color: #64748b; }
+.bar-pair { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.bar-line { display: flex; align-items: center; gap: 6px; }
+.bar { display: block; height: 10px; border-radius: 4px; min-width: 2px; }
+.bar-s { background: #3b82f6; }
+.bar-b { background: #10b981; }
+.bar-val { font-size: 11px; color: #475569; white-space: nowrap; }
+@media (max-width: 768px) {
+    .stats-kpis { grid-template-columns: repeat(2, 1fr); }
+    .bar-chart .bar-row { grid-template-columns: 1fr; gap: 4px; }
+}
+
 /* ===== Planlama: QR'lı yazdırma + tek sayfaya otomatik sığdırma (v18'den) ===== */
 .print-wrapper { display: none; font-size: 10pt; font-family: "Segoe UI", Arial, sans-serif; }
 .print-wrapper.measuring { display: block !important; position: absolute; left: -10000px; top: 0; visibility: hidden; }
@@ -464,9 +480,10 @@ button.chip { font-family: inherit; color: var(--text); }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.10</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.11</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
+        <a class="nav-tab" data-tab="stats">İstatistik</a>
         <a class="nav-tab" data-tab="loc">İşletme Konum</a>
         <a class="nav-tab" data-tab="plan">Haftalık Planlama</a>
         <a class="nav-tab" data-tab="rules">Kurallar</a>
@@ -498,6 +515,10 @@ button.chip { font-family: inherit; color: var(--text); }
                     <div class="multi-select" id="ms-sube">
                         <div class="multi-select-header" data-ms="sube"><span>🗓️ Şubeler</span> <i class="fas fa-chevron-down"></i></div>
                         <div class="multi-select-options" id="mso-sube"></div>
+                    </div>
+                    <div class="multi-select" id="ms-alan">
+                        <div class="multi-select-header" data-ms="alan"><span>🧭 Alanlar</span> <i class="fas fa-chevron-down"></i></div>
+                        <div class="multi-select-options" id="mso-alan"></div>
                     </div>
                     <div class="multi-select" id="ms-dal">
                         <div class="multi-select-header" data-ms="dal"><span>🛠️ Dallar</span> <i class="fas fa-chevron-down"></i></div>
@@ -705,6 +726,16 @@ button.chip { font-family: inherit; color: var(--text); }
     </div>
 
     <!-- ================= BÖLGE KURALLARI (v25) ================= -->
+    <div id="view-stats" class="view-section">
+        <div class="list-view-inner">
+            <div class="stats-kpis" id="statsKpis"></div>
+            <div class="card"><h3 class="card-title">Alanlara göre</h3><div id="statsAlan" class="bar-chart"></div></div>
+            <div class="card"><h3 class="card-title">Dallara göre</h3><div id="statsDal" class="bar-chart"></div></div>
+            <div class="card"><h3 class="card-title">Öğretmenlere göre</h3><div id="statsOgretmen" class="bar-chart"></div></div>
+            <p class="help-text" style="font-size:12px;">Bir işletmede birden fazla dal veya öğretmen olabileceğinden işletme sayıları gruplar arasında toplanmaz. Üstteki İşletme kartı tekil toplamı gösterir. Arşivdeki kayıtlar dahil değildir.</p>
+        </div>
+    </div>
+
     <div id="view-rules" class="view-section">
         <div class="rules-container">
             <div class="rules-form">
@@ -892,16 +923,15 @@ document.addEventListener('DOMContentLoaded', function() {
     /* =========================================================
        ORTAK ALTYAPI (v25 temelli): veri modeli + bölge motoru
        ========================================================= */
-    const defaultRules = [{"name": "PARSELLER MAH", "keywords": ["PARSELLER MAH"], "active": true}, {"name": "NAMIK KEMAL", "keywords": ["NAMIK KEMAL"], "active": true}, {"name": "MEHMET AKİF MAH", "keywords": ["MEHMET AKİF MAH", "MEHMET AKİF MAHALLESİ"], "active": true}, {"name": "ÇAKMAK MAH", "keywords": ["ÇAKMAK MAH"], "active": true}, {"name": "NECİP FAZIL MAH", "keywords": ["NECİP FAZIL MAH", "NECİP FAZIL MH", "N.FAZIL MAH"], "active": true}, {"name": "İSTİKLAL MAH", "keywords": ["İSTİKLAL MAH", "İSTİKLAL ÜMRANİYE"], "active": true}, {"name": "DUMLUPINAR MH", "keywords": ["DUMLUPINAR MH", "DUMLUPINAR MAH"], "active": true}, {"name": "ATAKENT", "keywords": ["ATAKENT"], "active": true}, {"name": "CEMİL MERİÇ MAH", "keywords": ["CEMİL MERİÇ MAH"], "active": true}, {"name": "SANCAKTEPE", "keywords": ["SANCAKTEPE", "SARIGAZİ", "MECLİS MAH"], "active": true}, {"name": "MALTEPE", "keywords": ["MALTEPE"], "active": true}, {"name": "ADEM YAVUZ", "keywords": ["ADEM YAVUZ"], "active": true}, {"name": "ÜSKÜDAR", "keywords": ["ÜSKÜDAR"], "active": true}, {"name": "TATLISU", "keywords": ["TATLISU", "TATLI SU"], "active": true}, {"name": "ALTINŞEHİR", "keywords": ["ALTINŞEHİR"], "active": true}, {"name": "HUZUR MAH", "keywords": ["HUZUR MAH"], "active": true}, {"name": "ELMALIKENT", "keywords": ["ELMALIKENT"], "active": true}, {"name": "KADIKÖY", "keywords": ["KADIKÖY", "BOSTANCI"], "active": true}, {"name": "ATAŞEHİR", "keywords": ["ATAŞEHİR", "İÇERENKÖY"], "active": true}, {"name": "ARMAĞANEVLER", "keywords": ["ARMAĞANEVLER"], "active": true}, {"name": "YAVUZTÜRK", "keywords": ["YAVUZTÜRK"], "active": true}, {"name": "İNKILAP", "keywords": ["İNKILAP", "İNKİLAP MAH"], "active": true}, {"name": "ESENKENT", "keywords": ["ESENKENT"], "active": true}, {"name": "TANTAVİ", "keywords": ["TANTAVİ"], "active": true}, {"name": "ŞERİFALİ", "keywords": ["ŞERİFALİ", "ŞERİF ALİ"], "active": true}, {"name": "IHLAMURKUYU", "keywords": ["IHLAMURKUYU"], "active": true}, {"name": "ESENŞEHİR", "keywords": ["ESENŞEHİR", "ESENSEHIR", "EŞENŞEHİR", "ESENİŞEHİR", "E.ŞEHİR"], "active": true}, {"name": "Çakmak Sanayi", "keywords": ["AK SAN", "KÜÇÜK SAN", "SARAY", "DENİZ SAN", "DENİZ SONAY", "YAMANEVLER", "GÜVEN", "GUVEN", "BİRLİK SAN", "ÖMER FAİK ATAKAN CAD", "GÜMRÜKÇÜLER", "FATİH SULTAN MEHMET SAN", "BİRLİK SANAYİ SİTESİ", "F.S.M", "DENİZ SANAYİ SİTESİ", "FSM", "FATİH S.MEHMET", "F.SULTAN MEHMET", "KÜÇÜK SANAYİ SİTESİ", "FATİH SANAYİ SİTESİ", "AK SANAYİ", "ÖZENTAŞ", "FATİHSULTAN MEH SAN"], "active": true}, {"name": "FATİH SULTAN MEHMET MAH", "keywords": ["FATİH SULTAN MEHMET MAH"], "active": true}, {"name": "Ümraniye Belediyesi", "keywords": ["ÜMRANİYE BELEDİYE", "BELEDİYE BİNASI"], "active": true}, {"name": "Kadosan", "keywords": ["KADOSAN", "KODOSAN", "KDS", "KODASAN", "KADOSAN OTO SAN", "KADOSAN SANAYİ", "KADOSAN OTO SAN Sİ"], "active": true}, {"name": "DES Sanayi Sitesi", "keywords": ["DES"], "active": true}, {"name": "İMES Sanayi Sitesi", "keywords": ["İMES", "IMES"], "active": true}, {"name": "Tepeüstü", "keywords": ["TEPEÜSTÜ", "TEPEUSTU"], "active": true}, {"name": "Alemdağ Bölgesi", "keywords": ["ALEMDAĞ", "ALEMDAG"], "active": true}, {"name": "Dudullu OSB", "keywords": ["OSB", "DUDULLU", "DUDULU", "YUKARIDUDULLU", "ORGANİZE SAN"], "active": true}, {"name": "MİMAR SİNAN MAH", "keywords": ["MİMAR SİNAN MAH"], "active": true}, {"name": "TAŞDELEN MAH", "keywords": ["TAŞDELEN MAH"], "active": true}, {"name": "NİŞANTEPE MAH", "keywords": ["NİŞANTEPE MAH"], "active": true}, {"name": "KAZIM KARABEKİR MAH", "keywords": ["KAZIM KARABEKİR MAH"], "active": true}, {"name": "KİRAZLIDERE MAH", "keywords": ["KİRAZLIDERE MAH"], "active": true}, {"name": "AYDINLAR MAH", "keywords": ["AYDINLAR MAH"], "active": true}, {"name": "FERHATPAŞA MAH", "keywords": ["FERHATPAŞA MAH"], "active": true}, {"name": "EMEK MAH", "keywords": ["EMEK MAH"], "active": true}, {"name": "SİTE MAH", "keywords": ["SİTE MAH"], "active": true}, {"name": "ATATÜRK MAH", "keywords": ["ATATÜRK MAH"], "active": true}];
-    defaultRules.forEach(r => { if (['DES Sanayi Sitesi','İMES Sanayi Sitesi','Dudullu OSB'].includes(r.name)) r.cluster = 'Dudullu Sanayi'; });
+    const defaultRules = []; // Kurallar yalnızca JSON dosyasından yüklenir (Kurallar > Yükle)
 
     let records = [];
     let regionRules = [];
     let compiledRules = [];
     let sortCol = 'internalId';
     let sortDesc = false;
-    let msData = { ogretmen: [], bolge: [], sinif: [], sube: [], dal: [] };
-    let msSelected = { ogretmen: [], bolge: [], sinif: [], sube: [], dal: [] };
+    let msData = { ogretmen: [], bolge: [], sinif: [], sube: [], dal: [], alan: [] };
+    let msSelected = { ogretmen: [], bolge: [], sinif: [], sube: [], dal: [], alan: [] };
     let renderTimer = null, toastTimer = null;
     const MAIN_PAGE = 100;
     let mainLimit = MAIN_PAGE;   // Ana listede çizilecek üst sınır (filtre/sıralama tüm kayıtlarda çalışır)
@@ -914,7 +944,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const escapeHtml = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     const escRec = r => { const o={}; for(const k in r){ o[k] = typeof r[k]==='string' ? escapeHtml(r[k]) : r[k]; } return o; };
     const normTR = s => String(s||'').toLocaleUpperCase('tr-TR').replace(/[ÇĞİÖŞÜçğıöşüi]/g, m => TR_ASCII[m]);
-    const bizKey = v => normTR(String(v||'').trim()).replace(/\s+/g,' '); // işletme tekilliği: Liste ve Plan aynı anahtarı kullanır
+    const bizKey = v => normTR(String(v||'').trim()).replace(/\s+/g,' ');
+    const ALAN_LISTE = [["ELEKTRİK- ELEKTRONİK TEKNOLOJİSİ", ["Bobinaj", "Büro Makineleri Teknik Servisi", "Elektrik Tesisatları ve Pano Montörlüğü", "Elektrikli Ev Aletleri Teknik Servisi", "Asansör Sistemleri", "Endüstriyel Bakım Onarım", "Görüntü ve Ses Sistemleri", "Güvenlik Sistemleri", "Haberleşme Sistemleri", "Yüksek Gerilim Sistemleri"]], ["MAKİNE TEKNOLOJİSİ", ["Anahtarcılık ve Çilingirlik", "Bilgisayar Destekli Endüstriyel Modelleme", "Bilgisayar Destekli Makine Ressamlığı", "Bilgisayarlı Makine İmalatı", "Değirmencilik", "Endüstriyel Kalıp", "Makine Bakım Onarım", "Mermer İşleme", "Saat Tamirciliği"]], ["METAL TEKNOLOJİSİ", ["Avizecilik", "Çelik Konstrüksiyon", "Isıl İşlem", "Karosercilik", "Kaynakçılık", "Metal Doğrama", "Metal Levha İşlemeciliği", "Metal Yüzey Boyama", "Sac İşleri", "Endüstriyel Reklam Tabelacılığı"]], ["MOTORLU ARAÇLAR TEKNOLOJİSİ", ["Dizel Motorları Yakıt Pompası ve Enjektör Ayarcılığı", "İş Makineleri", "Motorlu Araçlar LPG Sistemleri Bakım ve Onarımcılığı", "Motosiklet Tamirciliği", "Otomotiv Boya", "Otomotiv Elektrikçiliği", "Otomotiv Elektromekanik", "Otomotiv Gövde", "Otomotiv Mekanikerliği", "Otomotiv Motor Yenileştirmeciliği", "Ön Düzen Ayarcılığı ve Lastikçilik"]], ["YİYECEK İÇECEK HİZMETLERİ", ["Aşçılık", "Fırıncılık", "Kantin İşletmeciliği", "Kasaplık", "Pasta ve Tatlı Yapımı", "Servis"]], ["GÜZELLİK VE SAÇ BAKIM HİZMETLERİ", ["Cilt Bakımı ve Makyaj", "Erkek Kuaförü", "Kadın Kuaförü"]]];
+        const alanKey = v => normTR(String(v || '')).replace(/[^A-Z0-9]+/g, ' ').trim();
+        const DAL_TO_ALAN = new Map(); ALAN_LISTE.forEach(([alan, dals]) => dals.forEach(d => DAL_TO_ALAN.set(alanKey(d), alan)));
+        const alanOf = r => DAL_TO_ALAN.get(alanKey(r.dal)) || 'Tanımsız';
+ // işletme tekilliği: Liste ve Plan aynı anahtarı kullanır
     const stuKey = r => String(r.ogrId || r.ogrNo || r.internalId); // tekil öğrenci
     const escapeRegExp = s => s.replace(/[.*+?^${}()|[\]\\\/-]/g, '\\$&');
 
@@ -1031,7 +1066,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (confirm("TÜM SİSTEMİ SIFIRLAMAK ÜZERESİNİZ!\n\nTüm kayıtlar, adresler, notlar ve kurallar kalıcı olarak silinecek. Emin misiniz?")) {
             exportBackup();
             ['mesemRecordsBirlesikV1','mesemRulesBirlesikV1','mesemHolidaysBirlesikV1','mesemImeBirlesikV1','mesemImeBirlesikV2','mesemRecordsV23','mesemRulesV23', BULK_UNDO_KEY].forEach(k => localStorage.removeItem(k));
-            msSelected = { ogretmen: [], bolge: [], sinif: [], sube: [], dal: [] };
+            msSelected = { ogretmen: [], bolge: [], sinif: [], sube: [], dal: [], alan: [] };
             document.getElementById('searchInput').value = '';
             document.getElementById('archiveSearchInput').value = '';
             document.getElementById('ruleSearchInput').value = '';
@@ -1050,6 +1085,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (link) link.classList.add('active');
         if (tabId === 'main') renderTable('main');
         if (tabId === 'archive') renderTable('archive');
+        if (tabId === 'stats') renderStats();
         if (tabId === 'plan') populatePlanTeachers();
         if (tabId === 'loc') renderLoc();
     }
@@ -1111,11 +1147,12 @@ document.addEventListener('DOMContentLoaded', function() {
     /* --- MULTI-SELECT (Şube filtresi eklendi) --- */
     function updateFilters() {
         msData.ogretmen = [...new Set(records.filter(r => !r.isArchived && r.ogretmen).map(r => r.ogretmen))].sort(collator.compare);
-        msData.bolge = [...new Set(records.filter(r => !r.isArchived && r.bolge).map(r => r.bolge))].sort(collator.compare);
+        msData.bolge = [...new Set(records.filter(r => !r.isArchived && r.bolge).map(r => r.bolge))].sort((a, b) => (a === 'Belirtilmemiş / Diğer') ? -1 : (b === 'Belirtilmemiş / Diğer') ? 1 : collator.compare(a, b));
         msData.sinif = [...new Set(records.filter(r => !r.isArchived && r.sinif).map(r => r.sinif))].sort(collator.compare);
         msData.sube = [...new Set(records.filter(r => !r.isArchived && r.sube).map(r => r.sube))].sort(collator.compare);
         msData.dal = [...new Set(records.filter(r => !r.isArchived && r.dal).map(r => r.dal))].sort(collator.compare);
-        buildMsDOM('ogretmen', 'Öğretmenler'); buildMsDOM('bolge', 'Bölgeler'); buildMsDOM('sinif', 'Sınıflar'); buildMsDOM('sube', 'Şubeler'); buildMsDOM('dal', 'Dallar');
+        msData.alan = [...new Set(records.filter(r => !r.isArchived).map(alanOf))].sort(collator.compare);
+        buildMsDOM('ogretmen', 'Öğretmenler'); buildMsDOM('bolge', 'Bölgeler'); buildMsDOM('sinif', 'Sınıflar'); buildMsDOM('sube', 'Şubeler'); buildMsDOM('alan', 'Alanlar'); buildMsDOM('dal', 'Dallar');
     }
     function buildMsDOM(type, titleText) {
         let container = document.getElementById('mso-' + type);
@@ -1137,7 +1174,7 @@ document.addEventListener('DOMContentLoaded', function() {
             header.innerHTML = `<span>${titleText} (${msSelected[type].length})</span> <i class="fas fa-chevron-down"></i>`;
             header.style.borderColor = "var(--primary)";
         } else {
-            let emoji = type=='ogretmen'?'👨‍🏫':(type=='bolge'?'📍':(type=='sinif'?'🏫':(type=='dal'?'🛠️':'🗓️')));
+            let emoji = type=='ogretmen'?'👨‍🏫':(type=='bolge'?'📍':(type=='sinif'?'🏫':(type=='alan'?'🧭':(type=='dal'?'🛠️':'🗓️'))));
             header.innerHTML = `<span>${emoji} ${titleText}</span> <i class="fas fa-chevron-down"></i>`;
             header.style.borderColor = "var(--border)";
         }
@@ -1161,6 +1198,34 @@ document.addEventListener('DOMContentLoaded', function() {
             else { msSelected[type] = msSelected[type].filter(v => v !== val); }
         }
         updateMsHeader(type, titleText); triggerRender();
+    }
+    function drawBars(id, rows, sideText) {
+        const el = document.getElementById(id);
+        if (!rows.length) { el.innerHTML = '<p style="opacity:.6;font-size:13px;">Veri yok.</p>'; return; }
+        const max = Math.max(1, ...rows.map(r => Math.max(r.students, r.biz)));
+        const pct = v => Math.round(v / max * 100);
+        el.innerHTML = rows.map(r => `<div class="bar-row">
+            <div class="bar-label" title="${escapeHtml(r.k)}">${escapeHtml(r.k)}${sideText ? `<span class="bar-sub">${sideText(r)}</span>` : ''}</div>
+            <div class="bar-pair">
+                <div class="bar-line"><span class="bar bar-s" style="width:${pct(r.students)}%"></span><span class="bar-val">${r.students} öğr.</span></div>
+                <div class="bar-line"><span class="bar bar-b" style="width:${pct(r.biz)}%"></span><span class="bar-val">${r.biz} işl.</span></div>
+            </div></div>`).join('');
+    }
+    function renderStats() {
+        const active = records.filter(r => !r.isArchived);
+        const biz = new Set(active.map(r => bizKey(r.isletme)).filter(Boolean));
+        const konumlu = new Set(active.filter(r => r.koordinat && r.isletme).map(r => bizKey(r.isletme)));
+        const bolgeSay = new Set(active.map(r => r.bolge).filter(Boolean)).size;
+        const kpi = [['Öğrenci', active.length], ['İşletme', biz.size], ['Konumlu işletme', biz.size ? Math.round(konumlu.size / biz.size * 100) + '%' : '-'], ['Bölge', bolgeSay]];
+        $$('statsKpis').innerHTML = kpi.map(([l, v]) => `<div class="stat-box"><span class="num">${v}</span><span class="lbl">${l}</span></div>`).join('');
+        const group = keyFn => {
+            const m = new Map();
+            active.forEach(r => { const k = keyFn(r); if (!k) return; let g = m.get(k); if (!g) { g = { students: 0, biz: new Set() }; m.set(k, g); } g.students++; if (r.isletme) g.biz.add(bizKey(r.isletme)); });
+            return [...m.entries()].map(([k, g]) => ({ k, students: g.students, biz: g.biz.size })).sort((a, b) => b.students - a.students || collator.compare(a.k, b.k));
+        };
+        drawBars('statsAlan', group(alanOf));
+        drawBars('statsDal', group(r => String(r.dal || '').trim()));
+        drawBars('statsOgretmen', group(r => String(r.ogretmen || '').trim()), r => r.biz ? ` · ${(r.students / r.biz).toFixed(1)} öğr./işl.` : '');
     }
     function triggerRender() { mainLimit = MAIN_PAGE; clearTimeout(renderTimer); renderTimer = setTimeout(() => renderTable('main'), 100); }
 
@@ -1628,6 +1693,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (msSelected.bolge.length && !msSelected.bolge.includes(r.bolge)) return false;
             if (msSelected.sinif.length && !msSelected.sinif.includes(r.sinif)) return false;
             if (msSelected.sube.length && !msSelected.sube.includes(r.sube)) return false;
+            if (msSelected.alan.length && !msSelected.alan.includes(alanOf(r))) return false;
             if (msSelected.dal.length && !msSelected.dal.includes(r.dal)) return false;
         }
         if (sInput) return `${r.internalId} ${r.ogrNo} ${r.adSoyad} ${r.ogretmen} ${r.isletme} ${r.bolge} ${r.adres} ${r.dal} ${r.sube} ${r.notlar} ${r.ogrTel} ${r.isyeriTel} ${r.ustaOgretici}`.toLocaleLowerCase('tr-TR').includes(sInput);
