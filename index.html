@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v5.15 – Son güncelleme: 2026-10-15 -->
+<!-- MESEM Portal – Sürüm v5.16 – Son güncelleme: 2026-10-15 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.15</title>
+<title>MESEM Portal v5.16</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -413,24 +413,46 @@ button.chip { font-family: inherit; color: var(--text); }
     .bar-chart .bar-row { grid-template-columns: 1fr; gap: 4px; }
 }
 
-/* ===== v5.15: İstatistik yazdırma düzeni ===== */
+/* ===== v5.16: İstatistik yazdırma (yazı, sığdırma, grafiksiz) ===== */
 .stats-print-opts { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 13px; }
 .stats-print-opts select { padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; }
+/* Yazdırma önizleme ölçümü (ekranda, yazdırma genişliğinde) */
+#view-stats.stats-sim { display: block; }
+#view-stats.stats-sim .list-view-inner { width: 190mm; display: block; }
+#view-stats.stats-sim .noprint, #view-stats.stats-sim .help-text, #view-stats.stats-sim .stats-hide-print { display: none !important; }
+#view-stats.stats-sim .stats-print-head { display: block; }
+#view-stats.stats-sim .card { margin-bottom: 4mm; }
 @media print {
-    .stats-hide-print { display: none !important; }
-    /* Her grafik ayrı sayfa: tam A4 dikey alanı */
-    #view-stats.stats-print-each .card.stat-page { width: 190mm !important; height: 270mm !important; display: flex !important; flex-direction: column; break-after: page; page-break-after: always; margin: 0 !important; }
-    #view-stats.stats-print-each #statsKpis.stat-page { width: 190mm !important; display: grid !important; grid-template-columns: repeat(4, 1fr); break-after: page; margin: 0 0 8mm 0 !important; }
-    #view-stats.stats-print-each .stat-page:last-of-type { break-after: auto; }
-    /* Hepsi tek sayfa: seçilenler sayfayı eşit paylaşır */
-    #view-stats.stats-print-single .card.stat-page { flex: 1 1 0; min-height: 0; display: flex !important; flex-direction: column; margin: 0 0 4mm 0 !important; overflow: hidden; }
-    #view-stats.stats-print-single .list-view-inner { display: flex !important; flex-direction: column; height: 270mm !important; overflow: hidden !important; }
-    #view-stats.stats-print-single .stats-print-head { flex: 0 0 auto; }
-    #view-stats .stat-page .bar-chart { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
-    #view-stats .stat-page .bar-row { flex: 1 1 0; min-height: 0; overflow: hidden; }
-    #view-stats .help-text { display: none !important; }
-    #view-stats .stats-print-head small { display: block; font-size: 11px; font-weight: 400; margin-top: 2px; }
+    .stats-hide-print, #view-stats .help-text, #view-stats .noprint { display: none !important; }
+    #view-stats .stats-print-head { display: block; font-size: 15pt; margin: 0 0 4mm; }
+    #view-stats .stats-print-head small { display: block; font-size: 9pt; font-weight: 400; margin-top: 2mm; }
+    #view-stats .stat-box .num { font-size: 16pt; }
+    #view-stats .stat-box .lbl { font-size: 9pt; }
+    #view-stats .card { break-inside: auto; box-shadow: none; border: 1px solid #999; margin-bottom: 4mm; padding: 4mm; }
+    #view-stats .card-title { font-size: 13pt; margin-bottom: 3mm; }
+    #view-stats .bar-chart .bar-row { grid-template-columns: 42% 1fr; padding: 2mm 0; break-inside: avoid; border-bottom: 1px solid #ccc; }
+    #view-stats .bar-label { font-size: 10.5pt; font-weight: 700; color: #000; }
+    #view-stats .bar-sub { font-size: 9pt; color: #333; }
+    #view-stats .bar-val { font-size: 9.5pt; color: #000; }
+    #view-stats .bar-line { gap: 3mm; }
+    #view-stats .bar { height: 3mm; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    #view-stats .bar-s { background: #3b82f6 !important; } #view-stats .bar-b { background: #10b981 !important; }
+    #view-stats.stats-print-each .sp-break { break-after: page; page-break-after: always; }
+    /* Grafiksiz: çubuklar gizli, sayılar sütunlu */
+    #view-stats.stats-print-single .bar-chart { column-count: 2; column-gap: 8mm; }
+    #view-stats.stats-print-single .bar-chart .bar-row { break-inside: avoid; }
+    #view-stats.stats-print-text .bar { display: none !important; }
+    #view-stats.stats-print-text .bar-pair { flex-direction: row; gap: 6mm; justify-content: flex-end; }
+    #view-stats.stats-print-text .bar-line { gap: 0; }
+    #view-stats.stats-print-text .bar-chart .bar-row { grid-template-columns: 1fr auto; }
+    #view-stats.stats-print-text .bar-chart .bar-row { padding: 1.6mm 0; }
+    #view-stats.stats-print-text .bar-chart .bar-row:nth-child(odd) { background: #f6f7f9 !important; }
 }
+/* Ekranda sayfa boyutu ölçümü için aynı yazı boyutları */
+#view-stats.stats-sim .bar-label { font-size: 10.5pt; font-weight: 700; }
+#view-stats.stats-sim .bar-val { font-size: 9.5pt; }
+#view-stats.stats-sim .bar-chart .bar-row { grid-template-columns: 42% 1fr; }
+#view-stats.stats-sim .card-title { font-size: 13pt; }
 
 /* ===== v5.14: İstatistik yazdırma ===== */
 .stats-toolbar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
@@ -513,7 +535,7 @@ button.chip { font-family: inherit; color: var(--text); }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.15</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.16</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="stats">İstatistik</a>
@@ -768,7 +790,7 @@ button.chip { font-family: inherit; color: var(--text); }
                     <label class="chk"><input type="checkbox" class="sp-card" data-card="cardAlan" checked> Alanlar</label>
                     <label class="chk"><input type="checkbox" class="sp-card" data-card="cardDal" checked> Dallar</label>
                     <label class="chk"><input type="checkbox" class="sp-card" data-card="cardOgretmen" checked> Öğretmenler</label>
-                    <select id="statsPrintLayout"><option value="each">Her grafik ayrı sayfada (tam sayfa)</option><option value="single">Hepsi tek sayfada</option></select>
+                    <select id="statsPrintLayout"><option value="each">Her grafik ayrı sayfada</option><option value="single">Hepsi tek sayfada</option><option value="text">Grafiksiz (yalnızca sayılar)</option></select>
                 </div>
                 <button type="button" class="btn btn-print" id="btnStatsPrint"><i class="fas fa-print"></i>&nbsp;Yazdır</button>
             </div>
@@ -1286,16 +1308,28 @@ document.addEventListener('DOMContentLoaded', function() {
     function prepareStatsPrint() {
         if (!$$('view-stats').classList.contains('active')) return;
         renderStats();
-        const view = $$('view-stats');
-        const chosen = [...document.querySelectorAll('.sp-card')].filter(c => c.checked).map(c => c.dataset.card);
-        document.querySelectorAll('#view-stats .sp-card').forEach(c => { document.getElementById(c.dataset.card).classList.toggle('stats-hide-print', !c.checked); });
+        const view = $$('view-stats'), inner = view.querySelector('.list-view-inner');
         const layout = $$('statsPrintLayout').value;
-        view.classList.toggle('stats-print-each', layout === 'each');
-        view.classList.toggle('stats-print-single', layout === 'single');
-        chosen.forEach(id => document.getElementById(id).classList.add('stat-page'));
-        const wrap = $$('statsKpis').parentElement;
-        const cleanup = () => { document.querySelectorAll('#view-stats .stat-page, #view-stats .stats-hide-print').forEach(el => el.classList.remove('stat-page', 'stats-hide-print')); view.classList.remove('stats-print-each', 'stats-print-single'); };
-        window.addEventListener('afterprint', cleanup, { once: true });
+        const chosen = [...document.querySelectorAll('#view-stats .sp-card')];
+        chosen.forEach(c => document.getElementById(c.dataset.card).classList.toggle('stats-hide-print', !c.checked));
+        const on = chosen.filter(c => c.checked).map(c => document.getElementById(c.dataset.card));
+        on.forEach((el, i) => el.classList.toggle('sp-break', layout === 'each' && i < on.length - 1));
+        view.classList.remove('stats-print-each', 'stats-print-single', 'stats-print-text');
+        view.classList.add({ each: 'stats-print-each', single: 'stats-print-single', text: 'stats-print-text' }[layout]);
+        inner.style.zoom = '';
+        if (layout === 'single') {
+            // Tek sayfa: seçilen satır, kart ve özet sayısına göre tahmini yükseklik (mm) hesaplanır, sayfa yüksekliğine sığacak şekilde küçültülür
+            const rows = on.reduce((t, el) => t + el.querySelectorAll('.bar-row').length, 0);
+            const kpi = on.some(el => el.id === 'statsKpis') ? 1 : 0;
+            const cards = on.filter(el => el.id !== 'statsKpis').length;
+            const needMm = rows * 8 + cards * 16 + kpi * 35 + 22;
+            inner.style.zoom = Math.min(1, 270 / needMm).toFixed(3);
+        }
+        window.addEventListener('afterprint', () => {
+            document.querySelectorAll('#view-stats .stats-hide-print, #view-stats .sp-break').forEach(el => el.classList.remove('stats-hide-print', 'sp-break'));
+            view.classList.remove('stats-print-each', 'stats-print-single', 'stats-print-text');
+            inner.style.zoom = '';
+        }, { once: true });
     }
     window.addEventListener('beforeprint', prepareStatsPrint);
     onInit(() => { $$('btnStatsPrint').addEventListener('click', () => window.print()); });
