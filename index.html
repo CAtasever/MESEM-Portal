@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v5.17 – Son güncelleme: 2026-10-15 -->
+<!-- MESEM Portal – Sürüm v5.18 – Son güncelleme: 2026-10-17 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.17</title>
+<title>MESEM Portal v5.18</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -413,59 +413,49 @@ button.chip { font-family: inherit; color: var(--text); }
     .bar-chart .bar-row { grid-template-columns: 1fr; gap: 4px; }
 }
 
-/* ===== v5.16: İstatistik yazdırma (yazı, sığdırma, grafiksiz) ===== */
-.stats-print-opts { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 13px; }
-.stats-print-opts select { padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; }
-/* Yazdırma önizleme ölçümü (ekranda, yazdırma genişliğinde) */
-#view-stats.stats-sim { display: block; }
-#view-stats.stats-sim .list-view-inner { width: 190mm; display: block; }
-#view-stats.stats-sim .noprint, #view-stats.stats-sim .help-text, #view-stats.stats-sim .stats-hide-print { display: none !important; }
-#view-stats.stats-sim .stats-print-head { display: block; }
-#view-stats.stats-sim .card { margin-bottom: 4mm; }
-@media print {
-    .stats-hide-print, #view-stats .help-text, #view-stats .noprint { display: none !important; }
-    #view-stats .stats-print-head { display: block; font-size: 15pt; margin: 0 0 4mm; }
-    #view-stats .stats-print-head small { display: block; font-size: 9pt; font-weight: 400; margin-top: 2mm; }
-    #view-stats .stat-box .num { font-size: 16pt; }
-    #view-stats .stat-box .lbl { font-size: 9pt; }
-    #view-stats .card { break-inside: auto; box-shadow: none; border: 1px solid #999; margin-bottom: 4mm; padding: 4mm; }
-    #view-stats .card-title { font-size: 13pt; margin-bottom: 3mm; }
-    #view-stats .bar-chart .bar-row { grid-template-columns: 42% 1fr; padding: 2mm 0; break-inside: avoid; border-bottom: 1px solid #ccc; }
-    #view-stats .bar-label { font-size: 10.5pt; font-weight: 700; color: #000; }
-    #view-stats .bar-sub { font-size: 9pt; color: #333; }
-    #view-stats .bar-val { font-size: 9.5pt; color: #000; }
-    #view-stats .bar-line { gap: 3mm; }
-    #view-stats .bar { height: 3mm; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    #view-stats .bar-s { background: #3b82f6 !important; } #view-stats .bar-b { background: #10b981 !important; }
-    #view-stats.stats-print-each .sp-break { break-after: page; page-break-after: always; }
-    /* Grafiksiz: çubuklar gizli, sayılar sütunlu */
-    #view-stats.stats-print-single .bar-chart { column-count: 2; column-gap: 8mm; }
-    #view-stats.stats-print-single .bar-chart .bar-row { break-inside: avoid; }
-    #view-stats.stats-print-text .bar { display: none !important; }
-    #view-stats.stats-print-text .bar-pair { flex-direction: row; gap: 6mm; justify-content: flex-end; }
-    #view-stats.stats-print-text .bar-line { gap: 0; }
-    #view-stats.stats-print-text .bar-chart .bar-row { grid-template-columns: 1fr auto; }
-    #view-stats.stats-print-text .bar-chart .bar-row { padding: 1.6mm 0; }
-    #view-stats.stats-print-text .bar-chart .bar-row:nth-child(odd) { background: #f6f7f9 !important; }
-}
-/* Ekranda sayfa boyutu ölçümü için aynı yazı boyutları */
-#view-stats.stats-sim .bar-label { font-size: 10.5pt; font-weight: 700; }
-#view-stats.stats-sim .bar-val { font-size: 9.5pt; }
-#view-stats.stats-sim .bar-chart .bar-row { grid-template-columns: 42% 1fr; }
-#view-stats.stats-sim .card-title { font-size: 13pt; }
-
-/* ===== v5.14: İstatistik yazdırma ===== */
-.stats-toolbar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+/* ===== v5.18: İstatistik yazdırma =====
+   Yazdırma görünümü (.sp-mode) hem ekranda ölçüm sırasında hem yazdırmada AYNI kurallarla uygulanır;
+   böylece "tek sayfa" ölçümü gerçek çıktıyla birebir örtüşür (pencere genişliği/mobil medya kuralları etkilemez). */
+.stats-toolbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
 .stats-print-head { display: none; font-size: 16px; margin: 0 0 8px; }
+.stats-print-opts { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 13px; flex: 1 1 auto; }
+.stats-print-opts select { padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; }
+.stats-fit-info { flex-basis: 100%; font-size: 12px; color: #64748b; min-height: 16px; }
+.stats-fit-info.warn { color: #b45309; font-weight: 600; }
+.bar, .bar-s, .bar-b, .stat-box .num { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+#view-stats.sp-mode { display: block !important; padding: 0 !important; background: #fff; }
+#view-stats.sp-mode .list-view-inner { display: block !important; height: auto !important; overflow: visible !important; padding: 0 !important; transform-origin: 0 0; color: #000; }
+#view-stats.sp-mode .stats-toolbar, #view-stats.sp-mode .help-text, #view-stats.sp-mode .noprint, #view-stats.sp-mode .stats-hide-print { display: none !important; }
+#view-stats.sp-mode .stats-print-head { display: block; font-size: 15pt; margin: 0 0 4mm; color: #000; }
+#view-stats.sp-mode .stats-print-head small { display: block; font-size: 9pt; font-weight: 400; margin-top: 2mm; color: #333; }
+#view-stats.sp-mode .stats-kpis { grid-template-columns: repeat(4, 1fr); gap: 3mm; margin-bottom: 4mm; }
+#view-stats.sp-mode .stat-box { padding: 2.5mm 3mm; border: 1px solid #999; background: #fff; break-inside: avoid; }
+#view-stats.sp-mode .stat-box .num { font-size: 16pt; margin-bottom: 1mm; }
+#view-stats.sp-mode .stat-box .lbl { font-size: 9pt; opacity: 1; color: #000; }
+#view-stats.sp-mode .card { box-shadow: none; border: 1px solid #999; border-radius: 2mm; margin-bottom: 4mm; padding: 4mm; background: #fff; }
+#view-stats.sp-mode .card-title { font-size: 13pt; margin: 0 0 3mm; color: #000; break-after: avoid; }
+#view-stats.sp-mode .bar-chart { column-gap: 8mm; }
+#view-stats.sp-mode .bar-chart .bar-row { grid-template-columns: 42% 1fr; gap: 3mm; padding: 1.8mm 0; border-bottom: 1px solid #ccc; break-inside: avoid; }
+#view-stats.sp-mode .bar-label { font-size: 10.5pt; font-weight: 700; color: #000; }
+#view-stats.sp-mode .bar-sub { font-size: 9pt; color: #333; }
+#view-stats.sp-mode .bar-val { font-size: 9.5pt; color: #000; }
+#view-stats.sp-mode .bar-line { gap: 3mm; }
+#view-stats.sp-mode .bar { height: 3mm; }
+#view-stats.sp-mode .bar-s { background: #3b82f6 !important; }
+#view-stats.sp-mode .bar-b { background: #10b981 !important; }
+/* Tek sayfa: kartlar bölünmez (zaten ölçeklenerek tek sayfaya sığdırılır) */
+#view-stats.sp-single .card { break-inside: avoid; }
+/* Her grafik ayrı sayfada: kart uzunsa sayfalara bölünebilir, satırlar bölünmez */
+#view-stats.sp-each .card { break-inside: auto; }
+/* Grafiksiz: çubuklar gizli, yalnızca sayılar */
+#view-stats.sp-text .bar { display: none !important; }
+#view-stats.sp-text .bar-pair { flex-direction: row; gap: 6mm; justify-content: flex-end; }
+#view-stats.sp-text .bar-line { gap: 0; }
+#view-stats.sp-text .bar-chart .bar-row { grid-template-columns: 1fr auto; padding: 1.4mm 0; }
+#view-stats.sp-text .bar-chart .bar-row:nth-child(odd) { background: #f6f7f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 @media print {
-    .stats-print-head { display: block; }
-    #view-stats .stats-toolbar, #view-stats .noprint { display: none !important; }
-    #view-stats .card, #view-stats .stat-box, .bar-row, .stats-kpis { break-inside: avoid; page-break-inside: avoid; }
-    #view-stats .card { box-shadow: none; border: 1px solid #999; margin-bottom: 8px; }
-    .bar, .bar-s, .bar-b, .stat-box .num { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    .bar-s { background: #3b82f6 !important; } .bar-b { background: #10b981 !important; }
-    .bar-row { border-bottom: 1px solid #ddd; }
-    .help-text { color: #333; }
+    #view-stats.sp-each .sp-break { break-after: page; page-break-after: always; }
 }
 
 /* ===== Planlama: QR'lı yazdırma + tek sayfaya otomatik sığdırma (v18'den) ===== */
@@ -535,7 +525,7 @@ button.chip { font-family: inherit; color: var(--text); }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.17</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.18</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="stats">İstatistik</a>
@@ -792,6 +782,8 @@ button.chip { font-family: inherit; color: var(--text); }
                     <label class="chk"><input type="checkbox" class="sp-card" data-card="cardOgretmen" checked> Öğretmenler</label>
                     <select id="statsPrintStyle"><option value="chart">Grafikli</option><option value="text">Grafiksiz (yalnızca sayılar)</option></select>
                     <select id="statsPrintLayout"><option value="each">Her grafik ayrı sayfada</option><option value="single">Hepsi tek sayfada</option></select>
+                    <select id="statsPrintOrient" title="Sayfa yönü"><option value="auto">Yön: Otomatik</option><option value="portrait">Dikey</option><option value="landscape">Yatay</option></select>
+                    <span class="stats-fit-info" id="statsFitInfo"></span>
                 </div>
                 <button type="button" class="btn btn-print" id="btnStatsPrint"><i class="fas fa-print"></i>&nbsp;Yazdır</button>
             </div>
@@ -1153,7 +1145,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (link) link.classList.add('active');
         if (tabId === 'main') renderTable('main');
         if (tabId === 'archive') renderTable('archive');
-        if (tabId === 'stats') renderStats();
+        if (tabId === 'stats') { renderStats(); updateStatsFitInfo(); }
         if (tabId === 'plan') populatePlanTeachers();
         if (tabId === 'loc') renderLoc();
     }
@@ -1305,36 +1297,103 @@ document.addEventListener('DOMContentLoaded', function() {
         drawBars('statsDal', group(r => String(r.dal || '').trim()));
         drawBars('statsOgretmen', group(r => String(r.ogretmen || '').trim()), r => r.biz ? ` · ${(r.students / r.biz).toFixed(1)} öğr./işl.` : '');
     }
-    // Yazdırma hazırlığı: seçilen kartlar, sayfa düzeni (her grafik ayrı sayfa / tek sayfa)
-    function prepareStatsPrint() {
-        if (!$$('view-stats').classList.contains('active')) return;
-        renderStats();
+    /* --- İSTATİSTİK YAZDIRMA (v5.18) ---
+       Tek sayfa: içerik, yazdırma kurallarıyla (sp-mode) gerçek genişlikte ÖLÇÜLÜR; ikili aramayla sayfaya sığan
+       en büyük ölçek bulunur. Yön "Otomatik" ise yatay/dikey denenir, yazının daha büyük kaldığı yön seçilir.
+       @page boyutu da buna göre ayarlandığı için yazdırma penceresindeki varsayılan yön fark etmez. */
+    const SP_MARGIN = 8, SP_MIN_Z = 0.25;
+    let spLastInfo = null;
+    function statsLeavePrintMode() {
         const view = $$('view-stats'), inner = view.querySelector('.list-view-inner');
-        const layout = $$('statsPrintLayout').value, textOnly = $$('statsPrintStyle').value === 'text';
+        document.querySelectorAll('#view-stats .stats-hide-print, #view-stats .sp-break').forEach(el => el.classList.remove('stats-hide-print', 'sp-break'));
+        view.classList.remove('sp-mode', 'sp-each', 'sp-single', 'sp-text');
+        view.style.removeProperty('height'); view.style.removeProperty('overflow');
+        inner.style.width = ''; inner.style.transform = '';
+        view.querySelectorAll('.bar-chart').forEach(el => { el.style.columnCount = ''; });
+        const ps = document.getElementById('statsPageStyle'); if (ps) ps.remove();
+    }
+    function statsEnterPrintMode() {
+        const view = $$('view-stats'), inner = view.querySelector('.list-view-inner');
+        const single = $$('statsPrintLayout').value === 'single', textOnly = $$('statsPrintStyle').value === 'text';
+        const orient = $$('statsPrintOrient').value;
         const chosen = [...document.querySelectorAll('#view-stats .sp-card')];
         chosen.forEach(c => document.getElementById(c.dataset.card).classList.toggle('stats-hide-print', !c.checked));
         const on = chosen.filter(c => c.checked).map(c => document.getElementById(c.dataset.card));
-        on.forEach((el, i) => el.classList.toggle('sp-break', layout === 'each' && i < on.length - 1));
-        view.classList.remove('stats-print-each', 'stats-print-single', 'stats-print-text');
-        view.classList.add(layout === 'each' ? 'stats-print-each' : 'stats-print-single');
-        view.classList.toggle('stats-print-text', textOnly);
-        inner.style.zoom = '';
-        if (layout === 'single') {
-            // Tek sayfa: seçilen satır, kart ve özet sayısına göre tahmini yükseklik (mm) hesaplanır, sayfa yüksekliğine sığacak şekilde küçültülür
-            const rows = on.reduce((t, el) => t + el.querySelectorAll('.bar-row').length, 0);
-            const kpi = on.some(el => el.id === 'statsKpis') ? 1 : 0;
-            const cards = on.filter(el => el.id !== 'statsKpis').length;
-            const needMm = rows * (textOnly ? 5 : 8) + cards * 16 + kpi * 35 + 22;
-            inner.style.zoom = Math.min(1, 270 / needMm).toFixed(3);
-        }
-        window.addEventListener('afterprint', () => {
-            document.querySelectorAll('#view-stats .stats-hide-print, #view-stats .sp-break').forEach(el => el.classList.remove('stats-hide-print', 'sp-break'));
-            view.classList.remove('stats-print-each', 'stats-print-single', 'stats-print-text');
-            inner.style.zoom = '';
-        }, { once: true });
+        document.querySelectorAll('#view-stats .sp-break').forEach(el => el.classList.remove('sp-break'));
+        on.forEach((el, i) => el.classList.toggle('sp-break', !single && i < on.length - 1));
+        view.classList.remove('sp-each', 'sp-single', 'sp-text');
+        view.classList.add('sp-mode', single ? 'sp-single' : 'sp-each');
+        view.classList.toggle('sp-text', textOnly);
+        view.style.removeProperty('height'); view.style.removeProperty('overflow');
+        inner.style.width = ''; inner.style.transform = '';
+        view.querySelectorAll('.bar-chart').forEach(el => { el.style.columnCount = ''; });
+
+        let land = orient === 'landscape', z = 1, ok = true;
+        if (single) {
+            const fitFor = isLand => {
+                const W = (isLand ? 297 : 210) - 2 * SP_MARGIN, H = (isLand ? 210 : 297) - 2 * SP_MARGIN - 3;
+                const maxCols = textOnly ? (isLand ? 4 : 3) : (isLand ? 3 : 2); // uzun listeler sayfa genişliğine göre sütunlara bölünür (grafiksizde daha dar satırlar: daha çok sütun)
+                view.querySelectorAll('.bar-chart').forEach(el => { el.style.columnCount = Math.max(1, Math.min(maxCols, Math.floor(el.querySelectorAll('.bar-row').length / 4))); });
+                const probe = document.createElement('div');
+                probe.style.cssText = 'position:absolute;left:-9999px;width:1px;height:' + H + 'mm';
+                document.body.appendChild(probe); const ph = probe.offsetHeight; probe.remove();
+                // Genişlik 1/z oranında büyütülüp içerik z ile küçültülür; yükseklik = ölçülen * z
+                const measure = zz => { inner.style.width = (W / zz) + 'mm'; inner.style.transform = zz < 1 ? `scale(${zz})` : 'none'; return inner.offsetHeight * zz; };
+                let zz = 1;
+                if (measure(1) > ph) {
+                    let lo = SP_MIN_Z, hi = 1;
+                    for (let i = 0; i < 16; i++) { const mid = (lo + hi) / 2; if (measure(mid) <= ph) lo = mid; else hi = mid; }
+                    zz = lo;
+                }
+                const h = measure(zz);
+                return { land: isLand, z: zz, h, ok: h <= ph + 1 };
+            };
+            let res;
+            if (orient === 'auto') {
+                const p = fitFor(false), l = fitFor(true);
+                res = l.z > p.z + 0.02 ? fitFor(true) : fitFor(false); // eşitse dikey
+            } else res = fitFor(land);
+            land = res.land; z = res.z; ok = res.ok;
+            // Ölçeklenmiş içeriğin kapladığı gerçek yüksekliği sabitle: boş ikinci sayfa oluşmasın
+            view.style.setProperty('height', Math.ceil(res.h) + 'px', 'important');
+            view.style.setProperty('overflow', 'hidden', 'important');
+        } else if (orient === 'auto') land = false;
+        let st = document.getElementById('statsPageStyle');
+        if (st) st.remove();
+        st = document.createElement('style'); st.id = 'statsPageStyle';
+        st.textContent = `@page { size: A4 ${land ? 'landscape' : 'portrait'}; margin: ${SP_MARGIN}mm; }`;
+        document.head.appendChild(st);
+        spLastInfo = { single, land, z, ok };
+        return spLastInfo;
+    }
+    function statsInfoText(r) {
+        const yon = 'A4 ' + (r.land ? 'yatay' : 'dikey');
+        if (!r.single) return { t: yon + ' · her bölüm ayrı sayfada', warn: false };
+        const pct = Math.round(r.z * 100);
+        if (!r.ok) return { t: `${yon} · %${pct}: içerik tek sayfaya sığmıyor, bazı bölümleri kapatın.`, warn: true };
+        if (r.z < 0.5) return { t: `${yon} · ölçek %${pct}: yazı küçük kalıyor, bazı bölümleri kapatmak okunurluğu artırır.`, warn: true };
+        return { t: `Tek sayfa · ${yon} · ölçek %${pct}`, warn: false };
+    }
+    // Ekrandaki bilgi satırı: ölçüm yapıp hemen geri alır (kullanıcı bir değişiklik görmez)
+    function updateStatsFitInfo() {
+        const view = $$('view-stats'); if (!view || !view.classList.contains('active')) return;
+        const inner = view.querySelector('.list-view-inner'), top = inner.scrollTop;
+        let r; try { r = statsEnterPrintMode(); } finally { statsLeavePrintMode(); }
+        inner.scrollTop = top;
+        const o = statsInfoText(r), el = $$('statsFitInfo');
+        el.textContent = o.t; el.classList.toggle('warn', o.warn);
+    }
+    function prepareStatsPrint() {
+        if (!$$('view-stats').classList.contains('active')) return;
+        renderStats();
+        statsEnterPrintMode();
+        window.addEventListener('afterprint', () => { statsLeavePrintMode(); updateStatsFitInfo(); }, { once: true });
     }
     window.addEventListener('beforeprint', prepareStatsPrint);
-    onInit(() => { $$('btnStatsPrint').addEventListener('click', () => window.print()); });
+    onInit(() => {
+        $$('btnStatsPrint').addEventListener('click', () => window.print());
+        document.querySelector('#view-stats .stats-toolbar').addEventListener('change', updateStatsFitInfo);
+    });
     function triggerRender() { mainLimit = MAIN_PAGE; clearTimeout(renderTimer); renderTimer = setTimeout(() => renderTable('main'), 100); }
 
     /* --- LİSTE: çizim ve filtre --- */
