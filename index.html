@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v5.5 – Son güncelleme: 2026-10-15 -->
+<!-- MESEM Portal – Sürüm v5.6 – Son güncelleme: 2026-10-15 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.5</title>
+<title>MESEM Portal v5.6</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -236,7 +236,8 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
     #locTable tr { padding: 10px 12px; border-bottom: 1px solid var(--border); }
     #locTable td { border: none !important; padding: 4px 0 !important; }
     #locTable td:nth-child(2) { color: #64748b; }
-    #locTable td:nth-child(4) { display: inline-block; width: auto !important; margin-top: 4px; }
+    #locTable td.loc-region-cell { margin-top: 2px; }
+    #locTable td.loc-actions-cell { display: inline-block; width: auto !important; margin-top: 4px; }
     #locTable .loc-gps { min-width: 44px; min-height: 44px !important; }
     #locTable .map-icon { min-height: 44px; min-width: 44px; line-height: 36px; }
 }
@@ -277,7 +278,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 }
 @media (max-width: 640px) {
     #locTable .loc-input { height: 44px; min-height: 44px; font-size: 16px; }
-    #locTable td:nth-child(4) { display: block !important; width: 100% !important; margin-top: 6px; }
+    #locTable td.loc-actions-cell { display: block !important; width: 100% !important; margin-top: 6px; }
     #locTable .loc-actions { display: flex; gap: 8px; width: 100%; }
     #locTable .loc-gps, #locTable .loc-map { flex: 1 1 0; min-width: 0; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px; font-size: 14px; text-decoration: none; box-sizing: border-box; }
     #locTable .loc-map { border: 1px solid var(--border); color: #ef4444; }
@@ -366,6 +367,18 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
     #planTableContainer table { min-width: 680px; }
 }
 
+/* ===== v5.6: Konum bölge + sıralama ===== */
+.loc-region-chips { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+button.chip { font-family: inherit; color: var(--text); }
+.chip.on { background: var(--primary); border-color: var(--primary); color: #fff; }
+.loc-rcount { font-size: 11px; opacity: .75; }
+.loc-rclear { color: #b91c1c; border-color: #fecaca; }
+.loc-region-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #e0e7ff; color: #3730a3; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#locTable th.loc-sort { cursor: pointer; user-select: none; }
+#locTable th.loc-sort:hover { background-color: #e2e8f0; }
+#locTable .sort-ind { font-size: 10px; opacity: .7; }
+#locTable thead th { position: sticky; top: 0; background: #f1f5f9; z-index: 3; }
+
 /* ===== Planlama: QR'lı yazdırma + tek sayfaya otomatik sığdırma (v18'den) ===== */
 .print-wrapper { display: none; font-size: 10pt; font-family: "Segoe UI", Arial, sans-serif; }
 .print-wrapper.measuring { display: block !important; position: absolute; left: -10000px; top: 0; visibility: hidden; }
@@ -433,7 +446,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.5</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.6</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="loc">İşletme Konum</a>
@@ -528,6 +541,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
                 <div class="loc-filters" id="locFilters">
                     <label class="chip"><input type="checkbox" id="locOnlyMissing"> Yalnızca konumsuz</label>
                     <label class="chip"><input type="checkbox" id="locOnlyConflict"> Çakışan konumlar</label>
+                    <div class="loc-region-chips" id="locRegionChips"></div>
                 </div>
                 <div class="record-count" id="locCount"></div>
             </div>
@@ -535,7 +549,7 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
         </div>
         <div class="table-container">
             <table id="locTable" style="min-width:0;">
-                <thead><tr><th style="width:26%">İşletme</th><th style="width:30%">Adres</th><th style="width:32%">Konum (Nokta Konum)</th><th style="width:12%">İşlem</th></tr></thead>
+                <thead><tr><th class="sortable loc-sort" data-col="name" style="width:22%">İşletme</th><th class="sortable loc-sort" data-col="adres" style="width:25%">Adres</th><th class="sortable loc-sort" data-col="bolge" style="width:12%">Bölge</th><th class="sortable loc-sort" data-col="konum" style="width:29%">Konum (Nokta Konum)</th><th style="width:12%">İşlem</th></tr></thead>
                 <tbody id="locBody"></tbody>
             </table>
         </div>
@@ -1770,8 +1784,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const m = new Map();
         records.forEach(r => {
             const k = bizKey(r.isletme); if (!k || r.isArchived) return;
-            let g = m.get(k); if (!g) { g = { key: k, name: r.isletme, adres: '', koord: '', coords: new Set(), count: 0 }; m.set(k, g); }
-            g.count++; if (!g.adres && r.adres) g.adres = r.adres;
+            let g = m.get(k); if (!g) { g = { key: k, name: r.isletme, adres: '', bolge: '', koord: '', coords: new Set(), count: 0 }; m.set(k, g); }
+            g.count++; if (!g.adres && r.adres) g.adres = r.adres; if (!g.bolge && r.bolge) g.bolge = r.bolge;
             if (r.koordinat) { g.coords.add(r.koordinat); if (!g.koord) g.koord = r.koordinat; }
         });
         return [...m.values()].sort((a, b) => collator.compare(a.name, b.name));
@@ -1782,7 +1796,36 @@ document.addEventListener('DOMContentLoaded', function() {
     function coordOutsideTR(v) { const ll = parseLL(v); return !!ll && (ll[0] < TR_BOUNDS.latMin || ll[0] > TR_BOUNDS.latMax || ll[1] < TR_BOUNDS.lonMin || ll[1] > TR_BOUNDS.lonMax); }
     function filterLocGroups(all) {
         const q = normTR($$('locSearch').value.trim()), only = $$('locOnlyMissing').checked, conf = $$('locOnlyConflict').checked;
-        return all.filter(g => (!only || !g.koord) && (!conf || g.coords.size > 1) && (!q || normTR(g.name + ' ' + g.adres).includes(q)));
+        return all.filter(g => (!only || !g.koord) && (!conf || g.coords.size > 1) && (!locRegions.size || locRegions.has(locRegionKey(g))) && (!q || normTR(g.name + ' ' + g.adres).includes(q)));
+    }
+    /* --- v5.6: bölge filtresi, sıralama --- */
+    let locRegions = new Set();                 // boş = tüm bölgeler
+    let locSort = { col: 'name', desc: false };
+    const locRegionKey = g => g.bolge || 'Belirtilmemiş';
+    function sortLocGroups(list) {
+        const dir = locSort.desc ? -1 : 1;
+        const keyOf = { name: g => g.name, adres: g => g.adres || '', bolge: g => locRegionKey(g), konum: g => (g.koord ? 1 : 0) }[locSort.col] || (g => g.name);
+        return [...list].sort((a, b) => {
+            const ka = keyOf(a), kb = keyOf(b);
+            const r = typeof ka === 'number' ? ka - kb : collator.compare(ka, kb);
+            return r !== 0 ? r * dir : collator.compare(a.name, b.name);
+        });
+    }
+    function renderLocRegionChips(all) {
+        const counts = new Map();
+        all.forEach(g => { const k = locRegionKey(g); counts.set(k, (counts.get(k) || 0) + 1); });
+        [...locRegions].forEach(k => { if (!counts.has(k)) locRegions.delete(k); });
+        const names = [...counts.keys()].sort((a, b) => collator.compare(a, b));
+        $$('locRegionChips').innerHTML = names.map(k => {
+            const on = locRegions.has(k);
+            return `<button type="button" class="chip loc-rchip${on ? ' on' : ''}" data-region="${escapeHtml(k)}" aria-pressed="${on}">${escapeHtml(k)} <span class="loc-rcount">${counts.get(k)}</span></button>`;
+        }).join('') + (locRegions.size ? '<button type="button" class="chip loc-rclear" id="locRegionClear">Bölgeleri temizle</button>' : '');
+    }
+    function updateLocSortHeaders() {
+        document.querySelectorAll('#locTable th.loc-sort').forEach(th => {
+            th.querySelector('.sort-ind') && th.querySelector('.sort-ind').remove();
+            if (th.dataset.col === locSort.col) { const i = document.createElement('span'); i.className = 'sort-ind'; i.textContent = locSort.desc ? ' ▼' : ' ▲'; th.appendChild(i); }
+        });
     }
     function locRowHtml(g) {
         const url = planMapsUrl({ ll: parseLL(g.koord), adres: g.adres, name: g.name });
@@ -1792,6 +1835,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const hasKoord = !!g.koord;
         return `<tr><td><strong>${escapeHtml(g.name)}</strong><br><span class="loc-badge ${hasKoord ? 'ok' : 'no'}">${hasKoord ? 'Konumlu' : 'Konumsuz'}</span><div style="font-size:11px;opacity:.65">${g.count} kayıt</div></td>
             <td style="font-size:12px">${escapeHtml(g.adres || '-')}</td>
+            <td class="loc-region-cell"><span class="loc-region-badge">${escapeHtml(locRegionKey(g))}</span></td>
             <td><input type="text" class="loc-input" data-key="${escapeHtml(g.key)}" value="${escapeHtml(g.koord)}" placeholder="41.0082, 28.9784 veya harita linki" enterkeyhint="done" inputmode="text" autocomplete="off">
                 <div class="loc-msg">${warn.map(w => `<span class="warn-text">${w}</span>`).join('<br>')}</div></td>
             <td class="loc-actions-cell"><div class="loc-actions">
@@ -1808,8 +1852,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     function updateLocCount(listLen, all) { $$('locCount').textContent = `${listLen} / ${all.length} işletme · ${all.filter(g => g.koord).length} konumlu`; }
     function renderLoc() {
-        const all = locGroups(), list = filterLocGroups(all), shown = list.slice(0, locLimit);
-        $$('locBody').innerHTML = shown.map(locRowHtml).join('') || '<tr><td colspan="4" style="text-align:center;padding:20px;opacity:.6;">Gösterilecek işletme yok.</td></tr>';
+        const all = locGroups();
+        renderLocRegionChips(all); updateLocSortHeaders();
+        const list = sortLocGroups(filterLocGroups(all)), shown = list.slice(0, locLimit);
+        $$('locBody').innerHTML = shown.map(locRowHtml).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px;opacity:.6;">Gösterilecek işletme yok.</td></tr>';
         renderLocMore(list.length, shown.length);
         updateLocCount(list.length, all);
     }
@@ -1862,6 +1908,19 @@ document.addEventListener('DOMContentLoaded', function() {
     $$('locSearch').addEventListener('input', () => { locLimit = LOC_PAGE; renderLoc(); });
     $$('locOnlyMissing').addEventListener('change', () => { locLimit = LOC_PAGE; renderLoc(); });
     $$('locOnlyConflict').addEventListener('change', () => { locLimit = LOC_PAGE; renderLoc(); });
+    $$('locRegionChips').addEventListener('click', e => {
+        const b = e.target.closest('.loc-rchip'), c = e.target.closest('#locRegionClear');
+        if (c) locRegions.clear();
+        else if (b) { const k = b.dataset.region; locRegions.has(k) ? locRegions.delete(k) : locRegions.add(k); }
+        else return;
+        locLimit = LOC_PAGE; renderLoc();
+    });
+    $$('locTable').querySelector('thead').addEventListener('click', e => {
+        const th = e.target.closest('.loc-sort'); if (!th) return;
+        const col = th.dataset.col;
+        locSort = locSort.col === col ? { col, desc: !locSort.desc } : { col, desc: false };
+        locLimit = LOC_PAGE; renderLoc();
+    });
     });
     onInit(() => {
     $$('locFilterToggle').addEventListener('click', () => {
