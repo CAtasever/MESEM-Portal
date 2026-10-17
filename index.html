@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v5.23 – Son güncelleme: 2026-10-17 -->
+<!-- MESEM Portal – Sürüm v5.24 – Son güncelleme: 2026-10-17 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.23</title>
+<title>MESEM Portal v5.24</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -27,7 +27,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-
 #homeLink { cursor: pointer; user-select: none; } #homeLink:hover { opacity: .85; }
 .navbar h1 { margin: 0; font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 .nav-links { display: flex; gap: 10px; }
-.nav-links a { color: #cbd5e1; text-decoration: none; font-weight: 500; cursor: pointer; padding: 6px 10px; border-radius: 6px; transition: 0.2s; font-size: 14px; }
+.nav-links a { color: #cbd5e1; text-decoration: none; font-weight: 500; cursor: pointer; padding: 6px 10px; border-radius: 6px; transition: color .2s, background-color .2s; font-size: 14px; }
 .nav-links a.active, .nav-links a:hover { color: white; background-color: #334155; }
 
 .container { flex: 1; padding: 15px 15px 0 15px; overflow: hidden; display: flex; flex-direction: column; position: relative; }
@@ -995,6 +995,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let msData = { ogretmen: [], bolge: [], sinif: [], sube: [], dal: [], alan: [] };
     let msSelected = { ogretmen: [], bolge: [], sinif: [], sube: [], dal: [], alan: [] };
     let renderTimer = null, toastTimer = null;
+    // v5.24: sekme geçiş önbelleği. dataVersion her saveData() ile artar; bir sekme yalnızca veri değiştiyse yeniden çizilir.
+    let dataVersion = 1, statsFitVer = 0;
+    const tabRendered = {}, tabScroll = {};
     const MAIN_PAGE = 100;
     let mainLimit = MAIN_PAGE;   // Ana listede çizilecek üst sınır (filtre/sıralama tüm kayıtlarda çalışır)
 
@@ -1118,6 +1121,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     /* --- VERİ: kaydet / yükle / normalize --- */
     function saveData() {
+        dataVersion++;
         try {
             localStorage.setItem('mesemRecordsBirlesikV1', JSON.stringify(records));
             localStorage.setItem('mesemRulesBirlesikV1', JSON.stringify(regionRules));
@@ -1140,16 +1144,34 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function switchTab(tabId) {
-        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.nav-links a').forEach(el => el.classList.remove('active'));
-        document.getElementById('view-' + tabId).classList.add('active');
-        let link = document.querySelector(`.nav-links a[data-tab="${tabId}"]`);
+        const next = document.getElementById('view-' + tabId);
+        if (!next) return;
+        const cur = document.querySelector('.view-section.active');
+        // Aynı sekmeye tekrar tıklama: veri değişmediyse yapılacak iş yok
+        if (cur === next && tabRendered[tabId] === dataVersion) return;
+        if (cur && cur !== next) {
+            // display:none kaydırma konumunu sıfırlar; ayrılırken sakla
+            tabScroll[cur.id] = [...cur.querySelectorAll('.list-view-inner, .table-container')].map(el => el.scrollTop);
+            cur.classList.remove('active');
+        }
+        const curLink = document.querySelector('.nav-links a.active');
+        if (curLink) curLink.classList.remove('active');
+        next.classList.add('active');
+        const link = document.querySelector(`.nav-links a[data-tab="${tabId}"]`);
         if (link) link.classList.add('active');
-        if (tabId === 'main') renderTable('main');
-        if (tabId === 'archive') renderTable('archive');
-        if (tabId === 'stats') { renderStats(); scheduleStatsFitInfo(); }
-        if (tabId === 'plan') populatePlanTeachers();
-        if (tabId === 'loc') renderLoc();
+        // v5.24: veri değişmediyse yeniden çizme (eskiden her geçişte tüm tablo/istatistik baştan çiziliyordu)
+        if (tabRendered[tabId] !== dataVersion) {
+            tabRendered[tabId] = dataVersion;
+            if (tabId === 'main') renderTable('main');
+            else if (tabId === 'archive') renderTable('archive');
+            else if (tabId === 'stats') renderStats();
+            else if (tabId === 'plan') populatePlanTeachers();
+            else if (tabId === 'loc') renderLoc();
+        }
+        if (tabId === 'stats' && statsFitVer !== dataVersion) scheduleStatsFitInfo(); // sığdırma ölçümü ağır; yalnızca gerekirse
+        // Kaydırma konumunu geri yükle
+        const sc = tabScroll[next.id];
+        if (sc && cur !== next) next.querySelectorAll('.list-view-inner, .table-container').forEach((el, i) => { if (sc[i]) el.scrollTop = sc[i]; });
     }
 
     function showToast(msg, ms) {
@@ -1402,13 +1424,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const view = $$('view-stats'); if (!view || !view.classList.contains('active') || spPrinting) return;
         if ($$('statsPrintLayout').value !== 'single') { // ölçüm gerekmez: yalnızca bilgi metni
             const o = statsInfoText({ single: false, land: $$('statsPrintOrient').value === 'landscape' });
-            $$('statsFitInfo').textContent = o.t; $$('statsFitInfo').classList.toggle('warn', o.warn); return;
+            $$('statsFitInfo').textContent = o.t; $$('statsFitInfo').classList.toggle('warn', o.warn); statsFitVer = dataVersion; return;
         }
         const inner = view.querySelector('.list-view-inner'), top = inner.scrollTop;
         let r; try { r = statsEnterPrintMode(); } finally { statsLeavePrintMode(); }
         inner.scrollTop = top;
         const o = statsInfoText(r), el = $$('statsFitInfo');
         el.textContent = o.t; el.classList.toggle('warn', o.warn);
+        statsFitVer = dataVersion;
     }
     function prepareStatsPrint() {
         if (!$$('view-stats').classList.contains('active')) return;
