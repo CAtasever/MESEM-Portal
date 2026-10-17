@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v5.11 – Son güncelleme: 2026-10-15 -->
+<!-- MESEM Portal – Sürüm v5.12 – Son güncelleme: 2026-10-15 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.11</title>
+<title>MESEM Portal v5.12</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -480,7 +480,7 @@ button.chip { font-family: inherit; color: var(--text); }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.11</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.12</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="stats">İstatistik</a>
@@ -945,7 +945,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const escRec = r => { const o={}; for(const k in r){ o[k] = typeof r[k]==='string' ? escapeHtml(r[k]) : r[k]; } return o; };
     const normTR = s => String(s||'').toLocaleUpperCase('tr-TR').replace(/[ÇĞİÖŞÜçğıöşüi]/g, m => TR_ASCII[m]);
     const bizKey = v => normTR(String(v||'').trim()).replace(/\s+/g,' ');
-    const ALAN_LISTE = [["ELEKTRİK- ELEKTRONİK TEKNOLOJİSİ", ["Bobinaj", "Büro Makineleri Teknik Servisi", "Elektrik Tesisatları ve Pano Montörlüğü", "Elektrikli Ev Aletleri Teknik Servisi", "Asansör Sistemleri", "Endüstriyel Bakım Onarım", "Görüntü ve Ses Sistemleri", "Güvenlik Sistemleri", "Haberleşme Sistemleri", "Yüksek Gerilim Sistemleri"]], ["MAKİNE TEKNOLOJİSİ", ["Anahtarcılık ve Çilingirlik", "Bilgisayar Destekli Endüstriyel Modelleme", "Bilgisayar Destekli Makine Ressamlığı", "Bilgisayarlı Makine İmalatı", "Değirmencilik", "Endüstriyel Kalıp", "Makine Bakım Onarım", "Mermer İşleme", "Saat Tamirciliği"]], ["METAL TEKNOLOJİSİ", ["Avizecilik", "Çelik Konstrüksiyon", "Isıl İşlem", "Karosercilik", "Kaynakçılık", "Metal Doğrama", "Metal Levha İşlemeciliği", "Metal Yüzey Boyama", "Sac İşleri", "Endüstriyel Reklam Tabelacılığı"]], ["MOTORLU ARAÇLAR TEKNOLOJİSİ", ["Dizel Motorları Yakıt Pompası ve Enjektör Ayarcılığı", "İş Makineleri", "Motorlu Araçlar LPG Sistemleri Bakım ve Onarımcılığı", "Motosiklet Tamirciliği", "Otomotiv Boya", "Otomotiv Elektrikçiliği", "Otomotiv Elektromekanik", "Otomotiv Gövde", "Otomotiv Mekanikerliği", "Otomotiv Motor Yenileştirmeciliği", "Ön Düzen Ayarcılığı ve Lastikçilik"]], ["YİYECEK İÇECEK HİZMETLERİ", ["Aşçılık", "Fırıncılık", "Kantin İşletmeciliği", "Kasaplık", "Pasta ve Tatlı Yapımı", "Servis"]], ["GÜZELLİK VE SAÇ BAKIM HİZMETLERİ", ["Cilt Bakımı ve Makyaj", "Erkek Kuaförü", "Kadın Kuaförü"]]];
+    const ALAN_LISTE = [["ELEKTRİK- ELEKTRONİK TEKNOLOJİSİ", ["Bobinaj", "Büro Makineleri Teknik Servisi", "Elektrik Tesisatları ve Pano Montörlüğü", "Elektrikli Ev Aletleri Teknik Servisi", "Asansör Sistemleri", "Endüstriyel Bakım Onarım", "Görüntü ve Ses Sistemleri", "Güvenlik Sistemleri", "Haberleşme Sistemleri", "Yüksek Gerilim Sistemleri"]], ["MAKİNE TEKNOLOJİSİ", ["Anahtarcılık ve Çilingirlik", "Bilgisayar Destekli Endüstriyel Modelleme", "Bilgisayar Destekli Makine Ressamlığı", "Bilgisayarlı Makine İmalatı", "Değirmencilik", "Endüstriyel Kalıp", "Makine Bakım Onarım", "Mermer İşleme", "Saat Tamirciliği"]], ["METAL TEKNOLOJİSİ", ["Avizecilik", "Çelik Konstrüksiyon", "Isıl İşlem", "Karosercilik", "Kaynakçılık", "Metal Doğrama", "Metal Levha İşlemeciliği", "Metal Yüzey Boyama", "Sac İşleri", "Endüstriyel Reklam Tabelacılığı"]], ["MOTORLU ARAÇLAR TEKNOLOJİSİ", ["Dizel Motorları Yakıt Pompası ve Enjektör Ayarcılığı", "İş Makineleri", "Motorlu Araçlar LPG Sistemleri Bakım ve Onarımcılığı", "Motosiklet Tamirciliği", "Otomotiv Boya", "Otomotiv Elektrikçiliği", "Otomotiv Elektromekanik", "Otomotiv Gövde", "Otomotiv Mekanikerliği", "Otomotiv Motor Yenileştirmeciliği", "Ön Düzen Ayarcılığı ve Lastikçilik"]], ["YİYECEK İÇECEK HİZMETLERİ", ["Aşçılık", "Fırıncılık", "Kantin İşletmeciliği", "Kasaplık", "Pasta ve Tatlı Yapımı", "Servis"]], ["GÜZELLİK VE SAÇ BAKIM HİZMETLERİ", ["Cilt Bakımı ve Makyaj", "Erkek Kuaförlüğü", "Kadın Kuaförlüğü", "Erkek Kuaförü", "Kadın Kuaförü"]]];
         const alanKey = v => normTR(String(v || '')).replace(/[^A-Z0-9]+/g, ' ').trim();
         const DAL_TO_ALAN = new Map(); ALAN_LISTE.forEach(([alan, dals]) => dals.forEach(d => DAL_TO_ALAN.set(alanKey(d), alan)));
         const alanOf = r => DAL_TO_ALAN.get(alanKey(r.dal)) || 'Tanımsız';
@@ -1147,12 +1147,21 @@ document.addEventListener('DOMContentLoaded', function() {
     /* --- MULTI-SELECT (Şube filtresi eklendi) --- */
     function updateFilters() {
         msData.ogretmen = [...new Set(records.filter(r => !r.isArchived && r.ogretmen).map(r => r.ogretmen))].sort(collator.compare);
-        msData.bolge = [...new Set(records.filter(r => !r.isArchived && r.bolge).map(r => r.bolge))].sort((a, b) => (a === 'Belirtilmemiş / Diğer') ? -1 : (b === 'Belirtilmemiş / Diğer') ? 1 : collator.compare(a, b));
+        msData.bolge = msSort([...new Set(records.filter(r => !r.isArchived && r.bolge).map(r => r.bolge))]);
         msData.sinif = [...new Set(records.filter(r => !r.isArchived && r.sinif).map(r => r.sinif))].sort(collator.compare);
         msData.sube = [...new Set(records.filter(r => !r.isArchived && r.sube).map(r => r.sube))].sort(collator.compare);
-        msData.dal = [...new Set(records.filter(r => !r.isArchived && r.dal).map(r => r.dal))].sort(collator.compare);
-        msData.alan = [...new Set(records.filter(r => !r.isArchived).map(alanOf))].sort(collator.compare);
+        msData.dal = msSort([...new Set(records.filter(r => !r.isArchived && r.dal).map(r => r.dal))]);
+        msData.alan = msSort([...new Set(records.filter(r => !r.isArchived).map(alanOf))]);
         buildMsDOM('ogretmen', 'Öğretmenler'); buildMsDOM('bolge', 'Bölgeler'); buildMsDOM('sinif', 'Sınıflar'); buildMsDOM('sube', 'Şubeler'); buildMsDOM('alan', 'Alanlar'); buildMsDOM('dal', 'Dallar');
+    }
+    // Sistem değerleri (Belirtilmemiş / Diğer, Tanımsız) her filtrede listenin başında
+    const MS_PINNED = ['Belirtilmemiş / Diğer', 'Tanımsız'];
+    function msSort(arr) {
+        return [...arr].sort((a, b) => {
+            const pa = MS_PINNED.indexOf(a), pb = MS_PINNED.indexOf(b);
+            if (pa !== -1 || pb !== -1) return (pa === -1 ? 99 : pa) - (pb === -1 ? 99 : pb);
+            return collator.compare(a, b);
+        });
     }
     function buildMsDOM(type, titleText) {
         let container = document.getElementById('mso-' + type);
