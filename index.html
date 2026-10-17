@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v5.7 – Son güncelleme: 2026-10-15 -->
+<!-- MESEM Portal – Sürüm v5.9 – Son güncelleme: 2026-10-15 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.7</title>
+<title>MESEM Portal v5.9</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -464,7 +464,7 @@ button.chip { font-family: inherit; color: var(--text); }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.7</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.9</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="loc">İşletme Konum</a>
@@ -524,6 +524,7 @@ button.chip { font-family: inherit; color: var(--text); }
             <span class="bulk-count" id="bulkCount">0 kayıt seçili</span>
             <button type="button" class="btn btn-cancel" id="bulkSelVisible">Görünenleri seç</button>
             <button type="button" class="btn btn-cancel" id="bulkClear">Seçimi temizle</button>
+            <label class="chk"><input type="checkbox" id="bulkOnlyVisible"> Yalnızca filtrede görünenler</label>
             <input type="text" id="bulkTeacherInput" list="bulkTeacherList" placeholder="Yeni öğretmen adı" autocomplete="off">
             <datalist id="bulkTeacherList"></datalist>
             <button type="button" class="btn btn-primary" id="bulkApply">Öğretmeni değiştir</button>
@@ -1030,7 +1031,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function factoryReset() {
         if (confirm("TÜM SİSTEMİ SIFIRLAMAK ÜZERESİNİZ!\n\nTüm kayıtlar, adresler, notlar ve kurallar kalıcı olarak silinecek. Emin misiniz?")) {
             exportBackup();
-            ['mesemRecordsBirlesikV1','mesemRulesBirlesikV1','mesemHolidaysBirlesikV1','mesemImeBirlesikV1','mesemImeBirlesikV2','mesemRecordsV23','mesemRulesV23'].forEach(k => localStorage.removeItem(k));
+            ['mesemRecordsBirlesikV1','mesemRulesBirlesikV1','mesemHolidaysBirlesikV1','mesemImeBirlesikV1','mesemImeBirlesikV2','mesemRecordsV23','mesemRulesV23', BULK_UNDO_KEY].forEach(k => localStorage.removeItem(k));
             msSelected = { ogretmen: [], bolge: [], sinif: [], sube: [], dal: [] };
             document.getElementById('searchInput').value = '';
             document.getElementById('archiveSearchInput').value = '';
@@ -1511,7 +1512,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 let d = JSON.parse(e.target.result);
                 if (!d || !Array.isArray(d.records) || !Array.isArray(d.rules)) { alert('Geçersiz veya bozuk yedek dosyası!'); inputElem.value=''; return; }
                 if (!confirm(d.records.length + ' adet öğrenci kaydı ve ' + d.rules.length + ' adet bölge kuralı yüklenecek. Mevcut veriler silinecek. Onaylıyor musunuz?')) { inputElem.value=''; return; }
-                records = d.records; regionRules = d.rules; normalizeData(); saveData();
+                records = d.records; regionRules = d.rules; normalizeData(); localStorage.removeItem(BULK_UNDO_KEY); saveData();
                 compileRules(); recalculateRegions(); renderRules(); updateFilters(); updateRegionDatalist(); renderTable('main'); renderTable('archive'); populatePlanTeachers();
                 showToast('Yedek başarıyla yüklendi.');
             } catch(err) { alert('HATA: Yedek dosyası okunamadı!'); }
@@ -1893,18 +1894,26 @@ document.addEventListener('DOMContentLoaded', function() {
         $$('bulkCount').textContent = `${bulkSel.size} kayıt seçili`;
         const dl = [...new Set(records.filter(r => !r.isArchived && r.ogretmen).map(r => r.ogretmen))].sort(collator.compare);
         $$('bulkTeacherList').innerHTML = dl.map(t => `<option value="${escapeHtml(t)}">`).join('');
-        $$('bulkUndo').hidden = !localStorage.getItem(BULK_UNDO_KEY);
+        let u = null; try { u = JSON.parse(localStorage.getItem(BULK_UNDO_KEY) || 'null'); } catch(e) {}
+        const ok = !!(u && Array.isArray(u.items) && u.items.some(i => records.some(r => String(r.internalId) === i.id)));
+        if (!ok) localStorage.removeItem(BULK_UNDO_KEY);
+        $$('bulkUndo').hidden = !ok;
     }
     function applyBulkTeacher() {
         const target = $$('bulkTeacherInput').value.trim();
         if (!bulkSel.size) return showToast('Önce en az bir kayıt seçin.');
         if (!target) return showToast('Yeni öğretmen adını girin.');
-        const changed = records.filter(r => bulkSel.has(String(r.internalId)) && r.ogretmen !== target);
-        if (!changed.length) return showToast('Seçilen kayıtların öğretmeni zaten bu.');
-        if (!confirm(`${changed.length} kaydın öğretmeni "${target}" olarak değiştirilecek.\nPlan (varsa) yeniden hesaplanacak. Devam edilsin mi?`)) return;
+        const visible = new Set(getFiltered().map(r => String(r.internalId)));
+        const onlyVis = $$('bulkOnlyVisible').checked;
+        const selected = records.filter(r => bulkSel.has(String(r.internalId)));
+        const hidden = selected.filter(r => !visible.has(String(r.internalId))).length;
+        const targets = onlyVis ? selected.filter(r => visible.has(String(r.internalId))) : selected;
+        const changed = targets.filter(r => r.ogretmen !== target);
+        if (!changed.length) return showToast(onlyVis && hidden ? 'Filtrede görünen seçili kayıt yok.' : 'Seçilen kayıtların öğretmeni zaten bu.');
+        const note = (!onlyVis && hidden) ? `\nSeçililerden ${hidden} kayıt şu an filtrede görünmüyor; yine de değişecek.` : '';
+        if (!confirm(`${changed.length} kaydın öğretmeni "${target}" olarak değiştirilecek.${note}\nAçık plan varsa yeniden hesaplanacak. Devam edilsin mi?`)) return;
         try { localStorage.setItem(BULK_UNDO_KEY, JSON.stringify({ at: new Date().toISOString(), items: changed.map(r => ({ id: String(r.internalId), old: r.ogretmen })) })); } catch(e) {}
-        changed.forEach(r => { r.ogretmen = target; });
-        bulkSel.clear();
+        changed.forEach(r => { r.ogretmen = target; bulkSel.delete(String(r.internalId)); });
         $$('bulkTeacherInput').value = '';
         afterTeacherChange(`${changed.length} kaydın öğretmeni değiştirildi.`);
     }
@@ -1920,16 +1929,19 @@ document.addEventListener('DOMContentLoaded', function() {
     function afterTeacherChange(msg) {
         saveData(); populatePlanTeachers(); updateFilters(); renderTable('main'); renderTable('archive');
         updateBulkBar();
-        recomputePlanAfterTeacherChange();
-        showToast(msg);
+        const extra = recomputePlanAfterTeacherChange();
+        showToast(msg + extra);
     }
     // Açık plan varsa, aynı öğretmen ve aynı ziyaret günleriyle yeniden hesaplanır
     function recomputePlanAfterTeacherChange() {
-        if (!activePlan) return;
+        if (!activePlan) return '';
         const teacher = $$('planTeacherSelect').value;
         if (teacher && records.some(r => !r.isArchived && r.ogretmen === teacher)) {
             (activePlan.source === 'ime' ? $$('btnImeGenerate') : $$('btnPlanGenerate')).click();
-        } else { activePlan = null; $$('planOutput').classList.add('hidden'); }
+            return ` Açık plan (${teacher}) yeniden hesaplandı.`;
+        }
+        activePlan = null; $$('planOutput').classList.add('hidden');
+        return ' Açık plan kapatıldı (öğretmenin aktif kaydı kalmadı).';
     }
     onInit(() => {
     $$('tableBody').addEventListener('change', e => {
