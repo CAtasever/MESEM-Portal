@@ -1,11 +1,11 @@
-<!-- MESEM Portal – Sürüm v5.21 – Son güncelleme: 2026-10-17 -->
+<!-- MESEM Portal – Sürüm v5.22 – Son güncelleme: 2026-10-17 -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.21</title>
+<title>MESEM Portal v5.22</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -525,7 +525,7 @@ button.chip { font-family: inherit; color: var(--text); }
 <body>
 
 <div class="navbar">
-    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.21</span></h1>
+    <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.22</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="stats">İstatistik</a>
@@ -1147,7 +1147,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (link) link.classList.add('active');
         if (tabId === 'main') renderTable('main');
         if (tabId === 'archive') renderTable('archive');
-        if (tabId === 'stats') { renderStats(); updateStatsFitInfo(); }
+        if (tabId === 'stats') { renderStats(); scheduleStatsFitInfo(); }
         if (tabId === 'plan') populatePlanTeachers();
         if (tabId === 'loc') renderLoc();
     }
@@ -1389,8 +1389,18 @@ document.addEventListener('DOMContentLoaded', function() {
         return { t: `Tek sayfa · ${yon} · ölçek %${pct}`, warn: false };
     }
     // Ekrandaki bilgi satırı: ölçüm yapıp hemen geri alır (kullanıcı bir değişiklik görmez)
+    // v5.22: ölçüm sekme açılışını bloklamaz; boşta çalışır, art arda istekler birleşir
+    let spFitTimer = null, spPrinting = false;
+    function scheduleStatsFitInfo() {
+        clearTimeout(spFitTimer);
+        spFitTimer = setTimeout(() => { spFitTimer = null; updateStatsFitInfo(); }, 60);
+    }
     function updateStatsFitInfo() {
-        const view = $$('view-stats'); if (!view || !view.classList.contains('active')) return;
+        const view = $$('view-stats'); if (!view || !view.classList.contains('active') || spPrinting) return;
+        if ($$('statsPrintLayout').value !== 'single') { // ölçüm gerekmez: yalnızca bilgi metni
+            const o = statsInfoText({ single: false, land: $$('statsPrintOrient').value === 'landscape' });
+            $$('statsFitInfo').textContent = o.t; $$('statsFitInfo').classList.toggle('warn', o.warn); return;
+        }
         const inner = view.querySelector('.list-view-inner'), top = inner.scrollTop;
         let r; try { r = statsEnterPrintMode(); } finally { statsLeavePrintMode(); }
         inner.scrollTop = top;
@@ -1399,16 +1409,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     function prepareStatsPrint() {
         if (!$$('view-stats').classList.contains('active')) return;
+        clearTimeout(spFitTimer); spPrinting = true;
         renderStats();
         statsEnterPrintMode();
-        window.addEventListener('afterprint', () => { statsLeavePrintMode(); updateStatsFitInfo(); }, { once: true });
+        window.addEventListener('afterprint', () => { spPrinting = false; statsLeavePrintMode(); updateStatsFitInfo(); }, { once: true });
     }
     window.addEventListener('beforeprint', prepareStatsPrint);
     // v5.19: Liste/Plan yazdırma @page ayarı yazdırma bitince temizlenir
     window.addEventListener('afterprint', () => { document.getElementById('planPageStyle')?.remove(); });
     onInit(() => {
         $$('btnStatsPrint').addEventListener('click', () => window.print());
-        document.querySelector('#view-stats .stats-toolbar').addEventListener('change', updateStatsFitInfo);
+        document.querySelector('#view-stats .stats-toolbar').addEventListener('change', scheduleStatsFitInfo);
     });
     function triggerRender() { mainLimit = MAIN_PAGE; clearTimeout(renderTimer); renderTimer = setTimeout(() => renderTable('main'), 100); }
 
