@@ -386,6 +386,11 @@ button.chip { font-family: inherit; color: var(--text); }
 .bulk-bar input[type=text] { padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; min-width: 180px; }
 .bulk-bar .btn { padding: 6px 10px; font-size: 12px; }
 .bulk-bar [hidden] { display: none !important; }
+.combo-wrap { position: relative; display: inline-block; }
+.combo-list { position: absolute; left: 0; top: calc(100% + 4px); min-width: 100%; max-height: 220px; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; background: #fff; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,.15); z-index: 1000; }
+.combo-item { padding: 10px 12px; font-size: 14px; cursor: pointer; border-bottom: 1px solid #f1f5f9; touch-action: manipulation; }
+.combo-item:last-child { border-bottom: 0; }
+.combo-item:hover, .combo-item:active { background: #ecfdf5; }
 .sel-wrap { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
 .rec-sel { width: 15px; height: 15px; margin: 0; cursor: pointer; flex-shrink: 0; }
 @media print { .rec-sel { display: none !important; } .id-txt { display: inline !important; } }
@@ -393,6 +398,8 @@ button.chip { font-family: inherit; color: var(--text); }
     #mainTable th:nth-child(1), #mainTable td:nth-child(1) { display: table-cell !important; width: 40px !important; min-width: 40px !important; max-width: 40px !important; padding: 4px !important; }
     #mainTable .id-txt { display: none; }
     .bulk-bar { flex-direction: column; align-items: stretch; }
+    .combo-wrap { display: block; width: 100%; }
+    .combo-list { max-height: 40vh; }
     .bulk-bar input[type=text] { min-width: 0; width: 100%; font-size: 16px; min-height: 44px; box-sizing: border-box; }
     .bulk-bar .btn { min-height: 44px; font-size: 13px; }
     .bulk-count { margin-right: 0; }
@@ -592,8 +599,10 @@ button.chip { font-family: inherit; color: var(--text); }
             <span class="bulk-count" id="bulkCount">0 kayıt seçili</span>
             <button type="button" class="btn btn-cancel" id="bulkSelVisible">Görünenleri seç</button>
             <button type="button" class="btn btn-cancel" id="bulkClear">Seçimi temizle</button>
-            <input type="text" id="bulkTeacherInput" list="bulkTeacherList" placeholder="Yeni öğretmen adı" autocomplete="off">
-            <datalist id="bulkTeacherList"></datalist>
+            <div class="combo-wrap" id="bulkTeacherWrap">
+                <input type="text" id="bulkTeacherInput" placeholder="Yeni öğretmen adı" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="bulkTeacherList">
+                <div class="combo-list" id="bulkTeacherList" role="listbox" hidden></div>
+            </div>
             <button type="button" class="btn btn-primary" id="bulkApply">Öğretmeni değiştir</button>
             <button type="button" class="btn btn-warning" id="bulkUndo" hidden>Son değişikliği geri al</button>
         </div>
@@ -2235,12 +2244,50 @@ document.addEventListener('DOMContentLoaded', function() {
         const hidden = [...bulkSel].filter(id => !visible.has(id)).length;
         $$('bulkCount').textContent = `${bulkSel.size} kayıt seçili${hidden ? ` (${hidden} tanesi filtrede gizli)` : ''}`;
         const dl = [...new Set(records.filter(r => !r.isArchived && r.ogretmen).map(r => r.ogretmen))].sort(collator.compare);
-        $$('bulkTeacherList').innerHTML = dl.map(t => `<option value="${escapeHtml(t)}">`).join('');
+        bulkTeacherNames = dl;
+        if (!$$('bulkTeacherList').hidden) renderBulkCombo();
         let u = null; try { u = JSON.parse(localStorage.getItem(BULK_UNDO_KEY) || 'null'); } catch(e) {}
         const ok = !!(u && Array.isArray(u.items) && u.items.some(i => records.some(r => String(r.internalId) === i.id)));
         if (!ok) localStorage.removeItem(BULK_UNDO_KEY);
         $$('bulkUndo').hidden = !ok;
     }
+    let bulkTeacherNames = [];
+    function renderBulkCombo() {
+        const box = $$('bulkTeacherList'), q = $$('bulkTeacherInput').value.trim().toLocaleLowerCase('tr');
+        const items = bulkTeacherNames.filter(t => !q || t.toLocaleLowerCase('tr').includes(q));
+        if (!items.length) { closeBulkCombo(); return; }
+        box.innerHTML = items.map(t => `<div class="combo-item" role="option" data-v="${escapeHtml(t)}">${escapeHtml(t)}</div>`).join('');
+        box.hidden = false;
+        $$('bulkTeacherInput').setAttribute('aria-expanded', 'true');
+    }
+    function closeBulkCombo() {
+        $$('bulkTeacherList').hidden = true;
+        $$('bulkTeacherInput').setAttribute('aria-expanded', 'false');
+    }
+    (function initBulkCombo() {
+        const inp = $$('bulkTeacherInput'), box = $$('bulkTeacherList'), wrap = $$('bulkTeacherWrap');
+        inp.addEventListener('focus', renderBulkCombo);
+        inp.addEventListener('click', () => { if (box.hidden) renderBulkCombo(); });
+        inp.addEventListener('input', renderBulkCombo);
+        inp.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { closeBulkCombo(); inp.blur(); }
+            else if (e.key === 'Enter') { closeBulkCombo(); inp.blur(); }
+        });
+        // Input'un odağını kaybetmemek için pointerdown'da engelle, sonra seç
+        box.addEventListener('mousedown', e => e.preventDefault());
+        box.addEventListener('click', e => {
+            const it = e.target.closest('.combo-item');
+            if (!it) return;
+            inp.value = it.dataset.v;
+            closeBulkCombo();
+            inp.blur(); // mobilde klavyeyi de kapatır
+        });
+        // Dışarı dokunma / tıklama listeyi kapatır
+        const outside = e => { if (!wrap.contains(e.target)) { closeBulkCombo(); } };
+        document.addEventListener('pointerdown', outside, true);
+        document.addEventListener('touchstart', outside, { passive: true, capture: true });
+        window.addEventListener('scroll', e => { if (!box.contains(e.target)) closeBulkCombo(); }, true);
+    })();
     function applyBulkTeacher() {
         const target = $$('bulkTeacherInput').value.trim();
         if (!bulkSel.size) return showToast('Önce en az bir kayıt seçin.');
@@ -2254,7 +2301,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!confirm(`${changed.length} kaydın öğretmeni "${target}" olarak değiştirilecek.${note}\nAçık plan varsa yeniden hesaplanacak. Devam edilsin mi?`)) return;
         try { localStorage.setItem(BULK_UNDO_KEY, JSON.stringify({ at: new Date().toISOString(), items: changed.map(r => ({ id: String(r.internalId), old: r.ogretmen })) })); } catch(e) { storageWriteError(e); }
         changed.forEach(r => { r.ogretmen = target; bulkSel.delete(String(r.internalId)); });
-        $$('bulkTeacherInput').value = '';
+        $$('bulkTeacherInput').value = ''; closeBulkCombo();
         afterTeacherChange(`${changed.length} kaydın öğretmeni değiştirildi.`);
     }
     function undoBulkTeacher() {
