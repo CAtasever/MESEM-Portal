@@ -1,99 +1,131 @@
+<div align="center">
+
 # 🏢 MESEM Portal (v5.32)
 
-> **Mesleki Eğitim Merkezleri (MESEM) için Koordinatör Öğretmen Ziyaret Planlama, İşletme Konum Yönetimi ve Görev Takip Portalı**
+**Mesleki Eğitim Merkezleri (MESEM) için Koordinatör Öğretmen Ziyaret Planlama, İşletme Konum Yönetimi, İME ve Görev Takip Sistemi**
 
-MESEM Portal; koordinatör öğretmenlerin işletmelerdeki çırak/kalfa öğrencilerini takip etmelerini, harita koordinatları üzerinden akıllı haftalık ziyaret rotaları oluşturmalarını, İME (İşletmelerde Mesleki Eğitim) saatlerini yönetmelerini ve resmi evrakları (Görev Teslim Listesi, QR Kodlu Ziyaret Çizelgesi) tek tıkla yazdırmalarını sağlayan **sunucusuz (serverless)**, tek sayfalık web uygulamasıdır.
+![Sürüm](https://img.shields.io/badge/S%C3%BCr%C3%BCm-v5.32-10b981?style=for-the-badge)
+![Mimari](https://img.shields.io/badge/Mimari-Tek%20Dosya%20(Sunucusuz)-1e3a8a?style=for-the-badge)
+![Veri Güvenliği](https://img.shields.io/badge/Veri-%25100%20Yerel%20(KVKK%20Dostu)-f59e0b?style=for-the-badge)
+![Mobil Uyum](https://img.shields.io/badge/Mobil-Tam%20Uyumlu-3b82f6?style=for-the-badge)
 
----
-
-## 📑 İçindekiler
-- [Öne Çıkan Özellikler](#-öne-çıkan-özellikler)
-- [Mimari ve Veri Güvenliği (Lokal Veri)](#-mimari-ve-veri-güvenliği-lokal-veri)
-- [Kullanım Rehberi ve Modüller](#-kullanım-rehberi-ve-modüller)
-  - [1. Liste ve Toplu İşlemler](#1-liste-ve-toplu-işlemler)
-  - [2. İşletme Konum Modülü (Kritik)](#2-işletme-konum-modülü-kritik)
-  - [3. Haftalık Planlama & İME Saatleri](#3-haftalık-planlama--ime-saatleri)
-  - [4. Bölge Kuralları Motoru](#4-bölge-kuralları-motoru)
-  - [5. İstatistik ve Grafikler](#5-istatistik-ve-grafikler)
-  - [6. Arşiv Sistemi](#6-arşiv-sistemi)
-- [Çıktılar ve Raporlama](#-çıktılar-ve-raporlama)
-- [Hızlı Başlangıç / Kurulum](#-hızlı-başlangıç--kurulum)
-- [Kullanılan Teknolojiler ve Kütüphaneler](#-kullanılan-teknolojiler-ve-kütüphaneler)
-- [Lisans](#-lisans)
+</div>
 
 ---
 
-## 🌟 Öne Çıkan Özellikler
+## 📖 Proje Hakkında
 
-- **🔒 %100 Sunucusuz & Çevrimdışı (Offline-First):** Veriler uzak bir sunucuya veya buluta aktarılmaz; doğrudan tarayıcının yerel hafızasında (`localStorage`) saklanır.
-- **📍 GPS ve Harita Entegrasyonu:** Sahada tek dokunuşla işletme koordinatı alma, Google Maps linklerini otomatik ayrıştırma.
-- **🗺️ Akıllı Rota Algoritması:** Aynı bölgedeki/sanayi sitesindeki yakın işletmeleri tespit edip aynı güne gruplayarak öğretmenin yol süresini en aza indirir.
-- **📅 Okul Günü Çakışma Önleme:** Öğrencilerin okulda olduğu günleri (`Şube` bilgisinden: *PZT-ÇRŞ* vb.) otomatik tanır ve o günlerde işletmeye ziyaret planlanmasını engeller.
-- **📱 QR Kodlu A4 Çıktısı:** Ziyaret planındaki her işletmeye özel navigasyon QR kodu basılır; öğretmen telefon kamerasıyla okutarak kapıya kadar yol tarifi alır.
-- **📊 Resmi Görev Teslim Listesi:** Millî Eğitim mevzuatına uygun formatta Excel formatında tek tıkla haftalık teslim çizelgesi üretir.
-- **👥 Toplu Öğretmen Değişikliği:** Seçilen öğrencilerin koordinatör öğretmenini tek seferde değiştirme ve tek tıkla geri alma (`Undo`) desteği.
+**MESEM Portal**; koordinatör öğretmenlerin işletmelerdeki çırak ve kalfa öğrencilerini takip etmesini, işletmelerin harita konumlarını tek merkezden yönetmesini, birbirine yakın dükkanları aynı güne toplayan akıllı ziyaret rotaları çıkarmasını ve resmi evrakları (**Karekodlu Ziyaret Çizelgesi**, **Görev Teslim Listesi**) tek tıkla hazırlamasını sağlayan **sunucusuz, tek dosyalı (`index.html`)** bir web uygulamasıdır.
+
+Hiçbir kurulum, veritabanı, üyelik veya şifre gerektirmez; bilgisayarda ve cep telefonunda doğrudan çalışır.
 
 ---
 
-## 🛡️ Mimari ve Veri Güvenliği (Lokal Veri)
+## 🛡️ 1. En Önemli Özellik: Lokal Veri (Bilgileriniz Sadece Sizin Cihazınızda!)
 
-MESEM Portal, **KVKK ve veri mahremiyeti** standartlarını en üst düzeyde korumak amacıyla sunucusuz çalışacak şekilde tasarlanmıştır:
+> [!IMPORTANT]
+> **Verileriniz İnternete Gitmez & Yedek Alma Şarttır!**
+> Bu sistem internetteki yabancı bir sunucuya veya buluta **asla veri göndermez**. Yüklediğiniz öğrenci listeleri, telefon numaraları, notlar ve dükkan konumları sadece o an kullandığınız bilgisayarın veya telefonun kendi tarayıcı hafızasında (`localStorage`) durur.
 
-1. **İnternet/Üyelik İstemez:** Hiçbir kullanıcı adı, şifre veya veritabanı bağlantısı gerektirmez.
-2. **Cihaza Özeldir:** Yüklenen veriler yalnızca o an kullanılan tarayıcı profiline özeldir.
-3. **Yedek Alma Şartı:** Tarayıcı geçmişi veya önbelleği temizlendiğinde verilerin kaybolmaması için sistemde düzenli aralıklarla **"Yedek Al"** yapılması önerilir (Portal 7 günden eski yedeklerde kullanıcıyı uyarır).
-4. **Cihazlar Arası Taşınabilirlik:** İndirilen `.json` yedek dosyası, **"Yedek Yükle"** düğmesiyle okul, ev veya cep telefonundaki tarayıcıya aktarılabilir.
-
----
-
-## 📖 Kullanım Rehberi ve Modüller
-
-### 1. Liste ve Toplu İşlemler
-- **Excel Yükleme:** İdareden alınan standart e-MESEM listelerini (`.xlsx`, `.xls`) doğrudan tanır. Öğrenci numarası veya Id üzerinden mükerrer kayıtları engeller, var olanları günceller.
-- **Çoklu Filtreleme:** Öğretmen, Bölge, Sınıf, Şube, Alan ve Dal bazında çoklu seçim (`Multi-select`) ile anında filtreleme.
-- **Toplu Öğretmen Atama:** Tablodan seçilen onlarca öğrencinin koordinatörünü tek tıkla değiştirme ve yapılan hatayı **"Son değişikliği geri al"** butonuyla kurtarma imkânı.
-
-### 2. İşletme Konum Modülü (Kritik)
-İşletmelerin coğrafi konumlarının tek bir merkezden yönetildiği bölümdür:
-- **Tekilleştirme:** Aynı işletmede çalışan birden fazla öğrenci varsa dükkan tek satırda görünür. Girilen koordinat, firmanın **tüm öğrencilerine otomatik yansır**.
-- **GPS ile Yerinde Kayıt:** Sahada ziyaret esnasında **"Konumum"** butonuna basılarak telefonun GPS koordinatları (`41.0082, 28.9784`) birkaç saniye içinde işletmeye atanır.
-- **Girdi Formatı Desteği:** İster enlem/boylam yazın, ister Google Maps bağlantısını yapıştırın; portal koordinatı otomatik ayıklar.
-- **Hata Denetimi:** Türkiye sınırları dışına taşan veya çakışan koordinatları sarı ikazlarla uyarır.
-
-### 3. Haftalık Planlama & İME Saatleri
-- **Ay ve Gün Seçimi:** Ayın haftaları, çalışma günleri ve resmi tatiller hesaba katılarak ziyaret günleri belirlenir.
-- **Otomatik Gün Önerisi:** En az okul günü çakışması yapacak gün kombinasyonunu matematiksel simülasyonla bulur.
-- **İME Saatleri:** 09:00–17:00 mesai penceresi ve 11:50–12:40 öğle paydosu dikkate alınarak işletme başına ziyaret süresi (varsayılan 40 dk) üzerinden kapasite hesabı yapılır.
-- **Gidilen İşletmeler:** Ay ortasında yapılan planlarda, o ay daha önce ziyaret edilmiş işletmeler işaretlenerek plandan çıkarılabilir.
-
-### 4. Bölge Kuralları Motoru
-- Adres metinleri içindeki anahtar kelimelere (`KADOSAN`, `DES`, `DUDULLU` vb.) göre adresleri otomatik bölgelere ayırır.
-- Kurallar yukarıdan aşağıya öncelik sırasıyla çalışır; kullanıcı kural sırasını değiştirebilir veya adresi anında test edebilir.
-
-### 5. İstatistik ve Grafikler
-- Aktif öğrenci sayısı, tekil işletme sayısı ve konumlandırılmış işletme yüzdesi KPI kartlarında gösterilir.
-- Alan, dal, öğretmen ve bölge dağılımları çubuk grafiklerle görselleştirilir; tek sayfaya sığdırılarak yazdırılabilir.
-
-### 6. Arşiv Sistemi
-- Ayrılan, mezun olan veya pasife alınan öğrencileri ana tablodan çıkarıp arşive taşır; istendiğinde tek tıkla geri yükler.
+1. **Gizlilik ve KVKK:** Öğrenci ve işletme verileri cihazınızdan dışarı çıkmadığı için %100 güvenlidir.
+2. **Aman "Yedek Al"mayı Unutmayın:** Bilgisayar temizliği yapıldığında, format atıldığında veya tarayıcı geçmişi silindiğinde bilgileriniz uçmasın diye işiniz bittiğinde sağ üstteki **"Yedek Al"** düğmesine basıp `.json` yedek dosyanızı bilgisayarınıza indirin (7 gün yedek alınmazsa sistem sizi otomatik uyarır).
+3. **Başka Bilgisayara veya Telefona Taşıma:** Evdeki bilgisayardan okuldakine (veya cep telefonunuza) geçeceğiniz zaman, indirdiğiniz yedek dosyasını **"Yedek Yükle"** düğmesiyle seçmeniz yeterlidir; tüm listeniz ve harita konumlarınız saniyeler içinde geri gelir.
+4. **Sekmeler Arası Canlı Senkronizasyon:** Portal aynı tarayıcıda birden fazla sekmede açıksa, bir sekmede yaptığınız değişiklik diğer sekmeye anında yansır.
 
 ---
 
-## 🖨️ Çıktılar ve Raporlama
+## 📍 2. İşletme Konum Modülü (Sahadaki En Büyük Kolaylık)
 
-| Çıktı Türü | Format | Açıklama |
+Koordinatör öğretmenlerin en çok vakit kaybettiği "adres arama ve konum tutturma" sorununu kökten çözen merkezi modüldür:
+
+* **Aynı Dükkana Tek İşlem:** Bir tamirhanede veya fabrikada birden fazla çırak öğrenciniz varsa tek tek uğraşmazsınız. **İşletme Konum** sekmesinde her dükkan tek bir satırda görünür; konumu bir kere kaydettiğinizde o dükkanda çalışan **tüm öğrencilerin kayıtlarına otomatik işlenir**.
+* **Dükkandayken Tek Tuşla "Konumum" (GPS):** İşletmeye ziyarete gittiğinizde cep telefonunuzdan portala girip **"Konumum"** düğmesine basmanız yeterlidir. Telefonunuzun GPS'i bulunduğunuz dükkanın tam noktasını (`41.0082, 28.9784`) haritaya eliyle koymuş gibi kaydeder.
+* **Harita Linki Yapıştırma:** Dilerseniz Google Haritalar'dan kopyaladığınız uzun harita linkini veya koordinatı doğrudan kutucuğa yapıştırabilirsiniz; sistem koordinatı içinden otomatik ayıklar.
+* **Eksik ve Hatalı Konumları Yakalama:**
+  * **"Yalnızca konumsuz"** filtresiyle haritası henüz girilmemiş dükkanları tek tıkla listeleyebilirsiniz.
+  * **"Çakışan konumlar"** filtresiyle farklı satırlarda farklı koordinat kalmış işletmeleri tespit edebilirsiniz.
+  * Türkiye sınırları dışına taşan hatalı koordinat girişlerinde sistem sizi sarı ikazla uyarır.
+
+---
+
+## 🧭 3. Tüm Modüller ve Kullanım Rehberi
+
+### 📋 Ana Liste ve Toplu İşlemler
+* **Excel'den Tek Tıkla Aktarma:** İdareden alınan öğrenci-işletme Excel listesini **"Excel Yükle"** ile içeri atabilirsiniz. Öğrenci No veya Id üzerinden mevcut kayıtları tanır, mükerrer kayıt açmaz, sadece değişen bilgileri günceller.
+* **Toplu Öğretmen Değiştirme:** Görev değişikliği olduğunda tablodan istediğiniz öğrencileri seçip tek tuşla yeni koordinatör öğretmenine atayabilirsiniz. Yanlışlıkla yaparsanız **"Son değişikliği geri al"** düğmesiyle işlemi anında geri alabilirsiniz.
+* **Çoklu Filtreleme ve Sabit Sütunlar:** Öğretmen, Bölge, Sınıf, Şube, Alan ve Dal bazında çoklu filtreleme yapabilirsiniz. Tabloyu sağa kaydırdığınızda öğrenci adı sabit kalır, satırı kaybetmezsiniz.
+
+### 📅 Akıllı Haftalık Planlama & İME Saatleri
+* **Yakın Dükkanları Aynı Güne Toplama:** Kaydettiğiniz dükkan konumları sayesinde sistem, aynı sanayi sitesindeki veya birbirine yakın işletmeleri aynı güne gruplar; öğretmeni şehrin bir ucundan diğer ucuna boşuna koşturmaz.
+* **Okul Günlerini Otomatik Ayıklama:** Öğrencinin `Şube` bilgisinden (*PZT-ÇRŞ*, *SALI* vb.) okulda olduğu günleri anlar ve öğrencinin okulda olduğu gün dükkana ziyaret yazmaz (elle taşırsanız da uyarı verir).
+* **Otomatik Gün Önerisi:** Ayın tüm iş günlerini deneyerek en az çakışma ve en dengeli dağılımı sağlayan günleri sizin yerinize bulur.
+* **İME Saatleri Modu:** 09:00–17:00 mesai penceresi ve 11:50–12:40 öğle dinlenmesini hesaba katar; işletme başı ziyaret süresine (örn. 40 dk) göre günlük kapasiteyi otomatik planlar.
+* **Daha Önce Gidilen İşletmeler:** Planı ay ortasında yapıyorsanız, o ay zaten ziyaret ettiğiniz dükkanları **"Gidildi"** olarak işaretleyip plandan ve süre hesabından düşebilirsiniz.
+
+### 🗂️ Bölge Kuralları Motoru
+* Adreslerin içinde geçen anahtar kelimelere (`KADOSAN`, `DES`, `İMES`, `DUDULLU` vb.) göre işletmelerin bölgesini otomatik atar.
+* **Adres Testi:** Kural eklemeden önce örnek bir adresi test kutusuna yazarak hangi kuralla eşleştiğini anında görebilirsiniz.
+* **Kümeleme ( 🔗 ):** Henüz GPS koordinatı girilmemiş işletmelerde yakınlık hesabı yapılabilmesi için birbirine yakın bölgeleri aynı küme altında gruplayabilirsiniz.
+
+### 📊 İstatistik ve Arşiv
+* **İstatistik:** Öğrenci, tekil işletme, konumlu işletme oranı (%) ve bölge dağılımlarını grafiklerle sunar; tek A4 sayfasına sığdırarak yazdırır.
+* **Arşiv:** Sözleşmesi feshedilen veya mezun olan öğrencileri silmek yerine arşive kaldırabilir, gerektiğinde tek tıkla geri alabilirsiniz.
+
+---
+
+## 🖨️ 4. Yazdırma ve Resmi Evrak Çıktıları
+
+| Çıktı / Evrak Adı | Biçim | Açıklama |
 | :--- | :--- | :--- |
-| **Haftalık Ziyaret Planı** | Yazıcı / PDF | A4 Yatay/Dikey tek sayfaya otomatik ölçeklenen, dinamik QR kodlu ziyaret çizelgesi. |
-| **Görev Teslim Listesi** | Excel (`.xlsx`) | Resmi MEB formatında, her haftası ayrı sayfada veya seçili hafta olarak üretilen imza teslim föyü. |
-| **İstatistik Raporu** | Yazıcı / PDF | Alan, dal ve öğretmen dağılımlarını tek A4 sayfasına sığdıran özet rapor. |
-| **Tam Sistem Yedeği** | JSON (`.json`) | Tüm veri, kural, tatil ve planları içeren taşınabilir veri paketi. |
+| **Karekodlu (QR) Ziyaret Planı** | A4 Baskı / PDF | Her dükkanın yanında özel karekod bulunur. Telefon kamerasını okuttuğunuz an harita açılır ve sizi dükkanın kapısına götürür. Tek sayfaya otomatik sığdırılır. |
+| **Görev Teslim Listesi** | Excel (`.xlsx`) | MEB standartlarına birebir uygun *"Koordinatör Öğretmen Görev Teslim Listesi"* şablonunu imza alanlarıyla birlikte tek tıkla Excel olarak indirir. |
+| **İstatistik Raporu** | A4 Baskı / PDF | Alan, dal, bölge ve öğretmen bazlı öğrenci/işletme yükünü grafikli veya tablosal olarak tek sayfaya basar. |
+| **Filtrelenmiş Ana Liste** | Excel & A4 Baskı | O an ekranda süzülmüş olan listeyi Excel'e aktarır veya A4 yatay sayfaya sığdırarak yazdırır. |
 
 ---
 
-## 🚀 Hızlı Başlangıç / Kurulum
+## 📥 5. Excel Yükleme Sütun Başlıkları
 
-Portalın çalışması için herhangi bir Node.js, Python veya sunucu ortamı kurmanıza **gerek yoktur**.
+Excel'den veri yüklerken sütun sıralaması önemli değildir. Sistem aşağıdaki başlık isimlerini otomatik olarak tanır:
 
-1. Depoyu klonlayın veya zip olarak indirin:
-   ```bash
-   git clone https://github.com/kullaniciadi/mesem-portal.git
+| Veri Alanı | Tanınan Excel Sütun Başlıkları (Herhangi Biri Olabilir) |
+| :--- | :--- |
+| **Öğrenci No** | `Öğr.No`, `Öğrenci No`, `Ogr.No`, `ogrNo`, `No`, `Numara` |
+| **Ad Soyad** | `Ad Soyad`, `Adı Soyadı`, `Öğrenci Adı`, `İsim`, `adSoyad` |
+| **İşletme Adı** | `Firma`, `Firma Adı`, `İşletme`, `İşletme Adı`, `Tespit Edilen Firma` |
+| **İşyeri Adresi** | `Adres`, `İşyeri Adresi`, `İşletme Adresi`, `Temiz Adres` |
+| **Öğretmen** | `Öğretmen`, `Koordinatör Öğretmen`, `ogretmen` |
+| **Şube (Okul Günü)** | `Şube`, `Şubesi`, `Sube`, `sube` *(Örn: PZT, PZT-ÇRŞ, SALI)* |
+| **Sınıf & Dal** | `Sınıf`, `Sınıfı` / `Dal`, `Dalı`, `Alan/Dal` |
+| **İletişim & Usta** | `Öğrenci Tel`, `Telefon` / `İşyeri Tel`, `Firma Tel` / `Usta Öğretici`, `Usta` |
+| **Konum & Not** | `Koordinat`, `Konum` / `Not`, `Notlar` |
+
+---
+
+## 💻 6. Kurulum ve Çalıştırma
+
+Herhangi bir program, sunucu veya teknik kurulum **gerektirmez**:
+
+1. Bu depodaki `index.html` dosyasını bilgisayarınıza veya telefonunuza indirin.
+2. Dosyaya çift tıklayarak **Google Chrome, Microsoft Edge, Firefox veya Safari** tarayıcınızda açın.
+3. Doğrudan kullanmaya başlayın!
+
+> [!TIP]
+> Excel okuma/yazma ve ikon kütüphaneleri internet üzerinden (CDN) yüklendiği için, dosyayı açarken cihazınızın internete bağlı olması önerilir.
+
+---
+
+## 🛠️ 7. Teknik Altyapı
+
+* **Çekirdek:** Saf (Vanilla) JavaScript (ES6+), HTML5, CSS3 (Hiçbir framework bağımlılığı yoktur).
+* **Kütüphaneler:**
+  * [SheetJS (`xlsx.full.min.js`)](https://sheetjs.com/) — Excel okuma ve dışa aktarma.
+  * [ExcelJS (`exceljs.min.js`)](https://github.com/exceljs/exceljs) — Resmi şablonlu Görev Teslim Listesi üretimi.
+  * [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) — Çıktılar için vektörel (SVG) QR kod üretimi.
+  * [Font Awesome 6](https://fontawesome.com/) — Arayüz ikon seti.
+
+---
+
+## 📄 Lisans
+
+Bu proje eğitim kurumlarında, koordinatör öğretmenler ve okul idarecileri tarafından serbestçe kullanılabilir, paylaşılabilir ve geliştirilebilir.
