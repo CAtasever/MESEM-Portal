@@ -1,4 +1,4 @@
-<!-- MESEM Portal – Sürüm v5.28 – Son güncelleme: 2026-10-17 -->
+<!-- MESEM Portal – Sürüm v5.29 – Son güncelleme: 2026-10-19 -->
 <!-- SÜRÜM NOTU: Her yeni sürümde sürüm numarası 3 yerde birlikte güncellenmelidir: (1) bu satırdaki başlık yorumu, (2) <title> etiketi, (3) sayfadaki "MESEM Portal" başlığının yanındaki küçük sürüm rozeti (id="homeLink" içindeki <span>). -->
 <!DOCTYPE html>
 <html lang="tr">
@@ -6,7 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.28</title>
+<title>MESEM Portal v5.29</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -353,8 +353,12 @@ tbody tr:hover td { background-color: #f1f5f9 !important; }
 #view-plan .tabs { margin-bottom: 8px; padding-bottom: 6px; }
 #planTableContainer table { min-width: 0; }
 #planTableContainer th, #planTableContainer td { padding: 4px 6px; font-size: 12px; }
-.print-settings > summary { cursor: pointer; list-style: none; }
+/* v5.29: başlıkta açılır/kapanır oku (mobilde kart kapalı gelir; ok olmadığı için açılabildiği anlaşılmıyordu) */
+.print-settings > summary { cursor: pointer; list-style: none; user-select: none; -webkit-tap-highlight-color: transparent; }
 .print-settings > summary::-webkit-details-marker { display: none; }
+.print-settings > summary::before { content: "\25B6"; display: inline-block; font-size: 11px; margin-right: 8px; transition: transform .15s; }
+.print-settings[open] > summary::before { transform: rotate(90deg); }
+@media (max-width: 768px) { .print-settings > summary { min-height: 44px; display: flex; align-items: center; } }
 .plan-settings-toggle { display: none; }
 @media (max-width: 768px) {
     .plan-settings-toggle { display: inline-flex; align-items: center; justify-content: center; width: 100%; min-height: 44px; margin-bottom: 8px; }
@@ -534,7 +538,7 @@ button.chip { font-family: inherit; color: var(--text); }
 
 <div class="navbar">
     <!-- Sürüm rozeti: her yeni sürümde güncelle (dosya başındaki SÜRÜM NOTU'na bakın) -->
-        <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.28</span></h1>
+        <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.29</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main">Liste</a>
         <a class="nav-tab" data-tab="stats">İstatistik</a>
@@ -963,7 +967,7 @@ button.chip { font-family: inherit; color: var(--text); }
 <div style="max-width:1200px;margin:0 auto;">
     <div style="display:flex;gap:10px;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
         <b style="color:#fff;font-size:15px;">Yazdırma Önizlemesi <span id="pvInfo" style="font-weight:400;opacity:.8;font-size:12px;"></span></b>
-        <span><button class="btn btn-primary" id="pvPrint" type="button">Yazdır</button> <button class="btn btn-print" id="pvClose" type="button">Kapat</button></span>
+        <span style="display:flex;gap:8px;"><button class="btn btn-primary" id="pvPrint" type="button">Yazdır</button><button class="btn btn-print" id="pvClose" type="button">Kapat</button></span>
     </div>
     <div id="pvHost" class="print-wrapper"></div>
 </div>
