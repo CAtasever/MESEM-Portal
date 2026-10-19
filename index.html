@@ -1,4 +1,4 @@
-<!-- MESEM Portal – Sürüm v5.31 – Son güncelleme: 2026-10-19 -->
+<!-- MESEM Portal – Sürüm v5.32 – Son güncelleme: 2026-10-19 -->
 <!-- SÜRÜM NOTU: Her yeni sürümde sürüm numarası 3 yerde birlikte güncellenmelidir: (1) bu satırdaki başlık yorumu, (2) <title> etiketi, (3) sayfadaki "MESEM Portal" başlığının yanındaki küçük sürüm rozeti (id="homeLink" içindeki <span>). -->
 <!DOCTYPE html>
 <html lang="tr">
@@ -6,7 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.31</title>
+<title>MESEM Portal v5.32</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -30,6 +30,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-
 .nav-links { display: flex; gap: 10px; }
 .nav-links a { color: #cbd5e1; text-decoration: none; font-weight: 500; cursor: pointer; padding: 6px 10px; border-radius: 6px; transition: color .2s, background-color .2s; font-size: 14px; }
 .nav-links a.active, .nav-links a:hover { color: white; background-color: #334155; }
+.nav-links a .fas { margin-right: 4px; opacity: .9; }
 
 .container { flex: 1; padding: 15px 15px 0 15px; overflow: hidden; display: flex; flex-direction: column; position: relative; }
 .view-section { display: none; height: 100%; flex-direction: column; overflow: hidden; }
@@ -544,14 +545,14 @@ button.chip { font-family: inherit; color: var(--text); }
 
 <div class="navbar">
     <!-- Sürüm rozeti: her yeni sürümde güncelle (dosya başındaki SÜRÜM NOTU'na bakın) -->
-        <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.31</span></h1>
+        <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.32</span></h1>
     <div class="nav-links">
-        <a class="active nav-tab" data-tab="main">Liste</a>
-        <a class="nav-tab" data-tab="stats">İstatistik</a>
-        <a class="nav-tab" data-tab="loc">İşletme Konum</a>
-        <a class="nav-tab" data-tab="plan">Haftalık Planlama</a>
-        <a class="nav-tab" data-tab="rules">Kurallar</a>
-        <a class="nav-tab" data-tab="archive">Arşiv</a>
+        <a class="active nav-tab" data-tab="main"><i class="fas fa-list"></i> Liste</a>
+        <a class="nav-tab" data-tab="loc"><i class="fas fa-map-location-dot"></i> İşletme Konum</a>
+        <a class="nav-tab" data-tab="plan"><i class="fas fa-calendar-week"></i> Haftalık Planlama</a>
+        <a class="nav-tab" data-tab="rules"><i class="fas fa-list-check"></i> Kurallar</a>
+        <a class="nav-tab" data-tab="stats"><i class="fas fa-chart-column"></i> İstatistik</a>
+        <a class="nav-tab" data-tab="archive"><i class="fas fa-box-archive"></i> Arşiv</a>
         <a id="btnFactoryReset" title="Sistemi Sıfırla"><i class="fas fa-sync"></i><span class="nav-lbl"> Sıfırla</span></a>
     </div>
 </div>
@@ -704,6 +705,19 @@ button.chip { font-family: inherit; color: var(--text); }
             </div>
             <div id="planHolidayChips" style="display:flex; flex-wrap:wrap; gap:6px; margin:-2px 0 8px;"></div>
             <div id="planUploadInfo" style="margin-bottom:10px;font-size:13px;font-weight:600;"></div>
+        </div>
+
+        <div class="card noprint" id="visitedCard">
+            <details id="visitedBox">
+                <summary style="cursor:pointer; font-weight:600; font-size:14px;"><i class="fas fa-circle-check"></i> Daha Önce Gidilen İşletmeler <span id="visitedSummary" style="font-weight:400; opacity:.7; font-size:12px;"></span></summary>
+                <p style="font-size:12px; opacity:.75; margin:8px 0;">Planı ay ortasında yapıyorsanız bu ay zaten ziyaret ettiğiniz işletmeleri işaretleyin: plana alınmaz, İME süresi ve günlerdeki yük kalan işletmelere göre dağıtılır. Seçim <b>öğretmen + ay</b> için saklanır; yeni ayda sıfırdan başlar. Plan oluşturduktan sonra da tablodaki <b>Gidildi</b> düğmesiyle tek tek işaretleyebilirsiniz.</p>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:8px;">
+                    <input type="search" id="visitedSearch" placeholder="İşletme ara..." style="flex:1; min-width:160px; padding:6px 8px;">
+                    <button type="button" class="btn btn-import" id="btnVisitedClear" style="padding:6px 10px;">Seçimi temizle</button>
+                </div>
+                <div class="chk-box" id="visitedList" style="max-height:240px; overflow:auto;"></div>
+                <div id="visitedHint" style="font-size:12px; margin-top:6px; color:#b45309;"></div>
+            </details>
         </div>
 
         <div class="card noprint" id="weekCard">
@@ -1162,7 +1176,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function factoryReset() {
         if (confirm("TÜM SİSTEMİ SIFIRLAMAK ÜZERESİNİZ!\n\nTüm kayıtlar, adresler, notlar ve kurallar kalıcı olarak silinecek. Emin misiniz?")) {
             exportBackup();
-            ['mesemRecordsBirlesikV1','mesemRulesBirlesikV1','mesemHolidaysBirlesikV1','mesemImeBirlesikV1','mesemImeBirlesikV2','mesemRecordsV23','mesemRulesV23', BULK_UNDO_KEY].forEach(k => localStorage.removeItem(k));
+            ['mesemRecordsBirlesikV1','mesemRulesBirlesikV1','mesemHolidaysBirlesikV1','mesemImeBirlesikV1','mesemImeBirlesikV2','mesemVisitedV1','mesemRecordsV23','mesemRulesV23', BULK_UNDO_KEY].forEach(k => localStorage.removeItem(k));
             msSelected = { ogretmen: [], bolge: [], sinif: [], sube: [], dal: [], alan: [] };
             document.getElementById('searchInput').value = '';
             document.getElementById('archiveSearchInput').value = '';
@@ -1177,6 +1191,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function switchTab(tabId) {
         const next = document.getElementById('view-' + tabId);
         if (!next) return;
+        // v5.32: Arşiv de diğer sekmeler gibi her girişte ilk 100 kayıtla açılır ("Daha fazla göster" ile genişletilmişse sıfırlanır)
+        if (tabId === 'archive' && archiveLimit !== ARCHIVE_PAGE) { archiveLimit = ARCHIVE_PAGE; tabRendered.archive = 0; }
         const cur = document.querySelector('.view-section.active');
         // Aynı sekmeye tekrar tıklama: veri değişmediyse yapılacak iş yok
         if (cur === next && tabRendered[tabId] === dataVersion) return;
@@ -2048,6 +2064,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const prev = sel.value;
         sel.innerHTML = '<option value="">-- Öğretmen seçin --</option>' + teachers.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
         if (teachers.includes(prev)) sel.value = prev;
+        if (typeof renderVisitedList === 'function' && $$('visitedList')) renderVisitedList();
         const subeEksik = records.filter(r => !r.isArchived && !r.sube).length;
         $$('planUploadInfo').innerHTML = subeEksik > 0
             ? `<span class="warn-text">${subeEksik} aktif kayıtta Şube bilgisi eksik — bu öğrenciler plandan çıkarılmaz, herhangi bir güne yerleştirilir ve ⚠ ile işaretlenir.</span>`
@@ -2566,7 +2583,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const businessMap = new Map();
         records.filter(r => !r.isArchived && r.ogretmen === teacher).forEach(r => {
             const bKey = bizKey(r.isletme);
-            if (!businessMap.has(bKey)) businessMap.set(bKey, { name: r.isletme, bolge: r.bolge, kume: r.kume || '', students: [], stu: [], adres: r.adres, ustas: new Set(), dals: new Set(), schoolDays: new Set(), ll: parseLL(r.koordinat) });
+            if (!businessMap.has(bKey)) businessMap.set(bKey, { key: bKey, name: r.isletme, bolge: r.bolge, kume: r.kume || '', students: [], stu: [], adres: r.adres, ustas: new Set(), dals: new Set(), schoolDays: new Set(), ll: parseLL(r.koordinat) });
             const b = businessMap.get(bKey);
             if (!b.kume && r.kume) b.kume = r.kume;
             const nm = r.adSoyad || '(adsız)';
@@ -2577,13 +2594,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const days = parseSchoolDays(r.sube);
             if (days.length) days.forEach(d => b.schoolDays.add(d)); else b.unk = (b.unk||0)+1;
         });
-        const businesses = [...businessMap.values()];
+        const allBiz = [...businessMap.values()];
+        // v5.32: bu ay daha önce gidilen işletmeler plana alınmaz
+        const visitedKeys = (opts && opts.visited) || null;
+        const visitedBiz = visitedKeys ? allBiz.filter(b => visitedKeys.has(b.key)) : [];
+        const businesses = visitedKeys ? allBiz.filter(b => !visitedKeys.has(b.key)) : allBiz;
         const slack = (opts && opts.slack) || 0;
         const maxPerVisitDay = Math.ceil(businesses.length / Math.max(selectedVisitDates.length,1)) + slack;
         const dayLoad = {}; selectedVisitDates.forEach(dk => dayLoad[dk]=0);
         const assigned = [];
         // İME modu: günün kapasitesi = İME süresi / ziyaret süresi. Eksik kalırsa işletmeler yine de yerleştirilir, aşım raporlanır.
-        const imeMode = !!(opts && opts.imeCaps); let caps = null, floors = null, overflow = 0;
+        const imeMode = !!(opts && opts.imeCaps); let caps = null, floors = null, overflow = 0, strict = false;
         if (imeMode) {
             const c = {}; let tot = 0; const nB = businesses.length, nD = Math.max(selectedVisitDates.length, 1);
             selectedVisitDates.forEach(dk => { c[dk] = opts.imeCaps[dk] || 0; tot += c[dk]; });
@@ -2593,8 +2614,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 let sum = selectedVisitDates.reduce((t,dk) => t + caps[dk], 0);
                 while (sum < nB) { const d = selectedVisitDates.filter(dk => caps[dk] < c[dk]).sort((a,b) => (c[b]-caps[b])-(c[a]-caps[a]))[0]; if (!d) break; caps[d]++; sum++; }
             } else {
-                overflow = nB - tot;
-                selectedVisitDates.forEach(dk => { caps[dk] = c[dk] + (tot ? Math.ceil(overflow*c[dk]/tot) : Math.ceil(nB/nD)); });
+                // v5.32: süre yetmiyorsa kapasite AŞILMAZ; sığmayan işletmeler plana alınmaz (excluded olarak raporlanır)
+                strict = true;
+                selectedVisitDates.forEach(dk => { caps[dk] = c[dk]; });
             }
             selectedVisitDates.forEach(dk => { floors[dk] = Math.max(nB >= selectedVisitDates.length ? 1 : 0, Math.floor(nB*c[dk]/Math.max(tot,1)) - slack); floors[dk] = Math.min(floors[dk], caps[dk]); }); // işletme sayısı yetiyorsa her İME gününe en az 1 işletme
         }
@@ -2626,7 +2648,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 if (!best) break;
                 best.feas.sort((p,q) => p.options.length-q.options.length);
-                const take = best.feas.slice(0, Math.max(best.room,1));
+                const take = best.feas.slice(0, strict ? best.room : Math.max(best.room,1));
+                if (!take.length) break; // kapasite doldu: kalanlar plan dışı
                 take.forEach(bz => { dayLoad[best.dk]++; assigned.push({biz:bz, weekIndex:best.wi, dateKey:best.dk}); });
                 rest = rest.filter(bz => !take.includes(bz));
             }
@@ -2639,7 +2662,10 @@ document.addEventListener('DOMContentLoaded', function() {
             rebalance(assigned, selectedVisitDates, dayLoad, maxPerVisitDay, floor);
             if (!(opts && opts.fast)) improveClusters(assigned, selectedVisitDates, dayLoad, maxPerVisitDay, floor);
         }
-        return { teacher, selectedVisitDates, assigned, totalBusinesses: businesses.length, imeMode, caps, overflow };
+        const placed = new Set(assigned.map(a => a.biz));
+        const excluded = imeMode ? businesses.filter(b => !placed.has(b)) : [];
+        overflow = excluded.length;
+        return { teacher, selectedVisitDates, assigned, totalBusinesses: allBiz.length, imeMode, caps, overflow, excluded, visitedList: visitedBiz, visitedCount: visitedBiz.length };
     }
     function planCost(p) {
         const loads = p.selectedVisitDates.map(dk => p.assigned.filter(a=>a.dateKey===dk).length);
@@ -2647,7 +2673,50 @@ document.addEventListener('DOMContentLoaded', function() {
         if (p.imeMode && p.caps) { const u = p.selectedVisitDates.map((dk,k) => loads[k] / Math.max(1, p.caps[dk])); spread = u.length ? (Math.max(...u)-Math.min(...u))*10 : 0; }
         return confCount(p)*60 + spread*3 + avgRegions(p)*p.selectedVisitDates.length*2 + (p.overflow||0)*200;
     }
+    // --- v5.32: öğretmen + ay bazında "daha önce gidilen işletmeler" ---
+    const VISITED_KEY = 'mesemVisitedV1';
+    let visitedStore = {};
+    try { const x = JSON.parse(localStorage.getItem(VISITED_KEY) || 'null'); if (x && typeof x === 'object') visitedStore = x; } catch(e) {}
+    const visitedStoreKey = teacher => teacher + '|' + (($$('planMonthSelect') && $$('planMonthSelect').value) || '');
+    const visitedSet = teacher => new Set(visitedStore[visitedStoreKey(teacher)] || []);
+    function saveVisited() { try { localStorage.setItem(VISITED_KEY, JSON.stringify(visitedStore)); } catch(e) { storageWriteError(e); } }
+    function visitedAdd(teacher, key) { const k = visitedStoreKey(teacher); const a = visitedStore[k] || (visitedStore[k] = []); if (!a.includes(key)) a.push(key); saveVisited(); }
+    function visitedRemove(teacher, key) { const k = visitedStoreKey(teacher); visitedStore[k] = (visitedStore[k] || []).filter(x => x !== key); if (!visitedStore[k].length) delete visitedStore[k]; saveVisited(); }
+    function teacherBusinesses(teacher) {
+        const m = new Map();
+        records.filter(r => !r.isArchived && r.ogretmen === teacher && bizKey(r.isletme)).forEach(r => { const k = bizKey(r.isletme); if (!m.has(k)) m.set(k, r.isletme); });
+        return [...m.entries()].map(([key, name]) => ({ key, name })).sort((a,b) => a.name.localeCompare(b.name, 'tr-TR'));
+    }
+    function renderVisitedList() {
+        const teacher = $$('planTeacherSelect').value, box = $$('visitedList');
+        if (!teacher) { box.innerHTML = '<span style="opacity:.6;font-size:12px;">Önce öğretmen seçin.</span>'; $$('visitedSummary').textContent = ''; return; }
+        const q = ($$('visitedSearch').value || '').toLocaleLowerCase('tr-TR'), vs = visitedSet(teacher);
+        const all = teacherBusinesses(teacher), list = all.filter(b => !q || b.name.toLocaleLowerCase('tr-TR').includes(q));
+        box.innerHTML = list.map(b => `<label class="chk"><input type="checkbox" class="visited-cb" data-key="${escapeHtml(b.key)}" ${vs.has(b.key) ? 'checked' : ''}> ${escapeHtml(b.name)}</label>`).join('') || '<span style="opacity:.6;font-size:12px;">İşletme bulunamadı.</span>';
+        const n = all.filter(b => vs.has(b.key)).length;
+        $$('visitedSummary').textContent = n ? `· ${n} işletme plan dışı` : '· yok';
+    }
+    onInit(() => {
+        $$('visitedList').addEventListener('change', e => {
+            const cb = e.target.closest('.visited-cb'); if (!cb) return;
+            const t = $$('planTeacherSelect').value; if (!t) return;
+            (cb.checked ? visitedAdd : visitedRemove)(t, cb.dataset.key);
+            renderVisitedList();
+            $$('visitedHint').textContent = activePlan ? 'Değişiklik açık plana uygulanmadı: yeni durumu görmek için Planı yeniden oluşturun.' : '';
+        });
+        $$('visitedSearch').addEventListener('input', renderVisitedList);
+        $$('btnVisitedClear').addEventListener('click', () => {
+            const t = $$('planTeacherSelect').value; if (!t) return;
+            delete visitedStore[visitedStoreKey(t)]; saveVisited(); renderVisitedList();
+            $$('visitedHint').textContent = activePlan ? 'Değişiklik açık plana uygulanmadı: yeni durumu görmek için Planı yeniden oluşturun.' : '';
+        });
+        $$('planTeacherSelect').addEventListener('change', () => { $$('visitedHint').textContent = ''; renderVisitedList(); });
+        $$('planMonthSelect').addEventListener('change', () => { $$('visitedHint').textContent = ''; renderVisitedList(); });
+        renderVisitedList();
+    });
+
     function computePlan(teacher, selectedVisitDates, opts) {
+        opts = Object.assign({ visited: visitedSet(teacher) }, opts || {});
         const tries = (opts && opts.fast) ? 1 : 10;
         let best=null, bc=Infinity;
         for (let sd=0; sd<tries; sd++) { const p = computeOnce(teacher, selectedVisitDates, opts, sd), c = planCost(p); if (c<bc) { bc=c; best=p; } }
@@ -2689,7 +2758,7 @@ document.addEventListener('DOMContentLoaded', function() {
         activePlan.month = $$('planMonthSelect').value;
         currentWeekIndex = 0; renderPlanUI(); collapsePlanSettingsOnMobile();
         showToast("İME planı oluşturuldu.");
-        if (activePlan.overflow > 0) alert('İME süreleri yetmiyor: ' + activePlan.overflow + ' işletme kapasitenin dışında kaldı.\nZiyaret süresini kısaltın, İME saatlerini uzatın ya da ek hafta açın.');
+        if (activePlan.overflow > 0) alert('İME süreleri yetmiyor: ' + activePlan.overflow + ' işletme kapasitenin dışında kaldı ve plana dahil edilmedi.\nPlan, kalan işletmelerle oluşturuldu. Hepsini kapsamak için ziyaret süresini kısaltın, İME saatlerini uzatın ya da ek hafta açın.');
     });
     });
     onInit(() => {
@@ -2721,9 +2790,13 @@ document.addEventListener('DOMContentLoaded', function() {
         $$('planOutput').classList.remove('hidden');
         const plan = activePlan;
         $$('planSkipNote').innerHTML = '<span style="opacity:.8">Kaynak: ' + (planIme(plan) ? 'İME Saatleri' : 'Haftalık Ziyaret Günleri') + '</span>'
-            + (plan.closedWeeks && plan.closedWeeks.length ? ' <span class="warn-text">· Kapalı hafta atlandı: ' + plan.closedWeeks.map(n => n + '. hafta').join(', ') + '</span>' : '');
+            + (plan.closedWeeks && plan.closedWeeks.length ? ' <span class="warn-text">· Kapalı hafta atlandı: ' + plan.closedWeeks.map(n => n + '. hafta').join(', ') + '</span>' : '')
+            + (plan.visitedCount ? ' <span style="opacity:.85">· ' + plan.visitedCount + ' işletme bu ay daha önce gidildiği için plana alınmadı</span>' : '')
+            + (plan.excluded && plan.excluded.length ? '<details style="margin-top:6px"><summary class="warn-text" style="cursor:pointer">⚠ İME süresi yetmediği için ' + plan.excluded.length + ' işletme plana alınmadı (listeyi göster)</summary><div style="font-size:12px;margin-top:4px;">' + plan.excluded.map(b => escapeHtml(b.name) + (b.bolge ? ' <span style="opacity:.6">(' + escapeHtml(b.bolge) + ')</span>' : '')).join('<br>') + '</div></details>' : '');
         let statsHtml = `<div class="stat-box"><span class="num">${plan.totalBusinesses}</span><span class="lbl">Toplam İşletme</span></div>
             <div class="stat-box"><span class="num" style="color:var(--primary-dark)">${plan.assigned.length}</span><span class="lbl">Planlanan</span></div>
+            ${plan.visitedCount ? `<div class="stat-box"><span class="num" style="color:#64748b">${plan.visitedCount}</span><span class="lbl">Önceden gidilen</span></div>` : ''}
+            ${plan.excluded && plan.excluded.length ? `<div class="stat-box"><span class="num" style="color:#b91c1c">${plan.excluded.length}</span><span class="lbl">Kapasite dışı</span></div>` : ''}
             <div class="stat-box"><span class="num">${confCount(plan)}</span><span class="lbl">Okul günü notu</span></div>
             <div class="stat-box"><span class="num">${avgRegions(plan).toFixed(1)}</span><span class="lbl">Bölge / gün</span></div>`;
         const cntOf = dk => plan.assigned.filter(a => a.dateKey === dk).length;
@@ -2792,7 +2865,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td>${item.biz.bolge?`<span class="badge badge-bolge">${escapeHtml(item.biz.bolge)}</span>`:'-'}</td>
                     <td>${item.biz.stu.map(x => `<div>${escapeHtml(x.name + (x.no?' ('+x.no+')':''))}${x.dal?`<span style="font-size:11px;opacity:.75"> · ${escapeHtml(x.dal)}</span>`:''}${x.tel?`<span style="font-size:11px;opacity:.75"> — ${escapeHtml(x.tel)}</span>`:''}</div>`).join('')}</td>
                     <td>${[...new Set(item.biz.stu.map(x=>x.sube).filter(Boolean))].map(b=>`<span class="badge badge-sube">${escapeHtml(b)}</span>`).join(' ') || '-'}</td>
-                    <td class="noprint"><select data-idx="${actualIndex}" style="padding:6px;font-size:12px;font-weight:600;width:100%;">${optionsHtml}</select></td>
+                    <td class="noprint"><select data-idx="${actualIndex}" style="padding:6px;font-size:12px;font-weight:600;width:100%;">${optionsHtml}</select><button type="button" class="btn btn-import" data-visited-idx="${actualIndex}" style="margin-top:6px;padding:4px 8px;font-size:11px;width:100%;" title="Bu ay gidildi olarak işaretle ve plandan çıkar">✓ Gidildi</button></td>
                 </tr>`;
             });
         }
@@ -2806,8 +2879,26 @@ document.addEventListener('DOMContentLoaded', function() {
     $$('planTableContainer').addEventListener('change', e => {
         const sel = e.target.closest('select[data-idx]'); if (!sel) return;
         const item = activePlan.assigned[+sel.dataset.idx];
-        item.dateKey = sel.value; item.weekIndex = activePlan.selectedVisitDates.indexOf(sel.value);
-        showToast("İşletme başka güne taşındı."); renderPlanUI();
+        const oldKey = item.dateKey, newKey = sel.value;
+        // v5.32: hedef gün öğrencilerin okul gününe denk geliyorsa uyar, onay alırsa taşı
+        const clash = item.biz.stu.filter(x => stuSchoolDays({sube:x.sube}).includes(dowOf(newKey)));
+        if (clash.length) {
+            const nm = clash.slice(0,5).map(x => x.name).join(', ') + (clash.length > 5 ? ' +' + (clash.length - 5) : '');
+            if (!confirm(`⚠ Gün uyumsuzluğu\n\n${item.biz.name} işletmesinin ${clash.length} öğrencisi ${formatDisplayDate(newKey)} günü okulda: ${nm}\n\nYine de bu güne taşımak istiyor musunuz?`)) { sel.value = oldKey; return; }
+        }
+        item.dateKey = newKey; item.weekIndex = activePlan.selectedVisitDates.indexOf(newKey);
+        showToast(clash.length ? "İşletme taşındı (okul günü uyumsuzluğu onaylandı)." : "İşletme başka güne taşındı."); renderPlanUI();
+    });
+    $$('planTableContainer').addEventListener('click', e => {
+        const b = e.target.closest('button[data-visited-idx]'); if (!b || !activePlan) return;
+        const item = activePlan.assigned[+b.dataset.visitedIdx]; if (!item) return;
+        const t = activePlan.teacher;
+        visitedAdd(t, item.biz.key);
+        activePlan.assigned.splice(+b.dataset.visitedIdx, 1);
+        activePlan.visitedCount = (activePlan.visitedCount || 0) + 1;
+        (activePlan.visitedList || (activePlan.visitedList = [])).push(item.biz);
+        showToast(item.biz.name + " gidildi olarak işaretlendi, plandan çıkarıldı.");
+        renderPlanUI(); renderVisitedList();
     });
     });
     onInit(() => {
