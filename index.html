@@ -1,4 +1,4 @@
-<!-- MESEM Portal – Sürüm v5.33 – Son güncelleme: 2026-10-20 -->
+<!-- MESEM Portal – Sürüm v5.34 – Son güncelleme: 2026-10-20 -->
 <!-- SÜRÜM NOTU: Her yeni sürümde sürüm numarası 3 yerde birlikte güncellenmelidir: (1) bu satırdaki başlık yorumu, (2) <title> etiketi, (3) sayfadaki "MESEM Portal" başlığının yanındaki küçük sürüm rozeti (id="homeLink" içindeki <span>). -->
 <!DOCTYPE html>
 <html lang="tr">
@@ -6,7 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.33</title>
+<title>MESEM Portal v5.34</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -556,7 +556,7 @@ button.chip { font-family: inherit; color: var(--text); }
 
 <div class="navbar">
     <!-- Sürüm rozeti: her yeni sürümde güncelle (dosya başındaki SÜRÜM NOTU'na bakın) -->
-        <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.33</span></h1>
+        <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.34</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main"><i class="fas fa-list"></i> Liste</a>
         <a class="nav-tab" data-tab="loc"><i class="fas fa-map-location-dot"></i> İşletme Konum</a>
@@ -771,7 +771,6 @@ button.chip { font-family: inherit; color: var(--text); }
                 <summary class="card-title">Yazdırma Ayarları</summary>
                 <div class="opt-grid">
                     <div class="plan-fg" style="min-width:0"><label>Kâğıt yönü</label><select id="pOrient"><option value="landscape" selected>A4 Yatay</option><option value="portrait">A4 Dikey</option><option value="auto">Otomatik (en iyi sığan)</option></select></div>
-                    <div class="plan-fg" style="min-width:0"><label>QR içeriği</label><select id="pQrMode"><option value="addr" selected>Tam adres</option><option value="name">İşletme adı + adres</option></select></div>
                     <div class="plan-fg" style="min-width:0"><label>Kapsam</label><select id="pScope"><option value="all">Tüm ziyaret günleri</option><option value="active">Yalnızca seçili hafta</option></select></div>
                     <div class="plan-fg" style="min-width:0"><label>Okul / kurum adı</label><input type="text" id="pSchool" placeholder="Örn: ... Mesleki Eğitim Merkezi"></div>
                 </div>
@@ -1571,7 +1570,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td><div style="white-space:normal; font-size:12px;" title="${r.adres}">${r.adres}</div>${coordBadge}</td>
                     <td><span class="badge badge-bolge">${r.bolge}</span></td>
                     <td class="narrow-cell">${noteHtml}</td>
-                    <td class="narrow-cell"><a href="#" data-map data-mname="${escapeHtml(rr.isletme || '')}" data-madres="${escapeHtml(rr.adres || '')}" class="map-icon" title="Haritada aç (işletme adı / adres seç)"><i class="fas fa-map-marker-alt"></i></a></td>
+                    <td class="narrow-cell"><a href="#" data-map data-mname="${escapeHtml(rr.isletme || '')}" data-madres="${escapeHtml(rr.adres || '')}" data-mll="${escapeHtml(((parseLL(rr.koordinat) || []).join(',')))}" class="map-icon" title="${hasCoord ? 'Koordinatla haritada aç' : 'Haritada aç (işletme adı / adres seç)'}"><i class="fas fa-map-marker-alt"></i></a></td>
                     <td class="actions-cell">
                         <i class="fas fa-edit action-icon icon-edit" title="Düzenle" data-action="edit" data-idx="${idx}"></i>
                         <i class="fas fa-archive action-icon icon-archive" title="Arşive At" data-action="archive" data-idx="${idx}"></i>
@@ -2276,7 +2275,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="loc-msg">${warn.map(w => `<span class="warn-text">${w}</span>`).join('<br>')}</div></td>
             <td class="loc-actions-cell"><div class="loc-actions">
                 <button type="button" class="btn btn-import loc-gps" title="Bulunduğum konumu al"><i class="fas fa-crosshairs"></i><span class="btn-lbl"> Konumum</span></button>
-                <a href="#" data-map data-mname="${escapeHtml(g.name)}" data-madres="${escapeHtml(g.adres || '')}" class="map-icon loc-map" title="Haritada aç (işletme adı / adres seç)"><i class="fas fa-map-marker-alt"></i><span class="btn-lbl"> Haritada aç</span></a>
+                <a href="#" data-map data-mname="${escapeHtml(g.name)}" data-madres="${escapeHtml(g.adres || '')}" data-mll="${escapeHtml((parseLL(g.koord) || []).join(','))}" class="map-icon loc-map" title="${g.koord ? 'Koordinatla haritada aç' : 'Haritada aç (işletme adı / adres seç)'}"><i class="fas fa-map-marker-alt"></i><span class="btn-lbl"> Haritada aç</span></a>
                 </div></td></tr>`;
     }
     function renderLocMore(total, shown) {
@@ -2901,7 +2900,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const hasCoord = !!item.biz.ll;
                 // Konum artık ayrı sütun değil: adresin solundaki 📍 ikonu tıklanabilir (Liste'deki koordinatı/adresi kullanır)
                 const adresLine = item.biz.adres
-                    ? `<div style="font-size:11px;opacity:.8"><a href="#" data-map data-mname="${escapeHtml(item.biz.name || '')}" data-madres="${escapeHtml(item.biz.adres)}" class="map-icon" style="font-size:12px;vertical-align:-1px;" title="Haritada aç (işletme adı / adres seç)"><i class="fas fa-map-marker-alt"></i></a> ${escapeHtml(item.biz.adres)}</div>`
+                    ? `<div style="font-size:11px;opacity:.8"><a href="#" data-map data-mname="${escapeHtml(item.biz.name || '')}" data-madres="${escapeHtml(item.biz.adres)}" data-mll="${escapeHtml(item.biz.ll ? item.biz.ll.join(',') : '')}" class="map-icon" style="font-size:12px;vertical-align:-1px;" title="${hasCoord ? 'Koordinatla haritada aç' : 'Haritada aç (işletme adı / adres seç)'}"><i class="fas fa-map-marker-alt"></i></a> ${escapeHtml(item.biz.adres)}</div>`
                     : '';
                 html += `<tr class="${item.biz.unk>0?'tr-warn':''}">
                     <td><strong style="color:var(--primary-dark)">${escapeHtml(item.biz.name)}</strong>${planImeSlot(plan, targetDateKey, ix) ? `<div style="font-size:11px;color:#0b5cad">Saat: ${planImeSlot(plan, targetDateKey, ix)}</div>` : ''}${adresLine}${item.biz.tel?`<div style="font-size:11px;opacity:.8">Tel: ${escapeHtml(item.biz.tel)}</div>`:''}${item.biz.ustas.size?`<div style="font-size:11px;opacity:.7">Usta: ${escapeHtml([...item.biz.ustas].join(', '))}</div>`:''}
@@ -2978,7 +2977,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const opts = [];
         if (name) opts.push(['fa-store', 'İşletme adı ile ara', name, name]);
         if (adres) opts.push(['fa-location-dot', 'Adres ile ara', adres, adres]);
-        if (name && adres) opts.push(['fa-map-location-dot', 'İşletme adı + adres ile ara', name + ' · ' + adres, name + ' ' + adres]);
         const ov = document.createElement('div'); ov.id = 'mapChooser'; ov.className = 'mapch-ov noprint';
         ov.innerHTML = `<div class="mapch" role="dialog" aria-label="Haritada aç"><h3><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Haritada aç</h3><div class="mapch-sub">${escapeHtml(name || adres)}</div>`
             + opts.map(o => `<a class="mapch-opt" href="${mapQueryUrl(o[3])}" target="_blank" rel="noopener"><i class="fas ${o[0]}"></i><span>${escapeHtml(o[1])}<small>${escapeHtml(o[2])}</small></span></a>`).join('')
@@ -2987,7 +2985,12 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.appendChild(ov);
     }
     onInit(() => {
-        document.addEventListener('click', e => { const a = e.target.closest('[data-map]'); if (!a) return; e.preventDefault(); openMapChooser(a.dataset.mname, a.dataset.madres); });
+        document.addEventListener('click', e => {
+            const a = e.target.closest('[data-map]'); if (!a) return; e.preventDefault();
+            // v5.34: koordinat girilmişse seçim sorulmaz, doğrudan koordinatla açılır
+            if (a.dataset.mll) { window.open('https://maps.google.com/?q=' + encodeURIComponent(a.dataset.mll), '_blank', 'noopener'); return; }
+            openMapChooser(a.dataset.mname, a.dataset.madres);
+        });
         document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMapChooser(); });
     });
     function planMapsUrl(b) {
@@ -2998,7 +3001,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function fold(t) { return normTR(t).toLowerCase(); }
     function qrSegments(b) {
         if (b.ll) return [['https://maps.google.com/?q=', 'Byte'], [b.ll.join(','), 'Byte']];
-        const raw = (($$('pQrMode').value === 'name' ? (b.name + ' ') : '') + (b.adres || b.name || '')).trim();
+        const raw = (b.adres || '').trim(); // v5.34: QR yalnızca koordinat veya adres
         if (!raw) return null;
         let t = normTR(raw).replace(/[^A-Z0-9 \/.:-]+/g, ' ').replace(/\s+/g, ' ').trim();
         if (!/ISTANBUL/.test(t)) t += ' ISTANBUL';
@@ -3132,7 +3135,7 @@ document.addEventListener('DOMContentLoaded', function() {
         window.__planLand = land;
     }
     onInit(() => {
-    document.querySelectorAll('#pOrient,#pQrMode,#pScope,#pSchool,#pQrOn,#pFit').forEach(el => { el.addEventListener('change', renderPlanPrintArea); el.addEventListener('input', renderPlanPrintArea); });
+    document.querySelectorAll('#pOrient,#pScope,#pSchool,#pQrOn,#pFit').forEach(el => { el.addEventListener('change', renderPlanPrintArea); el.addEventListener('input', renderPlanPrintArea); });
     });
     onInit(() => {
     document.querySelectorAll('.pcol').forEach(el => el.addEventListener('change', renderPlanPrintArea));
