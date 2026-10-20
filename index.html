@@ -1,4 +1,4 @@
-<!-- MESEM Portal – Sürüm v5.32 – Son güncelleme: 2026-10-19 -->
+<!-- MESEM Portal – Sürüm v5.33 – Son güncelleme: 2026-10-20 -->
 <!-- SÜRÜM NOTU: Her yeni sürümde sürüm numarası 3 yerde birlikte güncellenmelidir: (1) bu satırdaki başlık yorumu, (2) <title> etiketi, (3) sayfadaki "MESEM Portal" başlığının yanındaki küçük sürüm rozeti (id="homeLink" içindeki <span>). -->
 <!DOCTYPE html>
 <html lang="tr">
@@ -6,7 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.32</title>
+<title>MESEM Portal v5.33</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -31,6 +31,17 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-
 .nav-links a { color: #cbd5e1; text-decoration: none; font-weight: 500; cursor: pointer; padding: 6px 10px; border-radius: 6px; transition: color .2s, background-color .2s; font-size: 14px; }
 .nav-links a.active, .nav-links a:hover { color: white; background-color: #334155; }
 .nav-links a .fas { margin-right: 4px; opacity: .9; }
+.loc-teacher { padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; min-height: 36px; max-width: 220px; background: #fff; }
+@media (max-width: 768px) { .loc-teacher { width: 100%; max-width: none; min-height: 44px; font-size: 16px; } }
+.mapch-ov { position: fixed; inset: 0; background: rgba(15,23,42,.6); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.mapch { background: #fff; border-radius: 12px; width: 420px; max-width: 100%; padding: 16px; box-shadow: 0 10px 25px rgba(0,0,0,.25); }
+.mapch h3 { margin: 0 0 4px; font-size: 16px; }
+.mapch .mapch-sub { font-size: 12px; opacity: .7; margin-bottom: 10px; word-break: break-word; }
+.mapch a.mapch-opt { display: flex; align-items: center; gap: 10px; padding: 12px; margin-top: 8px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; min-height: 44px; box-sizing: border-box; }
+.mapch a.mapch-opt:hover { background: #f1f5f9; }
+.mapch a.mapch-opt .fas { color: #ef4444; width: 18px; text-align: center; }
+.mapch a.mapch-opt small { display: block; font-size: 11px; opacity: .65; word-break: break-word; }
+.mapch button.mapch-x { margin-top: 10px; width: 100%; }
 
 .container { flex: 1; padding: 15px 15px 0 15px; overflow: hidden; display: flex; flex-direction: column; position: relative; }
 .view-section { display: none; height: 100%; flex-direction: column; overflow: hidden; }
@@ -545,7 +556,7 @@ button.chip { font-family: inherit; color: var(--text); }
 
 <div class="navbar">
     <!-- Sürüm rozeti: her yeni sürümde güncelle (dosya başındaki SÜRÜM NOTU'na bakın) -->
-        <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.32</span></h1>
+        <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.33</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main"><i class="fas fa-list"></i> Liste</a>
         <a class="nav-tab" data-tab="loc"><i class="fas fa-map-location-dot"></i> İşletme Konum</a>
@@ -651,9 +662,11 @@ button.chip { font-family: inherit; color: var(--text); }
       <div class="list-view-inner">
         <div class="action-bar">
             <div class="toolbar-row loc-toolbar" id="locToolbar">
+                <select id="locTeacherSelect" class="loc-teacher" title="Öğretmene göre işletmeler"><option value="">Tüm öğretmenler</option></select>
                 <input type="text" id="locSearch" class="search-compact loc-search" placeholder="İşletme veya adres ara..." enterkeyhint="search">
                 <button type="button" class="btn btn-cancel loc-filter-toggle" id="locFilterToggle" aria-expanded="false"><i class="fas fa-filter"></i> Filtre</button>
                 <div class="loc-filters" id="locFilters">
+                    <label class="chip"><input type="checkbox" id="locOnlyHas"> Yalnızca konumlu</label>
                     <label class="chip"><input type="checkbox" id="locOnlyMissing"> Yalnızca konumsuz</label>
                     <label class="chip"><input type="checkbox" id="locOnlyConflict"> Çakışan konumlar</label>
                     <div class="loc-region-chips" id="locRegionChips"></div>
@@ -1188,6 +1201,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // v5.33: Liste'de tek öğretmen seçiliyse İşletme Konum ve Haftalık Planlama o öğretmenle açılır (seçim değiştiğinde bir kez uygulanır)
+    let lastListeTeacher = '';
+    function syncTeacherDefault() {
+        const t = msSelected.ogretmen.length === 1 ? msSelected.ogretmen[0] : '';
+        if (!t) { lastListeTeacher = ''; return false; }
+        if (t === lastListeTeacher) return false;
+        lastListeTeacher = t;
+        populateLocTeachers();
+        const ls = document.getElementById('locTeacherSelect'); if (ls && [...ls.options].some(o => o.value === t)) { ls.value = t; locLimit = LOC_PAGE; }
+        const ps = document.getElementById('planTeacherSelect');
+        if (ps && [...ps.options].some(o => o.value === t) && ps.value !== t) {
+            ps.value = t;
+            if (activePlan && activePlan.teacher !== t) { activePlan = null; document.getElementById('planOutput').classList.add('hidden'); }
+            ps.dispatchEvent(new Event('change'));
+        }
+        return true;
+    }
     function switchTab(tabId) {
         const next = document.getElementById('view-' + tabId);
         if (!next) return;
@@ -1207,6 +1237,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const link = document.querySelector(`.nav-links a[data-tab="${tabId}"]`);
         if (link) link.classList.add('active');
         // v5.24: veri değişmediyse yeniden çizme (eskiden her geçişte tüm tablo/istatistik baştan çiziliyordu)
+        if ((tabId === 'loc' || tabId === 'plan') && syncTeacherDefault()) tabRendered[tabId] = 0;
         if (tabRendered[tabId] !== dataVersion) {
             tabRendered[tabId] = dataVersion;
             if (tabId === 'main') renderTable('main');
@@ -1540,7 +1571,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td><div style="white-space:normal; font-size:12px;" title="${r.adres}">${r.adres}</div>${coordBadge}</td>
                     <td><span class="badge badge-bolge">${r.bolge}</span></td>
                     <td class="narrow-cell">${noteHtml}</td>
-                    <td class="narrow-cell"><a href="${mapsLink}" target="_blank" class="map-icon" title="Haritada Konumu Gör"><i class="fas fa-map-marker-alt"></i></a></td>
+                    <td class="narrow-cell"><a href="#" data-map data-mname="${escapeHtml(rr.isletme || '')}" data-madres="${escapeHtml(rr.adres || '')}" class="map-icon" title="Haritada aç (işletme adı / adres seç)"><i class="fas fa-map-marker-alt"></i></a></td>
                     <td class="actions-cell">
                         <i class="fas fa-edit action-icon icon-edit" title="Düzenle" data-action="edit" data-idx="${idx}"></i>
                         <i class="fas fa-archive action-icon icon-archive" title="Arşive At" data-action="archive" data-idx="${idx}"></i>
@@ -2186,8 +2217,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     function locGroups() {
         const m = new Map();
+        const lt = ($$('locTeacherSelect') && $$('locTeacherSelect').value) || '';
         records.forEach(r => {
             const k = bizKey(r.isletme); if (!k || r.isArchived) return;
+            if (lt && r.ogretmen !== lt) return;
             let g = m.get(k); if (!g) { g = { key: k, name: r.isletme, adres: '', bolge: '', koord: '', coords: new Set(), count: 0 }; m.set(k, g); }
             g.count++; if (!g.adres && r.adres) g.adres = r.adres; if (!g.bolge && r.bolge) g.bolge = r.bolge;
             if (r.koordinat) { g.coords.add(r.koordinat); if (!g.koord) g.koord = r.koordinat; }
@@ -2199,8 +2232,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const TR_BOUNDS = { latMin: 35.8, latMax: 42.2, lonMin: 25.6, lonMax: 44.9 };
     function coordOutsideTR(v) { const ll = parseLL(v); return !!ll && (ll[0] < TR_BOUNDS.latMin || ll[0] > TR_BOUNDS.latMax || ll[1] < TR_BOUNDS.lonMin || ll[1] > TR_BOUNDS.lonMax); }
     function filterLocGroups(all) {
-        const q = normTR($$('locSearch').value.trim()), only = $$('locOnlyMissing').checked, conf = $$('locOnlyConflict').checked;
-        return all.filter(g => (!only || !g.koord) && (!conf || g.coords.size > 1) && (!locRegions.size || locRegions.has(locRegionKey(g))) && (!q || normTR(g.name + ' ' + g.adres).includes(q)));
+        const q = normTR($$('locSearch').value.trim()), only = $$('locOnlyMissing').checked, has = $$('locOnlyHas').checked, conf = $$('locOnlyConflict').checked;
+        return all.filter(g => (!only || !g.koord) && (!has || !!g.koord) && (!conf || g.coords.size > 1) && (!locRegions.size || locRegions.has(locRegionKey(g))) && (!q || normTR(g.name + ' ' + g.adres).includes(q)));
     }
     /* --- v5.6: bölge filtresi, sıralama --- */
     let locRegions = new Set();                 // boş = tüm bölgeler
@@ -2232,7 +2265,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     function locRowHtml(g) {
-        const url = planMapsUrl({ ll: parseLL(g.koord), adres: g.adres, name: g.name });
         const warn = [];
         if (g.coords.size > 1) warn.push('Satırlarda farklı konumlar var; kaydedince hepsi aynı olur.');
         if (g.koord && coordOutsideTR(g.koord)) warn.push('Türkiye sınırları dışında görünüyor; kontrol edin.');
@@ -2244,7 +2276,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="loc-msg">${warn.map(w => `<span class="warn-text">${w}</span>`).join('<br>')}</div></td>
             <td class="loc-actions-cell"><div class="loc-actions">
                 <button type="button" class="btn btn-import loc-gps" title="Bulunduğum konumu al"><i class="fas fa-crosshairs"></i><span class="btn-lbl"> Konumum</span></button>
-                ${url ? `<a href="${url}" target="_blank" class="map-icon loc-map" title="${g.koord ? 'Koordinatla aç' : 'Adresle ara'}"><i class="fas fa-map-marker-alt"></i><span class="btn-lbl"> Haritada aç</span></a>` : ''}
+                <a href="#" data-map data-mname="${escapeHtml(g.name)}" data-madres="${escapeHtml(g.adres || '')}" class="map-icon loc-map" title="Haritada aç (işletme adı / adres seç)"><i class="fas fa-map-marker-alt"></i><span class="btn-lbl"> Haritada aç</span></a>
                 </div></td></tr>`;
     }
     function renderLocMore(total, shown) {
@@ -2255,7 +2287,19 @@ document.addEventListener('DOMContentLoaded', function() {
             `<button type="button" class="btn btn-import" id="locMoreBtn">Daha fazla göster (+${Math.min(LOC_PAGE, total - shown)})</button>`;
     }
     function updateLocCount(listLen, all) { $$('locCount').textContent = `${listLen} / ${all.length} işletme · ${all.filter(g => g.koord).length} konumlu`; }
+    function populateLocTeachers() {
+        const sel = $$('locTeacherSelect'); if (!sel) return;
+        const teachers = [...new Set(records.filter(r => !r.isArchived && r.ogretmen).map(r => r.ogretmen))].sort((a,b) => a.localeCompare(b,'tr-TR'));
+        const sig = teachers.join('\u0001');
+        if (sel.dataset.sig !== sig) {
+            const prev = sel.value;
+            sel.innerHTML = '<option value="">Tüm öğretmenler</option>' + teachers.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+            if (teachers.includes(prev)) sel.value = prev;
+            sel.dataset.sig = sig;
+        }
+    }
     function renderLoc() {
+        populateLocTeachers();
         const all = locGroups();
         renderLocRegionChips(all); updateLocSortHeaders();
         const list = sortLocGroups(filterLocGroups(all)), shown = list.slice(0, locLimit);
@@ -2416,7 +2460,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     onInit(() => {
     $$('locSearch').addEventListener('input', () => { locLimit = LOC_PAGE; renderLoc(); });
-    $$('locOnlyMissing').addEventListener('change', () => { locLimit = LOC_PAGE; renderLoc(); });
+    $$('locOnlyMissing').addEventListener('change', () => { if ($$('locOnlyMissing').checked) $$('locOnlyHas').checked = false; locLimit = LOC_PAGE; renderLoc(); });
+    $$('locOnlyHas').addEventListener('change', () => { if ($$('locOnlyHas').checked) $$('locOnlyMissing').checked = false; locLimit = LOC_PAGE; renderLoc(); });
+    $$('locTeacherSelect').addEventListener('change', () => { locRegions.clear(); locLimit = LOC_PAGE; renderLoc(); });
     $$('locOnlyConflict').addEventListener('change', () => { locLimit = LOC_PAGE; renderLoc(); });
     $$('locRegionChips').addEventListener('click', e => {
         const b = e.target.closest('.loc-rchip'), c = e.target.closest('#locRegionClear');
@@ -2855,9 +2901,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const hasCoord = !!item.biz.ll;
                 // Konum artık ayrı sütun değil: adresin solundaki 📍 ikonu tıklanabilir (Liste'deki koordinatı/adresi kullanır)
                 const adresLine = item.biz.adres
-                    ? (mUrl
-                        ? `<div style="font-size:11px;opacity:.8"><a href="${mUrl}" target="_blank" class="map-icon" style="font-size:12px;vertical-align:-1px;" title="${hasCoord?'Koordinatla aç (Liste sekmesinden)':'Adres ile ara (koordinat girilmemiş)'}"><i class="fas fa-map-marker-alt"></i></a> ${escapeHtml(item.biz.adres)}</div>`
-                        : `<div style="font-size:11px;opacity:.7">📍 ${escapeHtml(item.biz.adres)}</div>`)
+                    ? `<div style="font-size:11px;opacity:.8"><a href="#" data-map data-mname="${escapeHtml(item.biz.name || '')}" data-madres="${escapeHtml(item.biz.adres)}" class="map-icon" style="font-size:12px;vertical-align:-1px;" title="Haritada aç (işletme adı / adres seç)"><i class="fas fa-map-marker-alt"></i></a> ${escapeHtml(item.biz.adres)}</div>`
                     : '';
                 html += `<tr class="${item.biz.unk>0?'tr-warn':''}">
                     <td><strong style="color:var(--primary-dark)">${escapeHtml(item.biz.name)}</strong>${planImeSlot(plan, targetDateKey, ix) ? `<div style="font-size:11px;color:#0b5cad">Saat: ${planImeSlot(plan, targetDateKey, ix)}</div>` : ''}${adresLine}${item.biz.tel?`<div style="font-size:11px;opacity:.8">Tel: ${escapeHtml(item.biz.tel)}</div>`:''}${item.biz.ustas.size?`<div style="font-size:11px;opacity:.7">Usta: ${escapeHtml([...item.biz.ustas].join(', '))}</div>`:''}
@@ -2924,6 +2968,28 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     /* --- QR'LI YAZDIRMA (v18'den sadeleştirilmiş) --- */
+    // v5.33: harita düğmesi koordinatı yok sayar; kullanıcı işletme adı / adres / ikisi ile aramayı seçer
+    function mapQueryUrl(q) { q = (q || '').trim(); if (!q) return ''; return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q + (fold(q).includes('istanbul') ? '' : ' İstanbul')); }
+    function closeMapChooser() { const o = document.getElementById('mapChooser'); if (o) o.remove(); }
+    function openMapChooser(name, adres) {
+        closeMapChooser();
+        name = (name || '').trim(); adres = (adres || '').trim();
+        if (!name && !adres) return;
+        const opts = [];
+        if (name) opts.push(['fa-store', 'İşletme adı ile ara', name, name]);
+        if (adres) opts.push(['fa-location-dot', 'Adres ile ara', adres, adres]);
+        if (name && adres) opts.push(['fa-map-location-dot', 'İşletme adı + adres ile ara', name + ' · ' + adres, name + ' ' + adres]);
+        const ov = document.createElement('div'); ov.id = 'mapChooser'; ov.className = 'mapch-ov noprint';
+        ov.innerHTML = `<div class="mapch" role="dialog" aria-label="Haritada aç"><h3><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Haritada aç</h3><div class="mapch-sub">${escapeHtml(name || adres)}</div>`
+            + opts.map(o => `<a class="mapch-opt" href="${mapQueryUrl(o[3])}" target="_blank" rel="noopener"><i class="fas ${o[0]}"></i><span>${escapeHtml(o[1])}<small>${escapeHtml(o[2])}</small></span></a>`).join('')
+            + `<button type="button" class="btn btn-cancel mapch-x">Vazgeç</button></div>`;
+        ov.addEventListener('click', e => { if (e.target === ov || e.target.closest('.mapch-x') || e.target.closest('a.mapch-opt')) closeMapChooser(); });
+        document.body.appendChild(ov);
+    }
+    onInit(() => {
+        document.addEventListener('click', e => { const a = e.target.closest('[data-map]'); if (!a) return; e.preventDefault(); openMapChooser(a.dataset.mname, a.dataset.madres); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMapChooser(); });
+    });
     function planMapsUrl(b) {
         if (b.ll) return 'https://maps.google.com/?q=' + b.ll.join(',');
         const base = (b.adres || b.name || '').trim(); if (!base) return '';
