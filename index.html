@@ -1,4 +1,4 @@
-<!-- MESEM Portal – Sürüm v5.34 – Son güncelleme: 2026-10-20 -->
+<!-- MESEM Portal – Sürüm v5.36 – Son güncelleme: 2026-10-20 -->
 <!-- SÜRÜM NOTU: Her yeni sürümde sürüm numarası 3 yerde birlikte güncellenmelidir: (1) bu satırdaki başlık yorumu, (2) <title> etiketi, (3) sayfadaki "MESEM Portal" başlığının yanındaki küçük sürüm rozeti (id="homeLink" içindeki <span>). -->
 <!DOCTYPE html>
 <html lang="tr">
@@ -6,7 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.34</title>
+<title>MESEM Portal v5.36</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -556,7 +556,7 @@ button.chip { font-family: inherit; color: var(--text); }
 
 <div class="navbar">
     <!-- Sürüm rozeti: her yeni sürümde güncelle (dosya başındaki SÜRÜM NOTU'na bakın) -->
-        <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.34</span></h1>
+        <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.36</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main"><i class="fas fa-list"></i> Liste</a>
         <a class="nav-tab" data-tab="loc"><i class="fas fa-map-location-dot"></i> İşletme Konum</a>
@@ -704,9 +704,10 @@ button.chip { font-family: inherit; color: var(--text); }
                     <label>Yakın adresleri aynı güne toplama</label>
                     <select id="planSlackSel">
                         <option value="0" selected>Eşit yük — önerilen</option>
-                        <option value="2">Dengeli (±2 işletme)</option>
-                        <option value="4">Yakınlık öncelikli (±4 işletme)</option>
+                        <option value="1">Dengeli (±2 işletme)</option>
+                        <option value="2">Yakınlık öncelikli (±4 işletme, 0–2 km)</option>
                     </select>
+                    <div id="planProxHint" style="font-size:11px; opacity:.7; margin-top:3px;"></div>
                 </div>
                 <div class="plan-fg" title="Eklenen tarihler hafta hesabından otomatik çıkarılır">
                     <label>Resmi Tatiller</label>
@@ -2537,8 +2538,35 @@ document.addEventListener('DOMContentLoaded', function() {
     function parseLL(geo) { const m = String(geo||'').match(/(-?\d{1,3}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/); return m ? [parseFloat(m[1]), parseFloat(m[2])] : null; }
     function kmBetween(a,b) { const R=6371, rad=x=>x*Math.PI/180, dLa=rad(b[0]-a[0]), dLo=rad(b[1]-a[1]); const h=Math.sin(dLa/2)**2+Math.cos(rad(a[0]))*Math.cos(rad(b[0]))*Math.sin(dLo/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
     // Yakınlık önceliği: 1) Koordinat varsa sadece mesafeye göre (0-1). 2) Koordinat yoksa, aynı kümedeyse 0.6. 3) Hiçbiri yoksa 0.
+    // v5.36: 3 seçenek. 0 Eşit yük, 1 Dengeli (±2), 2 Yakınlık öncelikli (±4; 0-2 km "yakın" sayılır, koordinata göre yakından uzağa).
+    // R: yakın sayılan yarıçap (km); wt*cap: gün seçiminde yakınlık ağırlığı (< 100); km: plan seçiminde gün içi ortalama mesafe maliyeti; sp: günler arası yük farkı maliyeti
+    const PROX_LEVELS = [
+        { slack: 0, R: 4, wt: 3, cap: 10, km: 0,  sp: 3 },
+        { slack: 2, R: 4, wt: 3, cap: 10, km: 0,  sp: 3 },
+        { slack: 4, R: 2, wt: 7, cap: 13, km: 14, sp: 3, geo: true }
+    ];
+    const PROX_TEXT = [
+        'Günlere işletme sayısı eşit dağıtılır; yakınlık yalnızca eşitlik bozulmadan kullanılır.',
+        'Günler arası ±2 işletme sapmaya izin verilir; yakın işletmeler mümkün olduğunca aynı güne alınır.',
+        'Koordinatı olan işletmeler en yakından uzağa doğru sıralanır ve günler bu sıranın doğal kopuş noktalarından bölünür (2 km içi yakın sayılır; günler arası ±4 sapma). Koordinatsız işletmeler bölgeye göre yerleştirilir.'
+    ];
+    // Gün içi ortalama ikili mesafe (km): yalnızca koordinatı olan işletme çiftleri
+    function meanDayKm(p) {
+        let sum = 0, n = 0;
+        p.selectedVisitDates.forEach(dk => {
+            const ls = p.assigned.filter(a => a.dateKey === dk && a.biz.ll).map(a => a.biz.ll);
+            for (let i = 0; i < ls.length; i++) for (let j = i + 1; j < ls.length; j++) { sum += kmBetween(ls[i], ls[j]); n++; }
+        });
+        return n ? sum / n : 0;
+    }
+    let PROX = PROX_LEVELS[0];
+    function proxOpts() { const l = Math.min(PROX_LEVELS.length - 1, Math.max(0, +$$('planSlackSel').value || 0)); return { level: l, slack: PROX_LEVELS[l].slack }; }
+    onInit(() => {
+        const upd = () => { $$('planProxHint').textContent = PROX_TEXT[proxOpts().level]; };
+        $$('planSlackSel').addEventListener('change', upd); upd();
+    });
     function proxW(a,b) {
-        if (a.ll && b.ll) return Math.max(0, 1 - kmBetween(a.ll,b.ll)/4);
+        if (a.ll && b.ll) return Math.max(0, 1 - kmBetween(a.ll,b.ll)/PROX.R);
         if (a.kume && a.kume === b.kume) return 0.6;
         return 0;
     }
@@ -2625,6 +2653,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function computeOnce(teacher, selectedVisitDates, opts, seed) {
         const rnd = mulberry(seed*7919+13);
+        PROX = PROX_LEVELS[(opts && opts.level) || 0] || PROX_LEVELS[0];
         const businessMap = new Map();
         records.filter(r => !r.isArchived && r.ogretmen === teacher).forEach(r => {
             const bKey = bizKey(r.isletme);
@@ -2674,9 +2703,40 @@ document.addEventListener('DOMContentLoaded', function() {
             const mn = Math.min(...cnt.map(c=>c.n));
             bz.options = cnt.filter(c=>c.n===mn).map(c=>({dateKey:c.dateKey, weekIndex:c.weekIndex}));
         });
+        // v5.36 "Yakınlık öncelikli": koordinatlı işletmeler en yakın komşu turu ile yakından uzağa dizilir; günler turun en büyük boşluklarından kesilir
+        const geoPlaced = new Set();
+        if (PROX.geo && seed % 3 !== 2) { // denemelerin 3'te 2'si koordinat turu, 3'te 1'i klasik dağıtım; planCost mesafeye göre en iyisini seçer
+            const pts = businesses.filter(b => b.ll && b.options.length > 0);
+            if (pts.length >= 2) {
+                const cen = [pts.reduce((t,b) => t + b.ll[0], 0) / pts.length, pts.reduce((t,b) => t + b.ll[1], 0) / pts.length];
+                const pool0 = pts.slice().sort((a,b) => kmBetween(b.ll, cen) - kmBetween(a.ll, cen));
+                const tour = [pool0.splice(seed ? Math.min(Math.floor(rnd()*3), pool0.length-1) : 0, 1)[0]];
+                while (pool0.length) { const last = tour[tour.length-1].ll; let bi = 0, bd = Infinity; pool0.forEach((x,i) => { const d = kmBetween(last, x.ll); if (d < bd) { bd = d; bi = i; } }); tour.push(pool0.splice(bi,1)[0]); }
+                let pool = tour.slice(), totalRem = businesses.length;
+                selectedVisitDates.forEach((dk, k) => {
+                    const L = pool.filter(bz => bz.options.some(o => o.dateKey === dk));
+                    if (!L.length) return;
+                    const room = Math.max(0, capOf(dk) - dayLoad[dk]);
+                    const later = selectedVisitDates.slice(k+1), laterCap = later.reduce((t,d) => t + Math.max(0, capOf(d) - dayLoad[d]), 0);
+                    const sumCap = selectedVisitDates.slice(k).reduce((t,d) => t + capOf(d), 0) || 1;
+                    const q = Math.round(totalRem * capOf(dk) / sumCap);
+                    let hi = Math.min(room, q + slack, L.length), lo = Math.max(0, q - slack, totalRem - laterCap);
+                    if (!later.length) lo = hi; if (lo > hi) lo = hi;
+                    let m = hi, bestSc = -Infinity;
+                    for (let c = lo; c <= hi; c++) {
+                        const gap = (c > 0 && c < L.length) ? kmBetween(L[c-1].ll, L[c].ll) : 0;
+                        const sc = gap - 0.1 * Math.abs(c - q);
+                        if (sc > bestSc) { bestSc = sc; m = c; }
+                    }
+                    const take = L.slice(0, m);
+                    take.forEach(bz => { dayLoad[dk]++; assigned.push({biz: bz, weekIndex: k, dateKey: dk}); geoPlaced.add(bz); });
+                    pool = pool.filter(bz => !geoPlaced.has(bz)); totalRem -= take.length;
+                });
+            }
+        }
         const regKey = bz => bz.bolge || '~';
         const groups = new Map();
-        businesses.filter(bz => bz.options.length>0).forEach(bz => { const k=regKey(bz); if (!groups.has(k)) groups.set(k,[]); groups.get(k).push(bz); });
+        businesses.filter(bz => bz.options.length>0 && !geoPlaced.has(bz)).forEach(bz => { const k=regKey(bz); if (!groups.has(k)) groups.set(k,[]); groups.get(k).push(bz); });
         const noise = new Map([...groups.keys()].map(k => [k, seed?rnd():0]));
         [...groups.entries()].sort((x,y) => y[1].length-x[1].length || noise.get(x[0])-noise.get(y[0]) || x[0].localeCompare(y[0],'tr-TR')).forEach(([key,members]) => {
             let rest = members.slice();
@@ -2688,7 +2748,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const room = Math.max(0, capOf(dk) - dayLoad[dk]);
                     const fit = Math.min(feas.length, room);
                     let aff=0; assigned.forEach(a => { if (a.dateKey===dk) aff += proxW(feas[0], a.biz); });
-                    const score = fit*100 + Math.min(aff,10)*3 - dayLoad[dk] + (seed?rnd()*4:0);
+                    const score = fit*100 + Math.min(aff, PROX.cap)*PROX.wt - dayLoad[dk] + (seed?rnd()*4:0);
                     if (score > bestScore) { bestScore=score; best={dk,wi,feas,room}; }
                 });
                 if (!best) break;
@@ -2710,13 +2770,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const placed = new Set(assigned.map(a => a.biz));
         const excluded = imeMode ? businesses.filter(b => !placed.has(b)) : [];
         overflow = excluded.length;
-        return { teacher, selectedVisitDates, assigned, totalBusinesses: allBiz.length, imeMode, caps, overflow, excluded, visitedList: visitedBiz, visitedCount: visitedBiz.length };
+        return { teacher, selectedVisitDates, assigned, level: (opts && opts.level) || 0, totalBusinesses: allBiz.length, imeMode, caps, overflow, excluded, visitedList: visitedBiz, visitedCount: visitedBiz.length };
     }
     function planCost(p) {
         const loads = p.selectedVisitDates.map(dk => p.assigned.filter(a=>a.dateKey===dk).length);
         let spread = loads.length ? Math.max(...loads)-Math.min(...loads) : 0;
         if (p.imeMode && p.caps) { const u = p.selectedVisitDates.map((dk,k) => loads[k] / Math.max(1, p.caps[dk])); spread = u.length ? (Math.max(...u)-Math.min(...u))*10 : 0; }
-        return confCount(p)*60 + spread*3 + avgRegions(p)*p.selectedVisitDates.length*2 + (p.overflow||0)*200;
+        const lv = PROX_LEVELS[p.level || 0] || PROX_LEVELS[0];
+        return confCount(p)*60 + spread*lv.sp + avgRegions(p)*p.selectedVisitDates.length*2 + (p.overflow||0)*200 + (lv.km ? meanDayKm(p)*lv.km : 0);
     }
     // --- v5.32: öğretmen + ay bazında "daha önce gidilen işletmeler" ---
     const VISITED_KEY = 'mesemVisitedV1';
@@ -2775,7 +2836,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!records.some(r => !r.isArchived && r.ogretmen === teacher)) { alert("Bu öğretmene ait aktif kayıt bulunamadı. Önce Liste sekmesinden veri yükleyin."); return; }
         const selectedVisitDates = [...document.querySelectorAll('.plan-week-visit-select')].map(s => s.value).filter(v => v !== "");
         if (!selectedVisitDates.length) { $$('weekBox').open = true; alert("Lütfen en az bir hafta için ziyaret günü seçin!"); return; }
-        const opts = { slack: +$$('planSlackSel').value };
+        const opts = proxOpts();
         activePlan = computePlan(teacher, selectedVisitDates, opts);
         activePlan.source = 'week'; activePlan.skipped = [];
         activePlan.month = $$('planMonthSelect').value;
@@ -2797,7 +2858,7 @@ document.addEventListener('DOMContentLoaded', function() {
             w.forEach(dk => { const cap = imeCapOn(dk); if (cap > 0) { dates.push(dk); labels.push(`${i+1}. Hafta · ${IME_SHORT[imeDow(dk)]}`); imeCaps[dk] = cap; imeWins[dk] = imeWin(imeDow(dk)); } });
         });
         if (!dates.length) { alert("Seçili ayda İME günü bulunamadı. Ayı, saatleri ve hafta işaretlerini kontrol edin."); return; }
-        activePlan = computePlan(teacher, dates, { slack: +$$('planSlackSel').value, imeCaps });
+        activePlan = computePlan(teacher, dates, Object.assign({ imeCaps }, proxOpts()));
         activePlan.source = 'ime'; activePlan.labels = labels; activePlan.imeWins = imeWins; activePlan.imeVisit = ime.visit;
         activePlan.skipped = []; activePlan.closedWeeks = closed;
         activePlan.month = $$('planMonthSelect').value;
@@ -2817,10 +2878,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!idx.length) { alert("Önce ay seçin."); return; }
         let combos = 1; idx.forEach(i => combos *= W[i].length);
         if (combos > 6000) { alert("Seçenek çok fazla (" + combos + "). Bazı haftaları 'Ziyaret Yok' yapıp tekrar deneyin."); return; }
-        const slack = +$$('planSlackSel').value, t0 = performance.now();
+        const po = proxOpts(), t0 = performance.now();
         let best=null, bestCost=Infinity, bestP=null, tested=0;
         const rec = (k, picks) => {
-            if (k === idx.length) { const p = computePlan(teacher, picks.slice(), {slack, fast:true}), c = planCost(p); tested++; if (c<bestCost) { bestCost=c; best=picks.slice(); bestP=p; } return; }
+            if (k === idx.length) { const p = computePlan(teacher, picks.slice(), Object.assign({ fast: true }, po)), c = planCost(p); tested++; if (c<bestCost) { bestCost=c; best=picks.slice(); bestP=p; } return; }
             W[idx[k]].forEach(dk => { picks.push(dk); rec(k+1, picks); picks.pop(); });
         };
         rec(0, []);
