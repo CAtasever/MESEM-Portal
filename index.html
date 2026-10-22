@@ -1,4 +1,4 @@
-<!-- MESEM Portal – Sürüm v5.38 – Son güncelleme: 2026-10-22 -->
+<!-- MESEM Portal – Sürüm v5.39 – Son güncelleme: 2026-10-22 -->
 <!-- SÜRÜM NOTU: Her yeni sürümde sürüm numarası 3 yerde birlikte güncellenmelidir: (1) bu satırdaki başlık yorumu, (2) <title> etiketi, (3) sayfadaki "MESEM Portal" başlığının yanındaki küçük sürüm rozeti (id="homeLink" içindeki <span>). -->
 <!DOCTYPE html>
 <html lang="tr">
@@ -6,7 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.38</title>
+<title>MESEM Portal v5.39</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -556,7 +556,7 @@ button.chip { font-family: inherit; color: var(--text); }
 
 <div class="navbar">
     <!-- Sürüm rozeti: her yeni sürümde güncelle (dosya başındaki SÜRÜM NOTU'na bakın) -->
-        <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.38</span></h1>
+        <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.39</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main"><i class="fas fa-list"></i> Liste</a>
         <a class="nav-tab" data-tab="loc"><i class="fas fa-map-location-dot"></i> İşletme Konum</a>
@@ -2453,10 +2453,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         $$('btnCloudExport').addEventListener('click', () => {
             const m = new Map();
-            records.forEach(r => { const k = bizKey(r.isletme); if (!k || r.isArchived) return; const g = m.get(k) || { id: cloudId(k), ad: r.isletme, adres: '', koordinat: '' }; if (!g.adres && r.adres) g.adres = r.adres; if (!g.koordinat && r.koordinat) g.koordinat = r.koordinat; m.set(k, g); });
-            const blob = new Blob([JSON.stringify([...m.values()], null, 1)], { type: 'application/json' });
+            // v5.39: işletmedeki öğrencilerin alan ve dalları da aktarılır (öğrenci adı/numarası aktarılmaz)
+            records.forEach(r => { const k = bizKey(r.isletme); if (!k || r.isArchived) return; const g = m.get(k) || { id: cloudId(k), ad: r.isletme, adres: '', koordinat: '', alanlar: new Set(), dallar: new Set() }; if (!g.adres && r.adres) g.adres = r.adres; if (!g.koordinat && r.koordinat) g.koordinat = r.koordinat; const al = alanOf(r); if (al && al !== 'Tanımsız') g.alanlar.add(al); if (r.dal) g.dallar.add(String(r.dal).trim()); m.set(k, g); });
+            const out = [...m.values()].map(g => ({ ...g, alanlar: [...g.alanlar].sort((a,b) => a.localeCompare(b,'tr-TR')).slice(0, 20), dallar: [...g.dallar].sort((a,b) => a.localeCompare(b,'tr-TR')).slice(0, 30) }));
+            const blob = new Blob([JSON.stringify(out, null, 1)], { type: 'application/json' });
             const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'konum_listesi.json'; document.body.appendChild(a); a.click(); a.remove();
-            cloudMsg('<span style="color:#15803d">' + m.size + ' işletme dışa aktarıldı. Dosyayı konum sayfasında "Liste yükle" ile yükleyin.</span>');
+            cloudMsg('<span style="color:#15803d">' + m.size + ' işletme (alan ve dallarıyla) dışa aktarıldı. Dosyayı konum sayfasında "İşletme listesini yükle" bölümünden yükleyin.</span>');
         });
         $$('btnCloudPull').addEventListener('click', async () => {
             const cfg = cloudCfg();
