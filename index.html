@@ -1,4 +1,4 @@
-<!-- MESEM Portal – Sürüm v5.36 – Son güncelleme: 2026-10-20 -->
+<!-- MESEM Portal – Sürüm v5.38 – Son güncelleme: 2026-10-22 -->
 <!-- SÜRÜM NOTU: Her yeni sürümde sürüm numarası 3 yerde birlikte güncellenmelidir: (1) bu satırdaki başlık yorumu, (2) <title> etiketi, (3) sayfadaki "MESEM Portal" başlığının yanındaki küçük sürüm rozeti (id="homeLink" içindeki <span>). -->
 <!DOCTYPE html>
 <html lang="tr">
@@ -6,7 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%231e3a8a'/%3E%3Ctext%20x='16'%20y='23'%20font-size='20'%20font-weight='700'%20text-anchor='middle'%20fill='%23fff'%20font-family='Arial%2Csans-serif'%3EM%3C/text%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MESEM Portal v5.36</title>
+<title>MESEM Portal v5.38</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -556,7 +556,7 @@ button.chip { font-family: inherit; color: var(--text); }
 
 <div class="navbar">
     <!-- Sürüm rozeti: her yeni sürümde güncelle (dosya başındaki SÜRÜM NOTU'na bakın) -->
-        <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.36</span></h1>
+        <h1 id="homeLink" role="button" tabindex="0" title="Ana ekran (Liste)">MESEM Portal <span style="font-size:11px;font-weight:400;opacity:.55;vertical-align:middle;">v5.38</span></h1>
     <div class="nav-links">
         <a class="active nav-tab" data-tab="main"><i class="fas fa-list"></i> Liste</a>
         <a class="nav-tab" data-tab="loc"><i class="fas fa-map-location-dot"></i> İşletme Konum</a>
@@ -671,9 +671,21 @@ button.chip { font-family: inherit; color: var(--text); }
                     <label class="chip"><input type="checkbox" id="locOnlyConflict"> Çakışan konumlar</label>
                     <div class="loc-region-chips" id="locRegionChips"></div>
                 </div>
+                <button type="button" class="btn btn-import" id="btnCloudPull" title="Ortak konum veritabanındaki güncel adres ve konumları getirir"><i class="fas fa-cloud-arrow-down"></i> Konumları güncelle</button>
                 <div class="record-count" id="locCount"></div>
             </div>
-            <div class="help-text loc-help" style="font-size:12px; opacity:.75;">Konum alanına <b>41.0082, 28.9784</b> yazın ya da Google Maps linkini yapıştırın. Bu alan Liste'deki <b>Nokta Konum</b> ile aynı veridir; değişiklik işletmenin tüm satırlarına ve Liste'ye yansır.</div>
+            <details class="noprint" id="cloudBox" style="margin:6px 0; font-size:12px;">
+                <summary style="cursor:pointer; font-weight:600;"><i class="fas fa-cloud"></i> Ortak konum veritabanı (Firebase) <span id="cloudStatus" style="font-weight:400; opacity:.7;"></span></summary>
+                <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; align-items:center;">
+                    <input type="text" id="cloudProject" placeholder="Proje kimliği (projectId)" style="flex:1; min-width:170px; padding:6px 8px;">
+                    <input type="text" id="cloudKey" placeholder="API anahtarı (isteğe bağlı)" style="flex:1; min-width:170px; padding:6px 8px;">
+                    <button type="button" class="btn btn-import" id="btnCloudSave">Ayarı kaydet</button>
+                    <a class="btn btn-import" id="lnkCloudPage" href="https://mesem-harita.hakseverc.workers.dev" target="_blank" rel="noopener" style="text-decoration:none;"><i class="fas fa-up-right-from-square"></i> Konum sayfasını aç</a>
+                    <button type="button" class="btn btn-import" id="btnCloudExport" title="Konum sayfasına ilk yüklemek için işletme listesini dosya olarak indirir"><i class="fas fa-file-export"></i> Listeyi dışa aktar</button>
+                </div>
+                <div id="cloudMsg" style="margin-top:6px;"></div>
+            </details>
+            <div class="help-text loc-help" style="font-size:12px; opacity:.75;">Konum alanına <b>41.0082, 28.9784</b> yazın ya da Google Maps linkini yapıştırın. Bu alan Liste'deki <b>Nokta Konum</b> ile aynı veridir; değişiklik işletmenin tüm satırlarına ve Liste'ye yansır. <b>Ortak veritabanı kullanılıyorsa</b> kalıcı düzeltmeyi konum sayfasından yapın: "Konumları güncelle" buradaki elle girilen değerin üzerine yazar.</div>
         </div>
         <div class="table-container">
             <table id="locTable" style="min-width:0;">
@@ -2412,6 +2424,67 @@ document.addEventListener('DOMContentLoaded', function() {
     $$('bulkApply').addEventListener('click', applyBulkTeacher);
     $$('bulkUndo').addEventListener('click', undoBulkTeacher);
     updateBulkBar();
+    });
+    // --- v5.37: ortak konum veritabanı (Firebase Firestore, yalnızca okuma; yazma konum.html üzerinden yapılır) ---
+    const CLOUD_KEY = 'mesemCloudV1';
+    const cloudId = k => k.replace(/\//g, '_');
+    const CLOUD_DEFAULT = { projectId: 'mesem-harita', apiKey: 'AIzaSyCmL-ULg4Qe4M8RHfty3A6Pdp5QpZ4qWMA', page: 'https://mesem-harita.hakseverc.workers.dev' };
+    const cloudCfg = () => { let c = {}; try { c = JSON.parse(localStorage.getItem(CLOUD_KEY) || '{}') || {}; } catch(e) {} return { projectId: c.projectId || CLOUD_DEFAULT.projectId, apiKey: c.apiKey || CLOUD_DEFAULT.apiKey, last: c.last || '' }; };
+    async function cloudFetchAll(cfg) {
+        const out = []; let token = '';
+        do {
+            const u = 'https://firestore.googleapis.com/v1/projects/' + encodeURIComponent(cfg.projectId) + '/databases/(default)/documents/isletmeler?pageSize=300'
+                + (cfg.apiKey ? '&key=' + encodeURIComponent(cfg.apiKey) : '') + (token ? '&pageToken=' + encodeURIComponent(token) : '');
+            const r = await fetch(u); if (!r.ok) throw new Error('HTTP ' + r.status);
+            const j = await r.json();
+            (j.documents || []).forEach(d => { const f = d.fields || {}, g = k => (f[k] && f[k].stringValue) || ''; out.push({ id: decodeURIComponent(d.name.split('/').pop()), adres: g('adres'), koordinat: g('koordinat') }); });
+            token = j.nextPageToken || '';
+        } while (token);
+        return out;
+    }
+    function cloudMsg(html) { $$('cloudMsg').innerHTML = html; }
+    onInit(() => {
+        const cfg = cloudCfg(); $$('cloudProject').value = cfg.projectId || ''; $$('cloudKey').value = cfg.apiKey || '';
+        $$('cloudStatus').textContent = cfg.projectId ? (cfg.last ? '· son güncelleme: ' + cfg.last : '· bağlı') : '· ayarlanmadı';
+        $$('btnCloudSave').addEventListener('click', () => {
+            const c = { projectId: $$('cloudProject').value.trim(), apiKey: $$('cloudKey').value.trim(), last: cloudCfg().last || '' };
+            try { localStorage.setItem(CLOUD_KEY, JSON.stringify(c)); } catch(e) { storageWriteError(e); }
+            $$('cloudStatus').textContent = c.projectId ? '· bağlı' : '· ayarlanmadı'; cloudMsg('<span style="color:#15803d">Ayar kaydedildi.</span>');
+        });
+        $$('btnCloudExport').addEventListener('click', () => {
+            const m = new Map();
+            records.forEach(r => { const k = bizKey(r.isletme); if (!k || r.isArchived) return; const g = m.get(k) || { id: cloudId(k), ad: r.isletme, adres: '', koordinat: '' }; if (!g.adres && r.adres) g.adres = r.adres; if (!g.koordinat && r.koordinat) g.koordinat = r.koordinat; m.set(k, g); });
+            const blob = new Blob([JSON.stringify([...m.values()], null, 1)], { type: 'application/json' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'konum_listesi.json'; document.body.appendChild(a); a.click(); a.remove();
+            cloudMsg('<span style="color:#15803d">' + m.size + ' işletme dışa aktarıldı. Dosyayı konum sayfasında "Liste yükle" ile yükleyin.</span>');
+        });
+        $$('btnCloudPull').addEventListener('click', async () => {
+            const cfg = cloudCfg();
+            if (!cfg.projectId) { $$('cloudBox').open = true; cloudMsg('<span class="warn-text">Önce proje kimliğini girip kaydedin.</span>'); $$('cloudProject').focus(); return; }
+            const btn = $$('btnCloudPull'); btn.disabled = true; cloudMsg('Güncelleniyor...');
+            try {
+                const docs = await cloudFetchAll(cfg);
+                const byId = new Map(); records.forEach(r => { const k = bizKey(r.isletme); if (k) byId.set(cloudId(k), k); });
+                let upd = 0, none = 0, bad = 0, adrChanged = false;
+                docs.forEach(d => {
+                    const key = byId.get(d.id); if (!key) { none++; return; }
+                    let changed = false;
+                    if (d.koordinat) { const p = parseCoordInput(d.koordinat); if (p.err) bad++; else records.forEach(r => { if (bizKey(r.isletme) === key && r.koordinat !== p.v) { r.koordinat = p.v; changed = true; } }); }
+                    if (d.adres) records.forEach(r => { if (bizKey(r.isletme) === key && r.adres !== d.adres) { r.adres = d.adres; changed = true; adrChanged = true; } });
+                    if (changed) upd++;
+                });
+                if (adrChanged) recalculateRegions(); else if (upd) saveData(); // adres değiştiyse bölge kuralları yeniden uygulanır
+                if (upd && activePlan) renderPlanTable();
+                const now = new Date().toLocaleString('tr-TR'); cfg.last = now;
+                try { localStorage.setItem(CLOUD_KEY, JSON.stringify(cfg)); } catch(e) {}
+                $$('cloudStatus').textContent = '· son güncelleme: ' + now;
+                renderLoc(); renderTable('main');
+                cloudMsg('<span style="color:#15803d">' + docs.length + ' kayıt okundu, ' + upd + ' işletme güncellendi.</span>' + (none ? ' ' + none + ' kayıt portaldaki işletmelerle eşleşmedi.' : '') + (bad ? ' <span class="warn-text">' + bad + ' konum biçimi okunamadı.</span>' : ''));
+                showToast('Konumlar güncellendi (' + upd + ' işletme).');
+            } catch(e) {
+                cloudMsg('<span class="warn-text">Bağlanılamadı (' + escapeHtml(e.message) + '). İnternet bağlantısını, proje kimliğini ve Firestore okuma kuralını kontrol edin.</span>');
+            } finally { btn.disabled = false; }
+        });
     });
     function setBizCoord(key, value) { records.forEach(r => { if (bizKey(r.isletme) === key) r.koordinat = value; }); saveData(); }
     // Kayıt sonrası: sayaç ve Liste/Plan anında tazelenir; satır yeniden çizilmez (yazma akışı bozulmaz)
